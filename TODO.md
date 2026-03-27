@@ -1,0 +1,16 @@
+- film grain : ajouter un mode noise, là on est trop en mode écran
+- vitesse : px/s + courbe
+- glow : je ne vois pas la différence entre "simple" et "post-process"; en garder qu'un et l'intégrer par défaut
+- trail : je vois pas la différence entre simple et feedback; en garder qu'un seul; et d'ailleurs j'ai l'impression que ça glow plus que ça trail
+- pseudo 3D, les particules du font devraient avoir une taille réduite
+- forme des particules
+- bug contraste diagonale
+- mode fullscreen
+- grosse refacto
+- couleurs : améliorer picker
+- pseudo 3D : intégrer par défaut
+- flow : intégrer en hybride par défaut
+- sortie écran : je pense que seul le mode "autorisée" a un intérêt, en tout cas pour cet effet ci
+- sortie : intégrer en "liée aux bord" par défaut
+- modulariser les effets; à quoi ressemblerait l'UI ?
+- réagir au son

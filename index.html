@@ -1,0 +1,1520 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jewels</title>
+  <style>
+    :root { color-scheme: dark; }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; background: #050507; color: #ddd; font: 12px/1.35 system-ui, sans-serif; }
+    #app { display: grid; grid-template-columns: 320px 1fr; height: 100vh; overflow: hidden; }
+    #controls {
+      overflow: auto;
+      min-height: 0;
+      padding: 12px;
+      border-right: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(18,18,24,.95), rgba(10,10,14,.95));
+    }
+    #controls h1 { margin: 0; font-size: 15px; }
+    .header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .spacer { flex: 1; }
+    #fps { font-size: 12px; color: #8f9bb3; }
+    .group { margin: 0 0 12px; padding: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; }
+    .group h2 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
+    label { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; margin: 6px 0; }
+    input[type="range"], select, button { width: 100%; }
+    input[type="checkbox"] { justify-self: end; }
+    .value { min-width: 50px; text-align: right; color: #aaa; }
+    #colors .row { display: grid; grid-template-columns: 1fr 32px; gap: 6px; margin: 6px 0; }
+    button { background: #181a22; color: #ddd; border: 1px solid rgba(255,255,255,.12); border-radius: 6px; padding: 7px 8px; cursor: pointer; }
+    button:hover { background: #202434; }
+    #canvasWrap { position: relative; min-width: 0; min-height: 0; overflow: hidden; }
+    canvas { width: 100%; height: 100%; display: block; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="controls">
+      <div class="header">
+        <h1>Jewels</h1>
+        <div class="spacer"></div>
+        <div id="fps">0 FPS</div>
+      </div>
+
+      <div class="group">
+        <h2>Particules</h2>
+        <label>Nombre <span class="value" id="particleCountVal"></span></label>
+        <input id="particleCount" type="range" min="100" max="10000" step="100" value="5000" />
+
+        <label>Vitesse <span class="value" id="speedVal"></span></label>
+        <input id="speed" type="range" min="0" max="3" step="0.001" value="0.06" />
+
+        <label>Taille <span class="value" id="sizeVal"></span></label>
+        <input id="size" type="range" min="0.5" max="3" step="0.01" value="1.35" />
+
+        <label>Sortie écran</label>
+        <select id="containMode">
+          <option value="free">Autorisé</option>
+          <option value="contained">Contenu</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h2>Flow</h2>
+        <label>Type de flux</label>
+        <select id="flowType">
+          <option value="noise">Noise</option>
+          <option value="vortex">Vortex</option>
+          <option value="hybrid" selected>Hybride</option>
+        </select>
+
+        <label>Direction globale</label>
+        <select id="flowDirection">
+          <option value="horizontal">Horizontal</option>
+          <option value="vertical">Vertical</option>
+          <option value="diagonal">Diagonal</option>
+          <option value="free" selected>Libre</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h2>Entrées / Sorties</h2>
+        <label>Entrées / sorties <input id="flowRespawn" type="checkbox" checked /></label>
+
+        <label>Entrée particules (ms) <span class="value" id="fadeInVal"></span></label>
+        <input id="fadeIn" type="range" min="250" max="5000" step="10" value="3000" />
+
+        <label>Sortie particules (ms) <span class="value" id="fadeOutVal"></span></label>
+        <input id="fadeOut" type="range" min="250" max="5000" step="10" value="1900" />
+
+        <label>Aléatoire fade (ms) <span class="value" id="fadeRandomVal"></span></label>
+        <input id="fadeRandom" type="range" min="0" max="1000" step="10" value="500" />
+
+        <label>Sortie</label>
+        <select id="fadeOutMode">
+          <option value="edge" selected>Liée aux bords</option>
+          <option value="external">Externe</option>
+          <option value="internal">Interne</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h2>Pseudo 3D</h2>
+        <label>Profondeur pseudo-3D <input id="pseudo3d" type="checkbox" checked /></label>
+      </div>
+
+      <div class="group">
+        <h2>Couleurs</h2>
+        <label>Activer couleurs <input id="colorEnabled" type="checkbox" checked /></label>
+        <div id="colors"></div>
+        <button id="addColor" type="button">Ajouter une couleur</button>
+      </div>
+
+      <div class="group">
+        <h2>Glow</h2>
+        <label>Glow <span class="value" id="glowVal"></span></label>
+        <input id="glow" type="range" min="0" max="2.5" step="0.01" value="1.30" />
+
+        <label>Mode glow</label>
+        <select id="glowMode">
+          <option value="simple">Simple</option>
+          <option value="post" selected>Post-process</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h2>Trail</h2>
+        <label>Trail <span class="value" id="trailVal"></span></label>
+        <input id="trail" type="range" min="0" max="0.98" step="0.01" value="0.50" />
+
+        <label>Mode trail</label>
+        <select id="trailMode">
+          <option value="simple">Simple</option>
+          <option value="feedback" selected>Feedback</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h2>Dreamy Glow</h2>
+        <label>Dreamy Glow <span class="value" id="dreamyVal"></span></label>
+        <input id="dreamyGlow" type="range" min="0" max="5" step="0.01" value="2.75" />
+
+        <label>Amplification bords <span class="value" id="dreamyEdgeBoostVal"></span></label>
+        <input id="dreamyEdgeBoost" type="range" min="0" max="5" step="0.01" value="1.50" />
+      </div>
+
+      <div class="group">
+        <h2>Grain</h2>
+        <label>Grain de film <input id="filmGrain" type="checkbox" checked /></label>
+
+        <label>Intensité grain <span class="value" id="grainAmountVal"></span></label>
+        <input id="grainAmount" type="range" min="0" max="10" step="0.01" value="3.0" />
+      </div>
+
+      <div class="group">
+        <h2>Aberration chromatique</h2>
+        <label>Chromatic aberration <input id="chromatic" type="checkbox" checked /></label>
+
+        <label>Largeur aberration <span class="value" id="chromaticWidthVal"></span></label>
+        <input id="chromaticWidth" type="range" min="0.05" max="1.0" step="0.01" value="0.55" />
+
+        <label>Décalage aberration <span class="value" id="chromaticOffsetVal"></span></label>
+        <input id="chromaticOffset" type="range" min="0.0" max="3.0" step="0.01" value="0.75" />
+
+        <label>Mode aberration chromatique</label>
+        <select id="chromaticMode">
+          <option value="particles">Particules</option>
+          <option value="edges" selected>Bords écran</option>
+        </select>
+      </div>
+
+      <div class="group">
+        <h2>Lens flare</h2>
+        <label>Lens flare <input id="lensFlare" type="checkbox" checked /></label>
+
+        <label>Type</label>
+        <select id="lensFlareType">
+          <option value="horizontal" selected>Horizontal</option>
+          <option value="vertical">Vertical</option>
+          <option value="star">Etoile</option>
+        </select>
+
+        <label>Anamorphic stretch <input id="lensFlareAnamorphic" type="checkbox" checked /></label>
+
+        <label>Epaisseur flare <span class="value" id="flareThicknessVal"></span></label>
+        <input id="flareThickness" type="range" min="0" max="5" step="0.1" value="2.8" />
+
+        <label>Longueur flare (%) <span class="value" id="flareLengthVal"></span></label>
+        <input id="flareLength" type="range" min="5" max="100" step="1" value="75" />
+
+        <label>Diffusion flare <span class="value" id="flareDiffusionVal"></span></label>
+        <input id="flareDiffusion" type="range" min="0" max="5" step="0.1" value="2.2" />
+
+        <label>Durée flare (ms) <span class="value" id="flareDurationVal"></span></label>
+        <input id="flareDuration" type="range" min="100" max="20000" step="10" value="4000" />
+
+        <label>Intervalle min (s) <span class="value" id="flareMinVal"></span></label>
+        <input id="flareMin" type="range" min="1" max="30" step="0.5" value="1" />
+
+        <label>Intervalle max (s) <span class="value" id="flareMaxVal"></span></label>
+        <input id="flareMax" type="range" min="5" max="60" step="0.5" value="60" />
+
+        <label>Fade in (%) <span class="value" id="flareFadeInVal"></span></label>
+        <input id="flareFadeIn" type="range" min="0" max="100" step="1" value="13" />
+
+        <label>Hold (%) <span class="value" id="flareHoldVal"></span></label>
+        <input id="flareHold" type="range" min="0" max="100" step="1" value="10" />
+
+        <label>Fade out (%) <span class="value" id="flareFadeOutVal"></span></label>
+        <input id="flareFadeOut" type="range" min="0" max="100" step="1" value="77" />
+
+        <label>Distance aux bords (px) <span class="value" id="flareEdgeDistanceVal"></span></label>
+        <input id="flareEdgeDistance" type="range" min="0" max="500" step="1" value="0" />
+
+        <label>Ghost reflections <input id="ghostEnabled" type="checkbox" checked /></label>
+
+        <label>Intensité ghosts <span class="value" id="ghostIntensityVal"></span></label>
+        <input id="ghostIntensity" type="range" min="0" max="1" step="0.01" value="0.35" />
+
+        <label>Nombre de ghosts <span class="value" id="ghostCountVal"></span></label>
+        <input id="ghostCount" type="range" min="1" max="5" step="1" value="1" />
+
+        <label>Espacement ghosts <span class="value" id="ghostSpacingVal"></span></label>
+        <input id="ghostSpacing" type="range" min="0.05" max="0.40" step="0.01" value="0.18" />
+
+        <label>Taille ghosts <span class="value" id="ghostSizeVal"></span></label>
+        <input id="ghostSize" type="range" min="0.2" max="2.5" step="0.01" value="1.50" />
+
+        <label>Diffusion ghosts <span class="value" id="ghostDiffusionVal"></span></label>
+        <input id="ghostDiffusion" type="range" min="0.2" max="4.0" step="0.01" value="3.50" />
+
+        <label>Décroissance ghosts <span class="value" id="ghostDecayVal"></span></label>
+        <input id="ghostDecay" type="range" min="0.0" max="1.0" step="0.01" value="0.50" />
+      </div>
+    </div>
+
+    <div id="canvasWrap">
+      <canvas id="glcanvas"></canvas>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('glcanvas');
+  const gl = canvas.getContext('webgl', {
+    antialias: true,
+    premultipliedAlpha: false,
+    preserveDrawingBuffer: false,
+  });
+
+  if (!gl) {
+    document.body.innerHTML = '<div style="padding:20px">WebGL non disponible.</div>';
+    return;
+  }
+
+  const controls = {
+    particleCount: document.getElementById('particleCount'),
+    speed: document.getElementById('speed'),
+    size: document.getElementById('size'),
+    containMode: document.getElementById('containMode'),
+    flowType: document.getElementById('flowType'),
+    flowDirection: document.getElementById('flowDirection'),
+    flowRespawn: document.getElementById('flowRespawn'),
+    fadeIn: document.getElementById('fadeIn'),
+    fadeOut: document.getElementById('fadeOut'),
+    fadeRandom: document.getElementById('fadeRandom'),
+    fadeOutMode: document.getElementById('fadeOutMode'),
+    pseudo3d: document.getElementById('pseudo3d'),
+    glow: document.getElementById('glow'),
+    glowMode: document.getElementById('glowMode'),
+    trail: document.getElementById('trail'),
+    trailMode: document.getElementById('trailMode'),
+    dreamyGlow: document.getElementById('dreamyGlow'),
+    dreamyEdgeBoost: document.getElementById('dreamyEdgeBoost'),
+    filmGrain: document.getElementById('filmGrain'),
+    grainAmount: document.getElementById('grainAmount'),
+    chromatic: document.getElementById('chromatic'),
+    chromaticMode: document.getElementById('chromaticMode'),
+    chromaticWidth: document.getElementById('chromaticWidth'),
+    chromaticOffset: document.getElementById('chromaticOffset'),
+    lensFlare: document.getElementById('lensFlare'),
+    lensFlareType: document.getElementById('lensFlareType'),
+    lensFlareAnamorphic: document.getElementById('lensFlareAnamorphic'),
+    flareThickness: document.getElementById('flareThickness'),
+    flareLength: document.getElementById('flareLength'),
+    flareDiffusion: document.getElementById('flareDiffusion'),
+    flareDuration: document.getElementById('flareDuration'),
+    flareMin: document.getElementById('flareMin'),
+    flareMax: document.getElementById('flareMax'),
+    flareFadeIn: document.getElementById('flareFadeIn'),
+    flareHold: document.getElementById('flareHold'),
+    flareFadeOut: document.getElementById('flareFadeOut'),
+    flareEdgeDistance: document.getElementById('flareEdgeDistance'),
+    ghostEnabled: document.getElementById('ghostEnabled'),
+    ghostIntensity: document.getElementById('ghostIntensity'),
+    ghostCount: document.getElementById('ghostCount'),
+    ghostSpacing: document.getElementById('ghostSpacing'),
+    ghostSize: document.getElementById('ghostSize'),
+    ghostDiffusion: document.getElementById('ghostDiffusion'),
+    ghostDecay: document.getElementById('ghostDecay'),
+    colorEnabled: document.getElementById('colorEnabled'),
+  };
+
+  const valueEls = {
+    particleCount: document.getElementById('particleCountVal'),
+    speed: document.getElementById('speedVal'),
+    size: document.getElementById('sizeVal'),
+    glow: document.getElementById('glowVal'),
+    trail: document.getElementById('trailVal'),
+    dreamy: document.getElementById('dreamyVal'),
+    dreamyEdgeBoost: document.getElementById('dreamyEdgeBoostVal'),
+    grainAmount: document.getElementById('grainAmountVal'),
+    chromaticWidth: document.getElementById('chromaticWidthVal'),
+    chromaticOffset: document.getElementById('chromaticOffsetVal'),
+    flareDuration: document.getElementById('flareDurationVal'),
+    flareMin: document.getElementById('flareMinVal'),
+    flareMax: document.getElementById('flareMaxVal'),
+    flareThickness: document.getElementById('flareThicknessVal'),
+    flareLength: document.getElementById('flareLengthVal'),
+    flareDiffusion: document.getElementById('flareDiffusionVal'),
+    flareFadeIn: document.getElementById('flareFadeInVal'),
+    flareHold: document.getElementById('flareHoldVal'),
+    flareFadeOut: document.getElementById('flareFadeOutVal'),
+    flareEdgeDistance: document.getElementById('flareEdgeDistanceVal'),
+    ghostIntensity: document.getElementById('ghostIntensityVal'),
+    ghostCount: document.getElementById('ghostCountVal'),
+    ghostSpacing: document.getElementById('ghostSpacingVal'),
+    ghostSize: document.getElementById('ghostSizeVal'),
+    ghostDiffusion: document.getElementById('ghostDiffusionVal'),
+    ghostDecay: document.getElementById('ghostDecayVal'),
+    fadeIn: document.getElementById('fadeInVal'),
+    fadeOut: document.getElementById('fadeOutVal'),
+    fadeRandom: document.getElementById('fadeRandomVal'),
+  };
+
+  const colorList = document.getElementById('colors');
+  const addColorBtn = document.getElementById('addColor');
+  const defaultColors = ['#5900ff', '#00d5ff'];
+
+  function addColor(hex = '#ffffff') {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const input = document.createElement('input');
+    input.type = 'color';
+    input.value = hex;
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.textContent = '×';
+    del.onclick = () => {
+      row.remove();
+      rebuildAccentCache();
+    };
+    row.append(input, del);
+    colorList.appendChild(row);
+  }
+
+  defaultColors.forEach(addColor);
+  addColorBtn.onclick = () => {
+    addColor('#ffffff');
+    rebuildAccentCache();
+  };
+
+  function rgbFromHex(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  }
+
+  let accentCache = new Float32Array(24);
+  let accentCountCache = 0;
+
+  function rebuildAccentCache() {
+    const nodes = [...colorList.querySelectorAll('input[type="color"]')].slice(0, 8);
+    accentCountCache = nodes.length;
+    for (let i = 0; i < 8; i++) {
+      const o = i * 3;
+      if (i < nodes.length) {
+        const rgb = rgbFromHex(nodes[i].value);
+        accentCache[o] = rgb[0];
+        accentCache[o + 1] = rgb[1];
+        accentCache[o + 2] = rgb[2];
+      } else {
+        accentCache[o] = 0;
+        accentCache[o + 1] = 0;
+        accentCache[o + 2] = 0;
+      }
+    }
+  }
+
+  colorList.addEventListener('input', rebuildAccentCache);
+  rebuildAccentCache();
+
+  function compile(type, src) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, src);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      throw new Error(gl.getShaderInfoLog(shader));
+    }
+    return shader;
+  }
+
+  function program(vs, fs) {
+    const p = gl.createProgram();
+    gl.attachShader(p, compile(gl.VERTEX_SHADER, vs));
+    gl.attachShader(p, compile(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(p);
+    if (!gl.getProgramParameter(p, gl.LINK_STATUS)) {
+      throw new Error(gl.getProgramInfoLog(p));
+    }
+    return p;
+  }
+
+  const particleVS = `
+    precision highp float;
+    attribute vec4 a_data;
+    uniform vec2 u_camera;
+    uniform float u_pseudo3d;
+    uniform float u_glow;
+    uniform float u_size;
+    uniform float u_dpr;
+    varying float v_depth;
+    varying float v_alpha;
+    varying vec2 v_sceneUv;
+    void main() {
+      vec2 pos = a_data.xy + u_camera;
+      gl_Position = vec4(pos, 0.0, 1.0);
+      v_sceneUv = pos * 0.5 + 0.5;
+      v_alpha = a_data.w;
+      float depth = mix(1.0, 0.25 + a_data.z * 0.95, u_pseudo3d);
+      float sizePx = 7.0 * u_size;
+      gl_PointSize = max(sizePx * u_dpr, 1.0);
+      v_depth = depth;
+    }
+  `;
+
+  const particleFS = `
+    precision highp float;
+    varying float v_depth;
+    varying float v_alpha;
+    varying vec2 v_sceneUv;
+    uniform vec3 u_accents[8];
+    uniform int u_accentCount;
+    uniform float u_colorEnabled;
+
+    vec3 paletteColor(float t) {
+      if (u_accentCount <= 0) return vec3(0.02, 0.035, 0.09);
+      if (u_accentCount == 1) return u_accents[0];
+      float scaled = clamp(t, 0.0, 0.9999) * float(u_accentCount - 1);
+      int i0 = int(floor(scaled));
+      int i1 = i0 + 1;
+      if (i1 >= u_accentCount) i1 = u_accentCount - 1;
+      float f = fract(scaled);
+      vec3 c0 = vec3(0.0);
+      vec3 c1 = vec3(0.0);
+      for (int i = 0; i < 8; i++) {
+        if (i == i0) c0 = u_accents[i];
+        if (i == i1) c1 = u_accents[i];
+      }
+      return mix(c0, c1, f);
+    }
+
+    void main() {
+      vec2 p = gl_PointCoord * 2.0 - 1.0;
+      float r = length(p);
+      if (r > 1.0) discard;
+
+      vec3 base = vec3(0.02, 0.035, 0.09) * mix(0.75, 1.25, v_depth);
+      if (u_colorEnabled > 0.5 && u_accentCount > 0) {
+        vec3 pal = paletteColor(clamp(v_sceneUv.x, 0.0, 1.0));
+        base = pal * mix(0.42, 0.82, v_depth);
+      }
+
+      float core = smoothstep(0.65, 0.0, r);
+      float ring = smoothstep(0.98, 0.72, r) * smoothstep(0.35, 0.55, r);
+      float halo = smoothstep(1.0, 0.15, r);
+      vec3 col = base * (0.8 + core * 0.9);
+      col += vec3(1.0) * ring * 0.9;
+      col += vec3(1.0) * halo * 0.15;
+      float alpha = (max(core * 0.55, ring * 0.95) + halo * 0.22) * v_alpha;
+      gl_FragColor = vec4(col, clamp(alpha, 0.0, 1.0));
+    }
+  `;
+
+  const quadVS = `
+    precision highp float;
+    attribute vec2 a_pos;
+    varying vec2 v_uv;
+    void main() {
+      v_uv = a_pos * 0.5 + 0.5;
+      gl_Position = vec4(a_pos, 0.0, 1.0);
+    }
+  `;
+
+  const blitFS = `
+    precision highp float;
+    varying vec2 v_uv;
+    uniform sampler2D u_tex;
+    void main() {
+      gl_FragColor = texture2D(u_tex, v_uv);
+    }
+  `;
+
+  const postFS = `
+    precision highp float;
+    varying vec2 v_uv;
+    uniform sampler2D u_scene;
+    uniform sampler2D u_prev;
+    uniform vec2 u_resolution;
+    uniform float u_time;
+    uniform float u_trail;
+    uniform float u_trailMode;
+    uniform float u_glow;
+    uniform float u_glowMode;
+    uniform float u_dreamyGlow;
+    uniform float u_dreamyEdgeBoost;
+    uniform float u_filmGrain;
+    uniform float u_grainAmount;
+    uniform float u_chromatic;
+    uniform float u_chromaticMode;
+    uniform float u_chromaticWidth;
+    uniform float u_chromaticOffset;
+    uniform float u_lensMode;
+    uniform float u_lensAnamorphic;
+    uniform float u_lensThickness;
+    uniform float u_lensLength;
+    uniform float u_lensDiffusion;
+    uniform float u_ghostEnabled;
+    uniform float u_ghostIntensity;
+    uniform float u_ghostCount;
+    uniform float u_ghostSpacing;
+    uniform float u_ghostSize;
+    uniform float u_ghostDiffusion;
+    uniform float u_ghostDecay;
+    uniform vec2 u_flarePos;
+    uniform float u_flareStrength;
+    uniform vec3 u_accents[8];
+    uniform int u_accentCount;
+    uniform float u_colorEnabled;
+
+    vec3 sampleScene(vec2 uv) { return texture2D(u_scene, uv).rgb; }
+
+    vec3 paletteColor(float t) {
+      if (u_accentCount <= 0) return vec3(1.0);
+      if (u_accentCount == 1) return u_accents[0];
+      float scaled = clamp(t, 0.0, 0.9999) * float(u_accentCount - 1);
+      int i0 = int(floor(scaled));
+      int i1 = i0 + 1;
+      if (i1 >= u_accentCount) i1 = u_accentCount - 1;
+      float f = fract(scaled);
+      vec3 c0 = vec3(0.0);
+      vec3 c1 = vec3(0.0);
+      for (int i = 0; i < 8; i++) {
+        if (i == i0) c0 = u_accents[i];
+        if (i == i1) c1 = u_accents[i];
+      }
+      return mix(c0, c1, f);
+    }
+
+    vec3 blurCross9(vec2 uv, float radius) {
+      vec2 px = 1.0 / u_resolution;
+      vec2 off = px * radius;
+      vec3 s = vec3(0.0);
+      s += sampleScene(uv - vec2(4.0 * off.x, 0.0)) * 0.05;
+      s += sampleScene(uv - vec2(3.0 * off.x, 0.0)) * 0.09;
+      s += sampleScene(uv - vec2(2.0 * off.x, 0.0)) * 0.12;
+      s += sampleScene(uv - vec2(1.0 * off.x, 0.0)) * 0.15;
+      s += sampleScene(uv) * 0.18;
+      s += sampleScene(uv + vec2(1.0 * off.x, 0.0)) * 0.15;
+      s += sampleScene(uv + vec2(2.0 * off.x, 0.0)) * 0.12;
+      s += sampleScene(uv + vec2(3.0 * off.x, 0.0)) * 0.09;
+      s += sampleScene(uv + vec2(4.0 * off.x, 0.0)) * 0.05;
+      s += sampleScene(uv - vec2(0.0, 4.0 * off.y)) * 0.05;
+      s += sampleScene(uv - vec2(0.0, 3.0 * off.y)) * 0.09;
+      s += sampleScene(uv - vec2(0.0, 2.0 * off.y)) * 0.12;
+      s += sampleScene(uv - vec2(0.0, 1.0 * off.y)) * 0.15;
+      s += sampleScene(uv + vec2(0.0, 1.0 * off.y)) * 0.15;
+      s += sampleScene(uv + vec2(0.0, 2.0 * off.y)) * 0.12;
+      s += sampleScene(uv + vec2(0.0, 3.0 * off.y)) * 0.09;
+      s += sampleScene(uv + vec2(0.0, 4.0 * off.y)) * 0.05;
+      return s * 0.5;
+    }
+
+    vec3 dreamyBloom(vec2 uv) {
+      float rSoft = 2.5 + u_dreamyGlow * 2.5;
+      float rWide = 5.5 + u_dreamyGlow * 5.5;
+      vec3 soft = blurCross9(uv, rSoft);
+      vec3 wide = blurCross9(uv, rWide);
+      vec3 blur = mix(soft, wide, 0.62);
+      float luma = dot(blur, vec3(0.2126, 0.7152, 0.0722));
+      float mask = smoothstep(0.03, 0.32, luma);
+      return blur * mask;
+    }
+
+    float grainHash(vec2 p) {
+      return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    }
+
+    float analogGrain(vec2 p, float t) {
+      float fine = grainHash(p * 1.25 + vec2(t * 173.0, t * 91.0)) - 0.5;
+      float mid = grainHash(p * 0.58 + vec2(-t * 67.0, t * 53.0)) - 0.5;
+      float coarse = grainHash(p * 0.18 + vec2(t * 19.0, -t * 23.0)) - 0.5;
+      float weave = sin((p.y + t * 24.0) * 0.42) * 0.5 + 0.5;
+      return fine * 0.58 + mid * 0.27 + coarse * 0.15 + (weave - 0.5) * 0.08;
+    }
+
+    vec3 renderGhosts(vec2 uv, vec2 p, vec3 tint, float st) {
+      if (u_ghostEnabled < 0.5 || u_ghostIntensity <= 0.001) return vec3(0.0);
+      vec2 center = vec2(0.5, 0.5);
+      vec2 axis = center - p;
+      vec3 gcol = vec3(0.0);
+      float countF = clamp(u_ghostCount, 1.0, 5.0);
+      float spacing = clamp(u_ghostSpacing, 0.01, 0.5);
+      float sizeBase = max(u_ghostSize, 0.05);
+      float diffBase = max(u_ghostDiffusion, 0.05);
+      float decay = clamp(u_ghostDecay, 0.0, 1.0);
+      for (int gi = 0; gi < 5; gi++) {
+        float idx = float(gi);
+        if (idx >= countF) break;
+        float t = (idx + 1.0) * spacing;
+        vec2 gp = mix(p, center, t);
+        vec2 d = uv - gp;
+        // Décroissance robuste: évite les NaN/valeurs pathologiques à decay = 1.0
+        float fall = mix(1.0, exp(-idx * 2.2), decay);
+        float ghostSize = sizeBase * mix(1.0, 0.72, idx / 4.0);
+        float ghostDiff = diffBase * mix(1.0, 1.15, idx / 4.0);
+        vec2 rel = vec2(max(ghostSize * 0.018, 0.0015), max(ghostSize * 0.018 * ghostDiff, 0.0015));
+        if (u_lensMode > 1.5) {
+          float rr = length(d);
+          float core = exp(-rr * (18.0 / max(ghostSize, 0.1)));
+          float halo = exp(-rr * (6.5 / max(ghostSize * ghostDiff, 0.1))) * 0.35;
+          gcol += tint * (core + halo) * st * u_ghostIntensity * fall;
+        } else if (u_lensMode > 0.9) {
+          float ghost = exp(-0.5 * pow(abs(d.x) / rel.x, 2.0)) * exp(-0.5 * pow(abs(d.y) / rel.y, 2.0));
+          gcol += tint * ghost * st * u_ghostIntensity * 1.25 * fall;
+        } else {
+          float ghost = exp(-0.5 * pow(abs(d.y) / rel.x, 2.0)) * exp(-0.5 * pow(abs(d.x) / rel.y, 2.0));
+          gcol += tint * ghost * st * u_ghostIntensity * 1.25 * fall;
+        }
+      }
+      return gcol;
+    }
+
+    vec3 lensFlare(vec2 uv) {
+      if (u_lensMode < 0.5) return vec3(0.0);
+
+      vec2 p = u_flarePos;
+      float st = u_flareStrength;
+      if (st <= 0.001) return vec3(0.0);
+
+      vec2 d = uv - p;
+      float thicknessPx = max(u_lensThickness, 0.001);
+      float sigmaCorePx = max(thicknessPx / 2.355, 0.5);
+      float diffusionAmount = clamp(u_lensDiffusion / 5.0, 0.0, 1.0);
+      float diffusionPx = max(u_lensDiffusion, 0.0) * 8.0;
+      float sigmaSoftPx = max((thicknessPx + diffusionPx) / 2.355, sigmaCorePx + 0.25);
+      float thicknessCoreUvX = sigmaCorePx / u_resolution.x;
+      float thicknessCoreUvY = sigmaCorePx / u_resolution.y;
+      float thicknessSoftUvX = sigmaSoftPx / u_resolution.x;
+      float thicknessSoftUvY = sigmaSoftPx / u_resolution.y;
+
+      float lengthFrac = clamp(u_lensLength, 0.01, 1.0);
+      float axisScale = mix(1.0, 1.8, step(0.5, u_lensAnamorphic));
+      float lenCoreX = max(lengthFrac * 0.5 * axisScale, 0.001);
+      float lenCoreY = max(lengthFrac * 0.5 * axisScale, 0.001);
+      float lenSoftX = lenCoreX;
+      float lenSoftY = lenCoreY;
+
+      vec3 tint = vec3(1.0, 0.98, 0.94);
+      vec3 c = vec3(0.0);
+
+      if (u_lensMode > 1.5) {
+        float r = length(d);
+        float core = exp(-r * 18.0);
+        float halo = exp(-r * 4.5) * 0.45;
+        float star = pow(max(0.0, 1.0 - abs(d.x * d.y) * 120.0), 8.0);
+        float ghosts = exp(-abs(length((uv - 0.5) + (p - 0.5) * 0.6) - 0.22) * 18.0) * 0.18;
+        c += tint * (core + halo + star + ghosts) * st;
+      } else if (u_lensMode > 0.9) {
+        float coreThin = exp(-0.5 * pow(abs(d.x) / thicknessCoreUvX, 2.0));
+        float coreLong = exp(-pow(abs(d.y) / lenCoreY, 1.08));
+        float softThin = exp(-0.5 * pow(abs(d.x) / thicknessSoftUvX, 2.0));
+        float softLong = exp(-pow(abs(d.y) / lenSoftY, 1.08));
+        float coreLine = coreThin * coreLong;
+        float softStreak = softThin * softLong;
+        float dispersed = mix(coreLine, softStreak, diffusionAmount);
+        float centerReduction = mix(1.0, 0.62, diffusionAmount);
+        float profile = dispersed * centerReduction;
+        c += tint * profile * st * 2.35;
+      } else {
+        float coreThin = exp(-0.5 * pow(abs(d.y) / thicknessCoreUvY, 2.0));
+        float coreLong = exp(-pow(abs(d.x) / lenCoreX, 1.08));
+        float softThin = exp(-0.5 * pow(abs(d.y) / thicknessSoftUvY, 2.0));
+        float softLong = exp(-pow(abs(d.x) / lenSoftX, 1.08));
+        float coreLine = coreThin * coreLong;
+        float softStreak = softThin * softLong;
+        float dispersed = mix(coreLine, softStreak, diffusionAmount);
+        float centerReduction = mix(1.0, 0.62, diffusionAmount);
+        float profile = dispersed * centerReduction;
+        c += tint * profile * st * 2.35;
+      }
+
+      c += renderGhosts(uv, p, tint, st);
+      return c;
+    }
+
+    void main() {
+      vec2 uv = v_uv;
+      vec2 px = 1.0 / u_resolution;
+      bool hasChrom = (u_chromatic > 0.5);
+      bool hasGlow = (u_glow > 0.001);
+      bool hasDreamy = (u_dreamyGlow > 0.001);
+      bool hasGrain = (u_filmGrain > 0.5 && u_grainAmount > 0.01);
+      bool hasFlare = (u_lensMode > 0.5);
+      bool hasTrail = (u_trail > 0.001);
+
+      vec3 preChromatic = sampleScene(uv);
+      vec3 base;
+      if (hasChrom) {
+        if (u_chromaticMode < 0.5) {
+          vec2 shift = px * (1.25 * u_chromaticOffset);
+          base.r = sampleScene(uv + shift).r;
+          base.g = preChromatic.g;
+          base.b = sampleScene(uv - shift).b;
+        } else {
+          vec2 centered = uv - 0.5;
+          vec2 rect = abs(centered) * 2.0;
+          float edgeMetric = max(rect.x, rect.y);
+          float edgeStart = clamp(1.0 - u_chromaticWidth, 0.0, 0.99);
+          float edge = smoothstep(edgeStart, 1.0, edgeMetric);
+          float dirLen = length(centered);
+          vec2 dir = dirLen > 0.0001 ? centered / dirLen : vec2(0.0);
+          vec2 shift = dir * px * (1.25 * u_chromaticOffset + edge * 5.0 * u_chromaticOffset) * edge;
+          base.r = sampleScene(uv + shift).r;
+          base.g = preChromatic.g;
+          base.b = sampleScene(uv - shift).b;
+        }
+      } else {
+        base = preChromatic;
+      }
+
+      if (!hasGlow && !hasDreamy && !hasGrain && !hasFlare && !hasTrail && u_colorEnabled < 0.5) {
+        gl_FragColor = vec4(base, 1.0);
+        return;
+      }
+
+      vec3 combined = base;
+      if (hasGlow) {
+        vec3 glow;
+        if (u_glowMode < 0.5) {
+          glow = (
+            sampleScene(uv + vec2(px.x, 0.0)) +
+            sampleScene(uv - vec2(px.x, 0.0)) +
+            sampleScene(uv + vec2(0.0, px.y)) +
+            sampleScene(uv - vec2(0.0, px.y))
+          ) * 0.25;
+        } else {
+          glow = blurCross9(uv, 1.0);
+        }
+        combined += glow * u_glow * 0.6;
+      }
+      if (hasDreamy) {
+        vec3 dreamy = dreamyBloom(uv);
+        vec2 centered = uv - 0.5;
+        vec2 rect = abs(centered) * 2.0;
+        float edgeMetric = max(rect.x, rect.y);
+        // Amplification uniquement dans une bande proche des bords.
+        // 0.0 au centre et jusqu'à 1.0 très près des bords.
+        float edgeMask = smoothstep(0.92, 0.995, edgeMetric);
+        float edgeBoost = 1.0 + edgeMask * u_dreamyEdgeBoost;
+        combined += dreamy * (0.35 + u_dreamyGlow * 0.85) * edgeBoost;
+      }
+      if (hasTrail) {
+        vec3 prev = texture2D(u_prev, uv).rgb;
+        prev *= (u_trailMode < 0.5) ? 0.96 : 0.985;
+        combined += prev * u_trail;
+      }
+      if (hasFlare) combined += lensFlare(uv);
+      if (u_colorEnabled > 0.5 && u_accentCount > 0) {
+        vec3 tint = paletteColor(clamp(uv.x, 0.0, 1.0));
+        combined = mix(combined, combined * tint, 0.28);
+      }
+      combined = smoothstep(vec3(0.0), vec3(1.4), combined);
+      if (hasGrain) {
+        vec2 gp = gl_FragCoord.xy;
+        float lum = dot(combined, vec3(0.2126, 0.7152, 0.0722));
+        float mask = 0.35 + smoothstep(0.015, 0.45, lum) * 0.95;
+        float grain = analogGrain(gp, u_time);
+        combined = clamp(combined + vec3(grain) * (0.10 * u_grainAmount) * mask, 0.0, 1.0);
+      }
+      gl_FragColor = vec4(combined, 1.0);
+    }
+  `;
+
+  const particleProgram = program(particleVS, particleFS);
+  const postProgram = program(quadVS, postFS);
+  const blitProgram = program(quadVS, blitFS);
+
+  const particleLocs = {
+    a_data: gl.getAttribLocation(particleProgram, 'a_data'),
+    u_camera: gl.getUniformLocation(particleProgram, 'u_camera'),
+    u_pseudo3d: gl.getUniformLocation(particleProgram, 'u_pseudo3d'),
+    u_glow: gl.getUniformLocation(particleProgram, 'u_glow'),
+    u_size: gl.getUniformLocation(particleProgram, 'u_size'),
+    u_dpr: gl.getUniformLocation(particleProgram, 'u_dpr'),
+    u_accents: gl.getUniformLocation(particleProgram, 'u_accents'),
+    u_accentCount: gl.getUniformLocation(particleProgram, 'u_accentCount'),
+    u_colorEnabled: gl.getUniformLocation(particleProgram, 'u_colorEnabled'),
+  };
+
+  const blitLocs = {
+    a_pos: gl.getAttribLocation(blitProgram, 'a_pos'),
+    u_tex: gl.getUniformLocation(blitProgram, 'u_tex'),
+  };
+
+  const postLocs = {
+    a_pos: gl.getAttribLocation(postProgram, 'a_pos'),
+    u_scene: gl.getUniformLocation(postProgram, 'u_scene'),
+    u_prev: gl.getUniformLocation(postProgram, 'u_prev'),
+    u_resolution: gl.getUniformLocation(postProgram, 'u_resolution'),
+    u_time: gl.getUniformLocation(postProgram, 'u_time'),
+    u_trail: gl.getUniformLocation(postProgram, 'u_trail'),
+    u_trailMode: gl.getUniformLocation(postProgram, 'u_trailMode'),
+    u_glow: gl.getUniformLocation(postProgram, 'u_glow'),
+    u_glowMode: gl.getUniformLocation(postProgram, 'u_glowMode'),
+    u_dreamyGlow: gl.getUniformLocation(postProgram, 'u_dreamyGlow'),
+    u_dreamyEdgeBoost: gl.getUniformLocation(postProgram, 'u_dreamyEdgeBoost'),
+    u_filmGrain: gl.getUniformLocation(postProgram, 'u_filmGrain'),
+    u_grainAmount: gl.getUniformLocation(postProgram, 'u_grainAmount'),
+    u_chromatic: gl.getUniformLocation(postProgram, 'u_chromatic'),
+    u_chromaticMode: gl.getUniformLocation(postProgram, 'u_chromaticMode'),
+    u_chromaticWidth: gl.getUniformLocation(postProgram, 'u_chromaticWidth'),
+    u_chromaticOffset: gl.getUniformLocation(postProgram, 'u_chromaticOffset'),
+    u_lensMode: gl.getUniformLocation(postProgram, 'u_lensMode'),
+    u_lensAnamorphic: gl.getUniformLocation(postProgram, 'u_lensAnamorphic'),
+    u_lensThickness: gl.getUniformLocation(postProgram, 'u_lensThickness'),
+    u_lensLength: gl.getUniformLocation(postProgram, 'u_lensLength'),
+    u_lensDiffusion: gl.getUniformLocation(postProgram, 'u_lensDiffusion'),
+    u_ghostEnabled: gl.getUniformLocation(postProgram, 'u_ghostEnabled'),
+    u_ghostIntensity: gl.getUniformLocation(postProgram, 'u_ghostIntensity'),
+    u_ghostCount: gl.getUniformLocation(postProgram, 'u_ghostCount'),
+    u_ghostSpacing: gl.getUniformLocation(postProgram, 'u_ghostSpacing'),
+    u_ghostSize: gl.getUniformLocation(postProgram, 'u_ghostSize'),
+    u_ghostDiffusion: gl.getUniformLocation(postProgram, 'u_ghostDiffusion'),
+    u_ghostDecay: gl.getUniformLocation(postProgram, 'u_ghostDecay'),
+    u_flarePos: gl.getUniformLocation(postProgram, 'u_flarePos'),
+    u_flareStrength: gl.getUniformLocation(postProgram, 'u_flareStrength'),
+    u_accents: gl.getUniformLocation(postProgram, 'u_accents'),
+    u_accentCount: gl.getUniformLocation(postProgram, 'u_accentCount'),
+    u_colorEnabled: gl.getUniformLocation(postProgram, 'u_colorEnabled'),
+  };
+
+  const particleBuffer = gl.createBuffer();
+  const quadBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+
+  let particleData = new Float32Array(0);
+  let particles = [];
+
+  let flowOffset = [0, 0];
+  const flowField = { cols: 72, rows: 72, vectors: new Float32Array(72 * 72 * 2) };
+  let flareState = { x: 0.5, y: 0.5, s: 0 };
+  let flareEvent = {
+    active: false,
+    nextAt: 1.5,
+    startAt: 0,
+    fadeIn: 1.2,
+    hold: 1.8,
+    fadeOut: 2.6,
+    anchor: { x: 0.5, y: 0.5, s: 0 },
+  };
+  let vortexSeeds = [];
+  let bufferInitialized = false;
+  let flowFrameCounter = 0;
+  const state = { width: 0, height: 0, dpr: 1, sceneA: null, sceneB: null, sceneTex: null };
+  const SIM_RADIUS = 1.25;
+  const FLOW_RADIUS = 1.0;
+
+  function createTexFbo(w, h) {
+    const tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    const fbo = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+    return { tex, fbo };
+  }
+
+  function clearFbo(fbo) {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  }
+
+  function rand(a = 0, b = 1) { return a + Math.random() * (b - a); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function fract(x) { return x - Math.floor(x); }
+  function hash2(x, y) { return fract(Math.sin(x * 127.1 + y * 311.7) * 43758.5453123); }
+  function smooth(t) { return t * t * (3.0 - 2.0 * t); }
+
+  function resize() {
+    const wrap = document.getElementById('canvasWrap');
+    const rect = wrap.getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.max(2, Math.floor(rect.width * dpr));
+    const h = Math.max(2, Math.floor(rect.height * dpr));
+    if (w === state.width && h === state.height && dpr === state.dpr) return;
+    state.width = w;
+    state.height = h;
+    state.dpr = dpr;
+    canvas.width = w;
+    canvas.height = h;
+    gl.viewport(0, 0, w, h);
+    state.sceneTex = createTexFbo(w, h);
+    state.sceneA = createTexFbo(w, h);
+    state.sceneB = createTexFbo(w, h);
+    clearFbo(state.sceneA.fbo);
+    clearFbo(state.sceneB.fbo);
+    clearFbo(state.sceneTex.fbo);
+    reseedParticles();
+  }
+
+  function valueNoise(x, y) {
+    const xi = Math.floor(x), yi = Math.floor(y);
+    const xf = x - xi, yf = y - yi;
+    const a = hash2(xi, yi);
+    const b = hash2(xi + 1.0, yi);
+    const c = hash2(xi, yi + 1.0);
+    const d = hash2(xi + 1.0, yi + 1.0);
+    const ux = smooth(xf), uy = smooth(yf);
+    return (a * (1.0 - ux) + b * ux) * (1.0 - uy) + (c * (1.0 - ux) + d * ux) * uy;
+  }
+
+  function fbm(x, y) {
+    let v = 0.0, a = 0.5, fx = x, fy = y;
+    for (let i = 0; i < 4; i++) {
+      v += valueNoise(fx, fy) * a;
+      fx *= 2.02;
+      fy *= 2.02;
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  function initFlowSeeds() {
+    vortexSeeds = [];
+    for (let i = 0; i < 4; i++) {
+      vortexSeeds.push({ x: rand(-0.85, 0.85), y: rand(-0.85, 0.85), sign: Math.random() > 0.5 ? 1 : -1, phase: rand(0, Math.PI * 2) });
+    }
+  }
+
+  function spawnParticleForRespawn(p, zOverride) {
+    const z = zOverride !== undefined ? zOverride : Math.random();
+    const margin = 1.15;
+    const dir = controls.flowDirection.value;
+    if (!controls.flowRespawn.checked || dir === 'free') {
+      p.x = rand(-1.0, 1.0);
+      p.y = rand(-1.0, 1.0);
+    } else if (dir === 'horizontal') {
+      p.x = -margin;
+      p.y = rand(-1.0, 1.0);
+    } else if (dir === 'vertical') {
+      p.y = -margin;
+      p.x = rand(-1.0, 1.0);
+    } else {
+      p.x = -margin;
+      p.y = -margin + rand(-0.18, 0.18);
+    }
+    p.vx = rand(-0.0005, 0.0005);
+    p.vy = rand(-0.0005, 0.0005);
+    p.z = z;
+    p.bright = 0;
+    p.life = 0;
+    p.fade = 0;
+    p.exiting = false;
+    p.exitLife = 0;
+    const randFade = +controls.fadeRandom.value;
+    const baseIn = +controls.fadeIn.value;
+    const baseOut = +controls.fadeOut.value;
+    p.fadeInDur = Math.max(50, baseIn + rand(-randFade, randFade)) / 1000;
+    p.fadeOutDur = Math.max(50, baseOut + rand(-randFade, randFade)) / 1000;
+    p.internalExitAt = rand(8.0, 24.0);
+    p.seed = rand(0, 1000);
+  }
+
+  function baseDirection() {
+    switch (controls.flowDirection.value) {
+      case 'horizontal': return [1, 0];
+      case 'vertical': return [0, 1];
+      case 'diagonal': return [0.75, 0.75];
+      default: {
+        const a = performance.now() * 0.00008;
+        return [Math.cos(a), Math.sin(a)];
+      }
+    }
+  }
+
+  function fieldNoise(x, y, t) {
+    const scale = 0.7;
+    const tx = x * scale + flowOffset[0] + t * 0.018;
+    const ty = y * scale + flowOffset[1] + t * 0.015;
+    const e = 0.12;
+    const s1 = fbm(tx, ty + e);
+    const s2 = fbm(tx, ty - e);
+    const s3 = fbm(tx + e, ty);
+    const s4 = fbm(tx - e, ty);
+    const dsdx = (s3 - s4) / (2.0 * e);
+    const dsdy = (s1 - s2) / (2.0 * e);
+    let vx = dsdy;
+    let vy = -dsdx;
+    const len = Math.hypot(vx, vy) || 1.0;
+    return [vx / len, vy / len];
+  }
+
+  function fieldVortex(x, y, t) {
+    let vx = 0.0, vy = 0.0;
+    for (let i = 0; i < vortexSeeds.length; i++) {
+      const s = vortexSeeds[i];
+      const cx = s.x + Math.sin(t * 0.05 + s.phase) * 0.18;
+      const cy = s.y + Math.cos(t * 0.04 + s.phase * 1.13) * 0.18;
+      const dx = x - cx;
+      const dy = y - cy;
+      const d2 = Math.max(dx * dx + dy * dy, 0.08);
+      vx += (-dy / d2) * 0.0065 * s.sign;
+      vy += ( dx / d2) * 0.0065 * s.sign;
+    }
+    return [vx, vy];
+  }
+
+  function computeFlowRaw(x, y, t) {
+    const bd = baseDirection();
+    let vx = bd[0] * 0.0045;
+    let vy = bd[1] * 0.0045;
+    const flowRadius = 0.22;
+    const nA = fieldNoise(x, y, t), nB = fieldNoise(x + flowRadius, y, t), nC = fieldNoise(x - flowRadius, y, t), nD = fieldNoise(x, y + flowRadius, t), nE = fieldNoise(x, y - flowRadius, t);
+    const noise = [(nA[0] + nB[0] + nC[0] + nD[0] + nE[0]) / 5, (nA[1] + nB[1] + nC[1] + nD[1] + nE[1]) / 5];
+    const vA = fieldVortex(x, y, t), vB = fieldVortex(x + flowRadius, y, t), vC = fieldVortex(x - flowRadius, y, t), vD = fieldVortex(x, y + flowRadius, t), vE = fieldVortex(x, y - flowRadius, t);
+    const vortex = [(vA[0] + vB[0] + vC[0] + vD[0] + vE[0]) / 5, (vA[1] + vB[1] + vC[1] + vD[1] + vE[1]) / 5];
+    const type = controls.flowType.value;
+    if (type === 'noise') {
+      vx += noise[0] * 0.0055;
+      vy += noise[1] * 0.0055;
+    } else if (type === 'vortex') {
+      vx += vortex[0] * 1.3;
+      vy += vortex[1] * 1.3;
+    } else {
+      vx += noise[0] * 0.0045 + vortex[0] * 0.9;
+      vy += noise[1] * 0.0045 + vortex[1] * 0.9;
+    }
+    return [vx, vy];
+  }
+
+  function rebuildFlowField(t) {
+    const cols = flowField.cols, rows = flowField.rows, data = flowField.vectors;
+    let ptr = 0;
+    for (let gy = 0; gy < rows; gy++) {
+      const y = -1.0 + (gy / (rows - 1)) * 2.0;
+      for (let gx = 0; gx < cols; gx++) {
+        const x = -1.0 + (gx / (cols - 1)) * 2.0;
+        const flow = computeFlowRaw(x, y, t);
+        const drift = fieldNoise(x + 5.0, y - 3.0, t * 0.9 + 17.0);
+        data[ptr++] = flow[0] + drift[0] * 0.00008;
+        data[ptr++] = flow[1] + drift[1] * 0.00008;
+      }
+    }
+  }
+
+  function reseedParticles() {
+    const count = +controls.particleCount.value;
+    particles = new Array(count);
+    particleData = new Float32Array(count * 4);
+    bufferInitialized = false;    initFlowSeeds();
+    flowOffset = [rand(0, 100), rand(0, 100)];
+    rebuildFlowField(0);
+    for (let i = 0; i < count; i++) {
+      const p = { x: 0, y: 0, vx: 0, vy: 0, z: Math.random(), bright: 0, life: 0, fade: 1, exiting: false, exitLife: 0, internalExitAt: 0, fadeInDur: 0, fadeOutDur: 0, seed: rand(0, 1000) };
+      spawnParticleForRespawn(p, Math.random());
+      if (!controls.flowRespawn.checked) {
+        p.x = rand(-0.92, 0.92);
+        p.y = rand(-0.92, 0.92);
+      }
+      particles[i] = p;
+    }
+    uploadParticles();
+  }
+
+  function uploadParticles() {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const j = i * 4;
+      particleData[j] = p.x;
+      particleData[j + 1] = p.y;
+      particleData[j + 2] = p.z;
+      particleData[j + 3] = p.fade;
+    }
+    gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
+    if (!bufferInitialized) {
+      gl.bufferData(gl.ARRAY_BUFFER, particleData, gl.DYNAMIC_DRAW);
+      bufferInitialized = true;
+    } else {
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, particleData);
+    }
+  }
+
+  function topBrightParticles() {
+    let a = null, b = null, c = null;
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      if (!a || p.bright > a.bright) { c = b; b = a; a = p; }
+      else if (!b || p.bright > b.bright) { c = b; b = p; }
+      else if (!c || p.bright > c.bright) { c = p; }
+    }
+    return [a, b, c].filter(Boolean).map((p) => ({ x: p.x * 0.5 + 0.5, y: p.y * 0.5 + 0.5, s: clamp(p.bright, 0, 1) }));
+  }
+
+  function findEdgeClusterAnchor(useLeftEdge) {
+    const w = Math.max(state.width, 1);
+    const h = Math.max(state.height, 1);
+    const edgeDistanceUv = (+controls.flareEdgeDistance.value) / w;
+    const jitterPx = 50.0;
+    const jitterUvX = jitterPx / w;
+    const jitterUvY = jitterPx / h;
+
+    const targetX = useLeftEdge ? edgeDistanceUv : 1.0 - edgeDistanceUv;
+    const bandPx = 140.0;
+    const bandUv = bandPx / w;
+    const bins = 18;
+    const scores = new Float32Array(bins);
+    const weightedY = new Float32Array(bins);
+    let bestBright = null;
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const px = p.x * 0.5 + 0.5;
+      const py = p.y * 0.5 + 0.5;
+      const dx = Math.abs(px - targetX);
+      if (dx > bandUv) continue;
+      const edgeWeight = 1.0 - clamp(dx / Math.max(bandUv, 0.0001), 0.0, 1.0);
+      const score = (0.25 + p.bright * 0.75) * edgeWeight * (0.2 + p.fade * 0.8);
+      const bin = Math.max(0, Math.min(bins - 1, Math.floor(py * bins)));
+      scores[bin] += score;
+      weightedY[bin] += py * score;
+      if (!bestBright || score > bestBright.score) bestBright = { x: px, y: py, score, bright: p.bright };
+    }
+
+    let bestBin = -1;
+    let bestScore = 0;
+    for (let i = 0; i < bins; i++) {
+      const neighborhood = scores[i] + (i > 0 ? scores[i - 1] * 0.55 : 0) + (i < bins - 1 ? scores[i + 1] * 0.55 : 0);
+      if (neighborhood > bestScore) {
+        bestScore = neighborhood;
+        bestBin = i;
+      }
+    }
+
+    let y = 0.5;
+    let strength = 0.65;
+    if (bestBin >= 0 && bestScore > 0.0001) {
+      const localScore = scores[bestBin];
+      if (localScore > 0.0001) y = weightedY[bestBin] / localScore;
+      else y = (bestBin + 0.5) / bins;
+      strength = clamp(0.45 + bestScore * 0.6, 0.45, 1.0);
+    } else if (bestBright) {
+      y = bestBright.y;
+      strength = clamp(0.45 + bestBright.bright * 0.7, 0.45, 1.0);
+    }
+
+    const x = clamp(targetX + (Math.random() - 0.5) * 2.0 * jitterUvX, 0.0, 1.0);
+    y = clamp(y + (Math.random() - 0.5) * 2.0 * jitterUvY, 0.02, 0.98);
+    return { x, y, s: strength };
+  }
+
+  function updateFlareEvent(t) {
+    if (!controls.lensFlare.checked) {
+      flareEvent.active = false;
+      flareState = { x: 0.5, y: 0.5, s: 0 };
+      return;
+    }
+    if (!flareEvent.active && t >= flareEvent.nextAt) {
+      flareEvent.active = true;
+      const useLeftEdge = Math.random() < 0.5;
+      flareEvent.anchor = findEdgeClusterAnchor(useLeftEdge);
+      flareEvent.startAt = t;
+      const totalDuration = (+controls.flareDuration.value) / 1000.0;
+      const fi = +controls.flareFadeIn.value;
+      const ho = +controls.flareHold.value;
+      const fo = +controls.flareFadeOut.value;
+      const sum = Math.max(fi + ho + fo, 0.0001);
+      flareEvent.fadeIn = totalDuration * (fi / sum);
+      flareEvent.hold = totalDuration * (ho / sum);
+      flareEvent.fadeOut = totalDuration * (fo / sum);
+    }
+    if (flareEvent.active) {
+      const local = t - flareEvent.startAt;
+      let amp = 0;
+      if (local < flareEvent.fadeIn) {
+        const u = clamp(local / Math.max(flareEvent.fadeIn, 0.0001), 0.0, 1.0);
+        amp = smooth(u);
+      } else if (local < flareEvent.fadeIn + flareEvent.hold) {
+        amp = 1.0;
+      } else if (local < flareEvent.fadeIn + flareEvent.hold + flareEvent.fadeOut) {
+        const u = clamp((local - flareEvent.fadeIn - flareEvent.hold) / Math.max(flareEvent.fadeOut, 0.0001), 0.0, 1.0);
+        amp = 1.0 - smooth(u);
+      }
+      else {
+        flareEvent.active = false;
+        const minI = Math.min(+controls.flareMin.value, +controls.flareMax.value);
+        const maxI = Math.max(+controls.flareMin.value, +controls.flareMax.value);
+        flareEvent.nextAt = t + minI + Math.random() * (maxI - minI);
+        amp = 0;
+      }
+      const a = flareEvent.anchor;
+      const strength = Math.max(a.s, 0.65) * amp;
+      // Un seul flare actif à la fois. Les autres slots restent nuls.
+      flareState = { x: a.x, y: a.y, s: strength };
+    } else {
+      flareState = { x: 0.5, y: 0.5, s: 0 };
+    }
+  }
+
+  function sampleFlowField(x, y) {
+    const cols = flowField.cols, rows = flowField.rows, data = flowField.vectors;
+    const fx = clamp((x * 0.5 + 0.5) * (cols - 1), 0, cols - 1);
+    const fy = clamp((y * 0.5 + 0.5) * (rows - 1), 0, rows - 1);
+    const x0 = Math.floor(fx), y0 = Math.floor(fy), x1 = Math.min(x0 + 1, cols - 1), y1 = Math.min(y0 + 1, rows - 1);
+    const tx = fx - x0, ty = fy - y0;
+    const i00 = (y0 * cols + x0) * 2, i10 = (y0 * cols + x1) * 2, i01 = (y1 * cols + x0) * 2, i11 = (y1 * cols + x1) * 2;
+    const vx0 = data[i00] * (1 - tx) + data[i10] * tx;
+    const vy0 = data[i00 + 1] * (1 - tx) + data[i10 + 1] * tx;
+    const vx1 = data[i01] * (1 - tx) + data[i11] * tx;
+    const vy1 = data[i01 + 1] * (1 - tx) + data[i11 + 1] * tx;
+    return [vx0 * (1 - ty) + vx1 * ty, vy0 * (1 - ty) + vy1 * ty];
+  }
+
+  function shouldRespawn(p) {
+    const dir = controls.flowDirection.value, m = 1.22;
+    if (!controls.flowRespawn.checked) return false;
+    if (dir === 'horizontal') return p.x > m || p.y < -m || p.y > m;
+    if (dir === 'vertical') return p.y > m || p.x < -m || p.x > m;
+    if (dir === 'diagonal') return p.x > m || p.y > m || p.x < -m || p.y < -m;
+    return p.x < -m || p.x > m || p.y < -m || p.y > m;
+  }
+
+  function computeRespawnFade(p) {
+    if (!controls.flowRespawn.checked) return 1;
+    const fadeInSec = p.fadeInDur || (+controls.fadeIn.value / 1000);
+    const fadeOutSec = p.fadeOutDur || (+controls.fadeOut.value / 1000);
+    const fadeIn = clamp(p.life / fadeInSec, 0, 1);
+    const mode = controls.fadeOutMode.value;
+    if (mode === 'external' || mode === 'internal') {
+      const exitFade = p.exiting ? (1 - clamp(p.exitLife / fadeOutSec, 0, 1)) : 1;
+      return fadeIn * exitFade;
+    }
+    let exitFade = 1;
+    const dir = controls.flowDirection.value;
+    const fadeDist = 0.15 + (fadeOutSec * 0.25);
+    if (dir === 'horizontal') exitFade = clamp((1.18 - p.x) / fadeDist, 0, 1);
+    else if (dir === 'vertical') exitFade = clamp((1.18 - p.y) / fadeDist, 0, 1);
+    else if (dir === 'diagonal') exitFade = clamp((1.18 - Math.max(p.x, p.y)) / fadeDist, 0, 1);
+    else {
+      const edgeDist = Math.min(p.x + 1.18, 1.18 - p.x, p.y + 1.18, 1.18 - p.y);
+      exitFade = clamp(edgeDist / fadeDist, 0, 1);
+    }
+    return fadeIn * exitFade;
+  }
+
+  function update(dt, t) {
+    const speed = +controls.speed.value;
+    const contained = controls.containMode.value === 'contained';
+    const pseudo3d = controls.pseudo3d.checked;
+    flowFrameCounter++;
+    if ((flowFrameCounter & 1) === 0) rebuildFlowField(t);
+
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
+      const depthFactor = pseudo3d ? (0.55 + p.z * 1.35) : 1.0;
+      p.life += dt;
+
+      if (controls.flowRespawn.checked && controls.fadeOutMode.value === 'internal' && !p.exiting && p.life >= p.internalExitAt) {
+        p.exiting = true;
+        p.exitLife = 0;
+      }
+
+      const flow = sampleFlowField(p.x, p.y);
+      const targetVx = flow[0] * speed * depthFactor;
+      const targetVy = flow[1] * speed * depthFactor;
+      const response = 0.06 + speed * 0.08;
+      p.vx += (targetVx - p.vx) * response;
+      p.vy += (targetVy - p.vy) * response;
+      p.vx *= 0.92;
+      p.vy *= 0.92;
+      p.x += p.vx * dt * 60.0;
+      p.y += p.vy * dt * 60.0;
+
+      if (contained) {
+        if (p.x < -0.98 || p.x > 0.98) p.vx *= -0.8;
+        if (p.y < -0.98 || p.y > 0.98) p.vy *= -0.8;
+        p.x = clamp(p.x, -0.98, 0.98);
+        p.y = clamp(p.y, -0.98, 0.98);
+      } else if (shouldRespawn(p)) {
+        if (controls.flowRespawn.checked && controls.fadeOutMode.value === 'external') {
+          if (!p.exiting) {
+            p.exiting = true;
+            p.exitLife = 0;
+          }
+        } else {
+          spawnParticleForRespawn(p, p.z);
+        }
+      } else if (!controls.flowRespawn.checked) {
+        const m = 1.25;
+        if (p.x < -m) p.x = m;
+        if (p.x > m) p.x = -m;
+        if (p.y < -m) p.y = m;
+        if (p.y > m) p.y = -m;
+      }
+
+      if (p.exiting) {
+        p.exitLife += dt;
+        if (p.exitLife >= (p.fadeOutDur || (+controls.fadeOut.value / 1000))) {
+          spawnParticleForRespawn(p, p.z);
+        }
+      }
+
+      p.fade = computeRespawnFade(p);
+      p.bright = clamp((Math.abs(p.vx) + Math.abs(p.vy)) * 60.0 + (pseudo3d ? p.z * 0.25 : 0.1), 0, 1);
+    }
+
+    uploadParticles();
+    updateFlareEvent(t);
+  }
+
+  function renderParticles() {
+    gl.bindFramebuffer(gl.FRAMEBUFFER, state.sceneTex.fbo);
+    gl.viewport(0, 0, state.width, state.height);
+    gl.disable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(particleProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
+    gl.enableVertexAttribArray(particleLocs.a_data);
+    gl.vertexAttribPointer(particleLocs.a_data, 4, gl.FLOAT, false, 0, 0);
+    gl.uniform2f(particleLocs.u_camera, 0.0, 0.0);
+    gl.uniform1f(particleLocs.u_pseudo3d, controls.pseudo3d.checked ? 1 : 0);
+    gl.uniform1f(particleLocs.u_glow, +controls.glow.value);
+    gl.uniform1f(particleLocs.u_size, +controls.size.value);
+    gl.uniform1f(particleLocs.u_dpr, state.dpr);
+    gl.uniform3fv(particleLocs.u_accents, accentCache);
+    gl.uniform1i(particleLocs.u_accentCount, accentCountCache);
+    gl.uniform1f(particleLocs.u_colorEnabled, controls.colorEnabled.checked ? 1 : 0);
+    gl.drawArrays(gl.POINTS, 0, particles.length);
+    gl.disable(gl.BLEND);
+  }
+
+  let ping = true;
+  function renderPost(t) {
+    const out = ping ? state.sceneA : state.sceneB;
+    const prev = ping ? state.sceneB : state.sceneA;
+    ping = !ping;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, out.fbo);
+    gl.viewport(0, 0, state.width, state.height);
+    gl.useProgram(postProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+    gl.enableVertexAttribArray(postLocs.a_pos);
+    gl.vertexAttribPointer(postLocs.a_pos, 2, gl.FLOAT, false, 0, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, state.sceneTex.tex);
+    gl.uniform1i(postLocs.u_scene, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, prev.tex);
+    gl.uniform1i(postLocs.u_prev, 1);
+    gl.uniform2f(postLocs.u_resolution, state.width, state.height);
+    gl.uniform1f(postLocs.u_time, t);
+    gl.uniform1f(postLocs.u_trail, +controls.trail.value);
+    gl.uniform1f(postLocs.u_trailMode, controls.trailMode.value === 'feedback' ? 1 : 0);
+    gl.uniform1f(postLocs.u_glow, +controls.glow.value);
+    gl.uniform1f(postLocs.u_glowMode, controls.glowMode.value === 'post' ? 1 : 0);
+    gl.uniform1f(postLocs.u_dreamyGlow, +controls.dreamyGlow.value);
+    gl.uniform1f(postLocs.u_dreamyEdgeBoost, +controls.dreamyEdgeBoost.value);
+    gl.uniform1f(postLocs.u_filmGrain, controls.filmGrain.checked ? 1 : 0);
+    gl.uniform1f(postLocs.u_grainAmount, +controls.grainAmount.value);
+    gl.uniform1f(postLocs.u_chromatic, controls.chromatic.checked ? 1 : 0);
+    gl.uniform1f(postLocs.u_chromaticMode, controls.chromaticMode.value === 'edges' ? 1 : 0);
+    gl.uniform1f(postLocs.u_chromaticWidth, +controls.chromaticWidth.value);
+    gl.uniform1f(postLocs.u_chromaticOffset, +controls.chromaticOffset.value);
+    let lensMode = 0;
+    if (controls.lensFlare.checked) {
+      if (controls.lensFlareType.value === 'horizontal') lensMode = 0.6;
+      else if (controls.lensFlareType.value === 'vertical') lensMode = 1.0;
+      else lensMode = 2.0;
+    }
+    gl.uniform1f(postLocs.u_lensMode, lensMode);
+    gl.uniform1f(postLocs.u_lensAnamorphic, controls.lensFlareAnamorphic.checked ? 1 : 0);
+    gl.uniform1f(postLocs.u_lensThickness, +controls.flareThickness.value);
+    gl.uniform1f(postLocs.u_lensLength, (+controls.flareLength.value) / 100);
+    gl.uniform1f(postLocs.u_lensDiffusion, +controls.flareDiffusion.value);
+    gl.uniform1f(postLocs.u_ghostEnabled, controls.ghostEnabled.checked ? 1 : 0);
+    gl.uniform1f(postLocs.u_ghostIntensity, +controls.ghostIntensity.value);
+    gl.uniform1f(postLocs.u_ghostCount, +controls.ghostCount.value);
+    gl.uniform1f(postLocs.u_ghostSpacing, +controls.ghostSpacing.value);
+    gl.uniform1f(postLocs.u_ghostSize, +controls.ghostSize.value);
+    gl.uniform1f(postLocs.u_ghostDiffusion, +controls.ghostDiffusion.value);
+    gl.uniform1f(postLocs.u_ghostDecay, +controls.ghostDecay.value);
+    const f = flareState || { x: 0.5, y: 0.5, s: 0 };
+    gl.uniform2f(postLocs.u_flarePos, f.x, f.y);
+    gl.uniform1f(postLocs.u_flareStrength, f.s * 1.6);
+    gl.uniform3fv(postLocs.u_accents, accentCache);
+    gl.uniform1i(postLocs.u_accentCount, accentCountCache);
+    gl.uniform1f(postLocs.u_colorEnabled, controls.colorEnabled.checked ? 1 : 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, state.width, state.height);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(blitProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
+    gl.enableVertexAttribArray(blitLocs.a_pos);
+    gl.vertexAttribPointer(blitLocs.a_pos, 2, gl.FLOAT, false, 0, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, out.tex);
+    gl.uniform1i(blitLocs.u_tex, 0);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  function syncValues() {
+    valueEls.particleCount.textContent = controls.particleCount.value;
+    valueEls.speed.textContent = (+controls.speed.value).toFixed(3);
+    valueEls.size.textContent = (+controls.size.value).toFixed(2);
+    valueEls.glow.textContent = (+controls.glow.value).toFixed(2);
+    valueEls.trail.textContent = (+controls.trail.value).toFixed(2);
+    valueEls.dreamy.textContent = (+controls.dreamyGlow.value).toFixed(2);
+    valueEls.dreamyEdgeBoost.textContent = (+controls.dreamyEdgeBoost.value).toFixed(2);
+    valueEls.grainAmount.textContent = (+controls.grainAmount.value).toFixed(2);
+    valueEls.chromaticWidth.textContent = (+controls.chromaticWidth.value).toFixed(2);
+    valueEls.chromaticOffset.textContent = (+controls.chromaticOffset.value).toFixed(2);
+    valueEls.flareDuration.textContent = controls.flareDuration.value + ' ms';
+    valueEls.flareMin.textContent = (+controls.flareMin.value).toFixed(1);
+    valueEls.flareMax.textContent = (+controls.flareMax.value).toFixed(1);
+    valueEls.flareThickness.textContent = (+controls.flareThickness.value).toFixed(1) + ' px';
+    valueEls.flareLength.textContent = Math.round(+controls.flareLength.value) + '%';
+    valueEls.flareDiffusion.textContent = (+controls.flareDiffusion.value).toFixed(1) + 'x';
+    valueEls.flareFadeIn.textContent = controls.flareFadeIn.value + '%';
+    valueEls.flareHold.textContent = controls.flareHold.value + '%';
+    valueEls.flareFadeOut.textContent = controls.flareFadeOut.value + '%';
+    valueEls.flareEdgeDistance.textContent = Math.round(+controls.flareEdgeDistance.value) + ' px';
+    valueEls.ghostIntensity.textContent = (+controls.ghostIntensity.value).toFixed(2);
+    valueEls.ghostCount.textContent = Math.round(+controls.ghostCount.value);
+    valueEls.ghostSpacing.textContent = (+controls.ghostSpacing.value).toFixed(2);
+    valueEls.ghostSize.textContent = (+controls.ghostSize.value).toFixed(2);
+    valueEls.ghostDiffusion.textContent = (+controls.ghostDiffusion.value).toFixed(2);
+    valueEls.ghostDecay.textContent = (+controls.ghostDecay.value).toFixed(2);
+    valueEls.fadeIn.textContent = controls.fadeIn.value + ' ms';
+    valueEls.fadeOut.textContent = controls.fadeOut.value + ' ms';
+    valueEls.fadeRandom.textContent = controls.fadeRandom.value + ' ms';
+  }
+
+  function on(el, event, handler) {
+    if (el) el.addEventListener(event, handler);
+  }
+
+  ['particleCount', 'flowDirection', 'flowType', 'flowRespawn', 'fadeIn', 'fadeOut', 'fadeRandom'].forEach((k) => {
+    on(controls[k], 'input', reseedParticles);
+    on(controls[k], 'change', reseedParticles);
+  });
+
+  document.querySelectorAll('input,select').forEach((el) => on(el, 'input', syncValues));
+  syncValues();
+
+  // Reset timer flare si intervalle modifié
+  function resetFlareTimer() {
+    flareEvent.active = false;
+    const now = performance.now() / 1000;
+    const minI = Math.min(+controls.flareMin.value, +controls.flareMax.value);
+    const maxI = Math.max(+controls.flareMin.value, +controls.flareMax.value);
+    flareEvent.nextAt = now + minI + Math.random() * (maxI - minI);
+  }
+
+  controls.flareMin.addEventListener('input', resetFlareTimer);
+  controls.flareMax.addEventListener('input', resetFlareTimer);
+
+  let last = performance.now() / 1000;
+  let fpsLastTime = performance.now();
+  let fpsFrames = 0;
+  let fpsDisplayed = -1;
+  const fpsEl = document.getElementById('fps');
+
+  function frame(nowMs) {
+    fpsFrames++;
+    if (nowMs - fpsLastTime >= 1000) {
+      const fpsRounded = Math.round(fpsFrames * 1000 / (nowMs - fpsLastTime));
+      if (fpsRounded !== fpsDisplayed) {
+        fpsDisplayed = fpsRounded;
+        fpsEl.textContent = fpsRounded + ' FPS';
+      }
+      fpsFrames = 0;
+      fpsLastTime = nowMs;
+    }
+    resize();
+    const now = nowMs / 1000;
+    const dt = Math.min(now - last, 1 / 20);
+    last = now;
+    update(dt, now);
+    renderParticles();
+    renderPost(now);
+    requestAnimationFrame(frame);
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
