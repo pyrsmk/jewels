@@ -2,7 +2,10 @@
 - vitesse : px/s + courbe
 - glow : je ne vois pas la différence entre "simple" et "post-process"; en garder qu'un et l'intégrer par défaut
 - trail : je vois pas la différence entre simple et feedback; en garder qu'un seul; et d'ailleurs j'ai l'impression que ça glow plus que ça trail
-- pseudo 3D, les particules du font devraient avoir une taille réduite
+- flux diagonal : à supprimer
+- flux horizontal/vertical : à corriger
+- pseudo 3D : les particules du fond devraient avoir une taille plus réduite
+- nombre de particules : il faudrait que ce soit un ratio sur le slider et que ça se calcule par rapport à la superficie de la scène (du coup on aurait une unité genre particule/décapixel²)
 - forme des particules
 - bug contraste diagonale
 - mode fullscreen
