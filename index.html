@@ -19,7 +19,7 @@
     #controls h1 { margin: 0; font-size: 15px; }
     .header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .spacer { flex: 1; }
-    .fullscreen { width: 100px; }
+    .fullscreen { width: 125px; }
     #fps { font-size: 12px; color: #8f9bb3; }
     .group { margin: 0 0 12px; padding: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; }
     .group h2 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
@@ -59,13 +59,16 @@
         <option value="core">Core</option>
       </select>
 
-      <label>Direction globale</label>
+      <label>Mouvement</label>
       <select id="flowDirection">
-        <option value="horizontal">Horizontal</option>
-        <option value="vertical">Vertical</option>
-        <option value="diagonal">Diagonal</option>
-        <option value="free" selected>Libre</option>
+        <option value="free" selected>Vortex</option>
+        <option value="horizontal">De gauche à droite</option>
+        <option value="horizontal-rev">De droite à gauche</option>
+        <option value="vertical-rev">De haut en bas</option>
+        <option value="vertical">De bas en haut</option>
       </select>
+
+      <label>Imperfections de surface <input id="surfaceImperfections" type="checkbox" /></label>
 
       <label>Nombre <span class="value" id="particleCountVal"></span></label>
       <input id="particleCount" type="range" min="0" max="1" step="0.001" value="0.316" />
@@ -244,7 +247,9 @@
     speed: document.getElementById('speed'),
     size: document.getElementById('size'),
     particleShape: document.getElementById('particleShape'),
-    flowDirection: document.getElementById('flowDirection'),    pseudo3d: document.getElementById('pseudo3d'),
+    flowDirection: document.getElementById('flowDirection'),
+    surfaceImperfections: document.getElementById('surfaceImperfections'),
+    pseudo3d: document.getElementById('pseudo3d'),
     pseudo3dSize: document.getElementById('pseudo3dSize'),
     glow: document.getElementById('glow'),
     glowGrainResponse: document.getElementById('glowGrainResponse'),
@@ -1288,6 +1293,7 @@ vec3 col = base * (0.82 + mask * 0.92);
 
   scheduleNextFlare(0);
   let vortexSeeds = [];
+  let imperfectionSeeds = [];
   let bufferInitialized = false;
   let flowFrameCounter = 0;
   const state = { width: 0, height: 0, dpr: 1, sceneA: null, sceneB: null, sceneTex: null };
@@ -1400,6 +1406,56 @@ async function toggleFullscreen() {
     return v;
   }
 
+  function createImperfectionSeed(ageOffset) {
+    const lifetime = rand(40, 60);
+    const fadeDur = 3.0;
+    return {
+      x: rand(-0.9, 0.9),
+      y: rand(-0.9, 0.9),
+      amplitude: rand(0.006, 0.014),
+      radius: rand(0.3, 0.7),
+      lifetime,
+      fadeDur,
+      age: ageOffset !== undefined ? ageOffset : 0,
+    };
+  }
+
+  function initImperfectionSeeds() {
+    const count = 4;
+    imperfectionSeeds = [];
+    for (let i = 0; i < count; i++) {
+      const seed = createImperfectionSeed(rand(0, 30));
+      imperfectionSeeds.push(seed);
+    }
+  }
+
+  function updateImperfectionSeeds(dt) {
+    for (let i = 0; i < imperfectionSeeds.length; i++) {
+      const s = imperfectionSeeds[i];
+      s.age += dt;
+      if (s.age >= s.lifetime) {
+        imperfectionSeeds[i] = createImperfectionSeed(0);
+      }
+    }
+  }
+
+  function imperfectionField(x, y) {
+    let perp = 0.0;
+    for (let i = 0; i < imperfectionSeeds.length; i++) {
+      const s = imperfectionSeeds[i];
+      const dx = x - s.x;
+      const dy = y - s.y;
+      const d2 = dx * dx + dy * dy;
+      const r2 = s.radius * s.radius;
+      if (d2 >= r2) continue;
+      const gaussian = Math.exp(-d2 / (r2 * 0.25));
+      const fadeIn  = clamp(s.age / s.fadeDur, 0, 1);
+      const fadeOut = clamp((s.lifetime - s.age) / s.fadeDur, 0, 1);
+      perp += gaussian * s.amplitude * fadeIn * fadeOut;
+    }
+    return perp;
+  }
+
   function initFlowSeeds() {
     vortexSeeds = [];
     const count = 4;
@@ -1415,28 +1471,33 @@ async function toggleFullscreen() {
     }
   }
 
-  function spawnParticleForRespawn(p, zOverride) {
+  function spawnParticleForRespawn(p, zOverride, scatterInit) {
     const z = zOverride !== undefined ? zOverride : Math.random();
     const margin = 1.15;
     const dir = controls.flowDirection.value;
-    if (dir === 'free') {
+    if (scatterInit) {
       p.x = rand(-1.0, 1.0);
       p.y = rand(-1.0, 1.0);
     } else if (dir === 'horizontal') {
       p.x = -margin;
       p.y = rand(-1.0, 1.0);
+    } else if (dir === 'horizontal-rev') {
+      p.x = margin;
+      p.y = rand(-1.0, 1.0);
     } else if (dir === 'vertical') {
       p.y = -margin;
       p.x = rand(-1.0, 1.0);
+    } else if (dir === 'vertical-rev') {
+      p.y = margin;
+      p.x = rand(-1.0, 1.0);
     } else {
-      p.x = -margin;
-      p.y = -margin + rand(-0.18, 0.18);
+      p.x = rand(-1.0, 1.0);
+      p.y = rand(-1.0, 1.0);
     }
     p.vx = rand(-0.0005, 0.0005);
     p.vy = rand(-0.0005, 0.0005);
     p.z = z;
     p.bright = 0;
-    p.life = 0;
     p.fade = 0;
     p.exiting = false;
     p.exitLife = 0;
@@ -1447,13 +1508,15 @@ async function toggleFullscreen() {
     p.fadeOutDur = Math.max(50, baseOut + rand(-randFade, randFade)) / 1000;
     p.internalExitAt = rand(8.0, 24.0);
     p.seed = rand(0, 1000);
+    p.life = scatterInit ? p.fadeInDur + rand(0, p.internalExitAt * 0.5) : 0;
   }
 
   function baseDirection() {
     switch (controls.flowDirection.value) {
-      case 'horizontal': return [1, 0];
-      case 'vertical': return [0, 1];
-      case 'diagonal': return [0.75, 0.75];
+      case 'horizontal':     return [ 1,  0];
+      case 'horizontal-rev': return [-1,  0];
+      case 'vertical':       return [ 0,  1];
+      case 'vertical-rev':   return [ 0, -1];
       default: {
         const a = performance.now() * 0.00008;
         return [Math.cos(a), Math.sin(a)];
@@ -1462,9 +1525,9 @@ async function toggleFullscreen() {
   }
 
   function fieldNoise(x, y, t) {
-    const scale = 0.7;
-    const tx = x * scale + flowOffset[0] + t * 0.018;
-    const ty = y * scale + flowOffset[1] + t * 0.015;
+    const scale = 0.45;
+    const tx = x * scale + flowOffset[0] + t * 0.06;
+    const ty = y * scale + flowOffset[1] + t * 0.05;
     const e = 0.12;
     const s1 = fbm(tx, ty + e);
     const s2 = fbm(tx, ty - e);
@@ -1495,23 +1558,28 @@ async function toggleFullscreen() {
 
   function computeFlowRaw(x, y, t) {
     const bd = baseDirection();
-    let vx = bd[0] * 0.0045;
-    let vy = bd[1] * 0.0045;
+    let vx = 0.0;
+    let vy = 0.0;
     const flowRadius = 0.22;
+    const dir = controls.flowDirection.value;
     const nA = fieldNoise(x, y, t), nB = fieldNoise(x + flowRadius, y, t), nC = fieldNoise(x - flowRadius, y, t), nD = fieldNoise(x, y + flowRadius, t), nE = fieldNoise(x, y - flowRadius, t);
     const noise = [(nA[0] + nB[0] + nC[0] + nD[0] + nE[0]) / 5, (nA[1] + nB[1] + nC[1] + nD[1] + nE[1]) / 5];
-    const vA = fieldVortex(x, y, t), vB = fieldVortex(x + flowRadius, y, t), vC = fieldVortex(x - flowRadius, y, t), vD = fieldVortex(x, y + flowRadius, t), vE = fieldVortex(x, y - flowRadius, t);
-    const vortex = [(vA[0] + vB[0] + vC[0] + vD[0] + vE[0]) / 5, (vA[1] + vB[1] + vC[1] + vD[1] + vE[1]) / 5];
-    const type = "hybrid";
-    if (type === 'noise') {
-      vx += noise[0] * 0.0055;
-      vy += noise[1] * 0.0055;
-    } else if (type === 'vortex') {
-      vx += vortex[0] * 1.3;
-      vy += vortex[1] * 1.3;
+    const useImperfections = controls.surfaceImperfections.checked;
+    if (dir === 'horizontal' || dir === 'horizontal-rev' || dir === 'vertical' || dir === 'vertical-rev') {
+      const perpX = -bd[1], perpY = bd[0];
+      const noiseAlong = noise[0] * bd[0] + noise[1] * bd[1];
+      const noisePerp  = noise[0] * perpX + noise[1] * perpY;
+      const imperf = useImperfections ? imperfectionField(x, y) : 0.0;
+      vx += bd[0] * 0.018 + bd[0] * noiseAlong * 0.003 + perpX * (noisePerp * 0.006 + imperf);
+      vy += bd[1] * 0.018 + bd[1] * noiseAlong * 0.003 + perpY * (noisePerp * 0.006 + imperf);
     } else {
-      vx += noise[0] * 0.0045 + vortex[0] * 0.9;
-      vy += noise[1] * 0.0045 + vortex[1] * 0.9;
+      vx += bd[0] * 0.0045;
+      vy += bd[1] * 0.0045;
+      const vA = fieldVortex(x, y, t), vB = fieldVortex(x + flowRadius, y, t), vC = fieldVortex(x - flowRadius, y, t), vD = fieldVortex(x, y + flowRadius, t), vE = fieldVortex(x, y - flowRadius, t);
+      const vortex = [(vA[0] + vB[0] + vC[0] + vD[0] + vE[0]) / 5, (vA[1] + vB[1] + vC[1] + vD[1] + vE[1]) / 5];
+      const imperf = useImperfections ? imperfectionField(x, y) : 0.0;
+      vx += noise[0] * 0.0045 + vortex[0] * 0.9 + imperf;
+      vy += noise[1] * 0.0045 + vortex[1] * 0.9 + imperf;
     }
     return [vx, vy];
   }
@@ -1538,6 +1606,7 @@ async function toggleFullscreen() {
     bufferInitialized = false;
     initFlowSeeds();
     flowOffset = [rand(0, 100), rand(0, 100)];
+    initImperfectionSeeds();
     rebuildFlowField(0);
     for (let i = 0; i < count; i++) {
       const p = {
@@ -1545,7 +1614,7 @@ async function toggleFullscreen() {
         life: 0, fade: 1, exiting: false, exitLife: 0, internalExitAt: 0,
         fadeInDur: 0, fadeOutDur: 0, seed: rand(0, 1000),
       };
-      spawnParticleForRespawn(p, Math.random());
+      spawnParticleForRespawn(p, Math.random(), true);
       particles[i] = p;
     }
     uploadParticles();
@@ -1701,9 +1770,10 @@ async function toggleFullscreen() {
   function shouldRespawn(p) {
     const dir = controls.flowDirection.value, m = 1.22;
     if (!true) return false;
-    if (dir === 'horizontal') return p.x > m || p.y < -m || p.y > m;
-    if (dir === 'vertical') return p.y > m || p.x < -m || p.x > m;
-    if (dir === 'diagonal') return p.x > m || p.y > m || p.x < -m || p.y < -m;
+    if (dir === 'horizontal')     return p.x >  m || p.y < -m || p.y > m;
+    if (dir === 'horizontal-rev') return p.x < -m || p.y < -m || p.y > m;
+    if (dir === 'vertical')       return p.y >  m || p.x < -m || p.x > m;
+    if (dir === 'vertical-rev')   return p.y < -m || p.x < -m || p.x > m;
     return p.x < -m || p.x > m || p.y < -m || p.y > m;
   }
 
@@ -1720,9 +1790,10 @@ async function toggleFullscreen() {
     let exitFade = 1;
     const dir = controls.flowDirection.value;
     const fadeDist = 0.15 + (fadeOutSec * 0.25);
-    if (dir === 'horizontal') exitFade = clamp((1.18 - p.x) / fadeDist, 0, 1);
-    else if (dir === 'vertical') exitFade = clamp((1.18 - p.y) / fadeDist, 0, 1);
-    else if (dir === 'diagonal') exitFade = clamp((1.18 - Math.max(p.x, p.y)) / fadeDist, 0, 1);
+    if (dir === 'horizontal')          exitFade = clamp((1.18 - p.x) / fadeDist, 0, 1);
+    else if (dir === 'horizontal-rev') exitFade = clamp((1.18 + p.x) / fadeDist, 0, 1);
+    else if (dir === 'vertical')       exitFade = clamp((1.18 - p.y) / fadeDist, 0, 1);
+    else if (dir === 'vertical-rev')   exitFade = clamp((1.18 + p.y) / fadeDist, 0, 1);
     else {
       const edgeDist = Math.min(p.x + 1.18, 1.18 - p.x, p.y + 1.18, 1.18 - p.y);
       exitFade = clamp(edgeDist / fadeDist, 0, 1);
@@ -1736,6 +1807,7 @@ async function toggleFullscreen() {
     const pseudo3d = controls.pseudo3d.checked;
     flowFrameCounter++;
     if ((flowFrameCounter & 1) === 0) rebuildFlowField(t);
+    if (controls.surfaceImperfections.checked) updateImperfectionSeeds(dt);
 
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i];

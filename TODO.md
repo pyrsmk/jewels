@@ -1,9 +1,9 @@
-- il y a toujours le soucis de balayage sombre
-- flux diagonal : à supprimer
-- flux horizontal/vertical : à corriger
-- grosse refacto
-- couleurs : améliorer picker
-- pseudo 3D : intégrer par défaut
-- sortie : intégrer en "liée aux bord" par défaut
-- modulariser les effets; à quoi ressemblerait l'UI ?
 - réagir au son
+- nouvelles particules
+  - flocons de neige
+  - glitter
+  - pierres précieuses
+- nouvelles sources :
+  - bandes horizontales/verticales
+  - figures géométriques ?
+- grosse refacto : découpage et modularisation
