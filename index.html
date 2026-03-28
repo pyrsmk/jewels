@@ -19,6 +19,7 @@
     #controls h1 { margin: 0; font-size: 15px; }
     .header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
     .spacer { flex: 1; }
+    .fullscreen { width: 100px; }
     #fps { font-size: 12px; color: #8f9bb3; }
     .group { margin: 0 0 12px; padding: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; }
     .group h2 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
@@ -41,7 +42,8 @@
   <div id="controls">
     <div class="header">
       <h1>Jewels</h1>
-      <button id="fullscreenBtn" type="button">Plein écran</button>
+      <div class="spacer"></div>
+      <button class="fullscreen" id="fullscreenBtn" type="button">Plein écran</button>
       <div class="spacer"></div>
       <div id="fps">0 FPS</div>
     </div>
@@ -74,8 +76,8 @@
       <label>Taille <span class="value" id="sizeVal"></span></label>
       <input id="size" type="range" min="1" max="24" step="0.1" value="9" />
 
-      <label>Profondeur pseudo-3D <input id="pseudo3d" type="checkbox" checked /></label>
-      <label>Taille liée au Z <input id="pseudo3dSize" type="checkbox" checked /></label>
+      <label>Pseudo-3D <input id="pseudo3d" type="checkbox" checked /></label>
+      <label>Profondeur pseudo-3D <input id="pseudo3dSize" type="checkbox" checked /></label>
     </div>
 
     <div class="group">
@@ -90,13 +92,13 @@
       <h2>Glow</h2>
       <label><input id="glowEnabled" type="checkbox" checked> Activer</label>
 
-      <label>Glow <span class="value" id="glowVal"></span></label>
+      <label>Intensité <span class="value" id="glowVal"></span></label>
       <input id="glow" type="range" min="0" max="2.5" step="0.01" value="1.30" />
 
       <label>Réponse au grain <span class="value" id="glowGrainResponseVal"></span></label>
       <input id="glowGrainResponse" type="range" min="0" max="1" step="0.01" value="1.0" />
 
-      <label>Mode glow</label>
+      <label>Mode</label>
       <select id="glowMode">
         <option value="simple">Simple</option>
         <option value="post" selected>Post-process</option>
@@ -108,10 +110,10 @@
       <h2>Trail</h2>
       <label><input id="trailEnabled" type="checkbox" checked> Activer</label>
 
-      <label>Trail <span class="value" id="trailVal"></span></label>
+      <label>Intensité <span class="value" id="trailVal"></span></label>
       <input id="trail" type="range" min="0" max="0.98" step="0.01" value="0.50" />
 
-      <label>Mode trail</label>
+      <label>Mode</label>
       <select id="trailMode">
         <option value="simple">Simple</option>
         <option value="feedback" selected>Feedback</option>
@@ -122,13 +124,13 @@
       <h2>Dreamy Glow</h2>
       <label><input id="dreamyEnabled" type="checkbox" checked /> Activer</label>
 
-      <label>Dreamy Glow <span class="value" id="dreamyVal"></span></label>
+      <label>Intensité <span class="value" id="dreamyVal"></span></label>
       <input id="dreamyGlow" type="range" min="0" max="5" step="0.01" value="4" />
 
       <label>Réponse au grain <span class="value" id="dreamyGrainResponseVal"></span></label>
       <input id="dreamyGrainResponse" type="range" min="0" max="1" step="0.01" value="1.0" />
 
-      <label>Amplification bords <span class="value" id="dreamyEdgeBoostVal"></span></label>
+      <label>Amplification aux bords <span class="value" id="dreamyEdgeBoostVal"></span></label>
       <input id="dreamyEdgeBoost" type="range" min="0" max="5" step="0.01" value="3" />
     </div>
 
@@ -136,10 +138,10 @@
       <h2>Grain</h2>
       <label><input id="filmGrain" type="checkbox" checked /> Activer</label>
 
-      <label>Intensité grain <span class="value" id="grainAmountVal"></span></label>
+      <label>Intensité <span class="value" id="grainAmountVal"></span></label>
       <input id="grainAmount" type="range" min="0" max="10" step="0.01" value="3.0" />
 
-      <label>Mode grain</label>
+      <label>Mode</label>
       <select id="grainMode">
         <option value="scan">Balayage</option>
         <option value="static">Stable</option>
@@ -151,13 +153,13 @@
       <h2>Aberration chromatique</h2>
       <label><input id="chromatic" type="checkbox" checked /> Activer</label>
 
-      <label>Largeur aberration <span class="value" id="chromaticWidthVal"></span></label>
+      <label>Largeur <span class="value" id="chromaticWidthVal"></span></label>
       <input id="chromaticWidth" type="range" min="0.05" max="1.0" step="0.01" value="0.55" />
 
-      <label>Décalage aberration <span class="value" id="chromaticOffsetVal"></span></label>
+      <label>Décalage <span class="value" id="chromaticOffsetVal"></span></label>
       <input id="chromaticOffset" type="range" min="0.0" max="3.0" step="0.01" value="0.75" />
 
-      <label>Mode aberration chromatique</label>
+      <label>Mode</label>
       <select id="chromaticMode">
         <option value="particles">Particules</option>
         <option value="edges" selected>Bords écran</option>
@@ -180,22 +182,22 @@
 
       <label>Anamorphic stretch <input id="lensFlareAnamorphic" type="checkbox" checked /></label>
 
-      <label>Epaisseur flare <span class="value" id="flareThicknessVal"></span></label>
+      <label>Epaisseur <span class="value" id="flareThicknessVal"></span></label>
       <input id="flareThickness" type="range" min="0" max="10" step="0.1" value="3" />
 
-      <label>Longueur flare (%) <span class="value" id="flareLengthVal"></span></label>
+      <label>Longueur (%) <span class="value" id="flareLengthVal"></span></label>
       <input id="flareLength" type="range" min="5" max="100" step="1" value="60" />
 
-      <label>Diffusion flare <span class="value" id="flareDiffusionVal"></span></label>
+      <label>Diffusion <span class="value" id="flareDiffusionVal"></span></label>
       <input id="flareDiffusion" type="range" min="0" max="5" step="0.1" value="2.5" />
 
-      <label>Durée flare (ms) <span class="value" id="flareDurationVal"></span></label>
+      <label>Durée (ms) <span class="value" id="flareDurationVal"></span></label>
       <input id="flareDuration" type="range" min="100" max="20000" step="10" value="4000" />
 
-      <label>Intervalle min (s) <span class="value" id="flareMinVal"></span></label>
+      <label>Intervalle min de déclenchement (s) <span class="value" id="flareMinVal"></span></label>
       <input id="flareMin" type="range" min="1" max="30" step="0.5" value="10" />
 
-      <label>Intervalle max (s) <span class="value" id="flareMaxVal"></span></label>
+      <label>Intervalle max de déclenchement (s) <span class="value" id="flareMaxVal"></span></label>
       <input id="flareMax" type="range" min="5" max="60" step="0.5" value="60" />
 
       <label>Fade in (%) <span class="value" id="flareFadeInVal"></span></label>
@@ -210,24 +212,24 @@
       <label>Distance aux bords (px) <span class="value" id="flareEdgeDistanceVal"></span></label>
       <input id="flareEdgeDistance" type="range" min="0" max="500" step="1" value="0" />
 
-      <label>Ghost reflections <input id="ghostEnabled" type="checkbox" checked /></label>
+      <label>Activer les ghost reflections <input id="ghostEnabled" type="checkbox" checked /></label>
 
-      <label>Intensité ghosts <span class="value" id="ghostIntensityVal"></span></label>
+      <label>Intensité des ghosts <span class="value" id="ghostIntensityVal"></span></label>
       <input id="ghostIntensity" type="range" min="0" max="1" step="0.01" value="0.3" />
 
       <label>Nombre de ghosts <span class="value" id="ghostCountVal"></span></label>
       <input id="ghostCount" type="range" min="1" max="5" step="1" value="2" />
 
-      <label>Espacement ghosts <span class="value" id="ghostSpacingVal"></span></label>
+      <label>Espacement des ghosts <span class="value" id="ghostSpacingVal"></span></label>
       <input id="ghostSpacing" type="range" min="0.05" max="0.40" step="0.01" value="0.18" />
 
-      <label>Taille ghosts <span class="value" id="ghostSizeVal"></span></label>
+      <label>Taille des ghosts <span class="value" id="ghostSizeVal"></span></label>
       <input id="ghostSize" type="range" min="0.2" max="2.5" step="0.01" value="2" />
 
-      <label>Diffusion ghosts <span class="value" id="ghostDiffusionVal"></span></label>
+      <label>Diffusion des ghosts <span class="value" id="ghostDiffusionVal"></span></label>
       <input id="ghostDiffusion" type="range" min="0.2" max="4.0" step="0.01" value="4" />
 
-      <label>Décroissance ghosts <span class="value" id="ghostDecayVal"></span></label>
+      <label>Décroissance des ghosts <span class="value" id="ghostDecayVal"></span></label>
       <input id="ghostDecay" type="range" min="0.0" max="1.0" step="0.01" value="0.50" />
     </div>
   </div>
