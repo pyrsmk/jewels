@@ -129,8 +129,8 @@
 
       <label>Mode</label>
       <select id="grainMode">
-        <option value="scan">Balayage</option>
-        <option value="static">Stable</option>
+        <option value="static">Fixe</option>
+        <option value="scan">Scan</option>
         <option value="celluloid" selected>Celluloïde</option>
       </select>
     </div>
@@ -919,9 +919,14 @@ vec3 col = base * (0.82 + mask * 0.92);
     float flickerGrain(vec2 p, float t) {
       float frame = mod(floor(t * 24.0), 512.0);
       vec2 px = floor(p);
-      float a = grainHash(px + vec2(frame * 17.0 + 5.0, frame * 23.0 + 11.0)) - 0.5;
-      float b = grainHash(px.yx + vec2(frame * 29.0 + 13.0, frame * 31.0 + 47.0)) - 0.5;
-      float c = grainHash(floor(px * 0.5) + vec2(frame * 7.0 + 97.0, frame * 11.0 + 37.0)) - 0.5;
+      // Normalisation des décalages temporels dans [0,1) via fract() pour éviter
+      // la perte de précision float32 en fin de cycle (~image 400-511).
+      vec2 ta = fract(frame * vec2(17.0 / 512.0, 23.0 / 512.0));
+      vec2 tb = fract(frame * vec2(29.0 / 512.0, 31.0 / 512.0));
+      vec2 tc = fract(frame * vec2( 7.0 / 512.0, 11.0 / 512.0));
+      float a = grainHash(px / 256.0 + ta) - 0.5;
+      float b = grainHash(px.yx / 256.0 + tb) - 0.5;
+      float c = grainHash(floor(px * 0.5) / 256.0 + tc) - 0.5;
       return a * 0.76 + b * 0.18 + c * 0.06;
     }
 

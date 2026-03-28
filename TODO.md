@@ -1,5 +1,4 @@
 - il y a toujours le soucis de balayage sombre
-- trail : je vois pas la différence entre simple et feedback; en garder qu'un seul; et d'ailleurs j'ai l'impression que ça glow plus que ça trail
 - flux diagonal : à supprimer
 - flux horizontal/vertical : à corriger
 - grosse refacto
