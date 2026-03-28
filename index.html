@@ -107,20 +107,6 @@
     </div>
 
     <div class="group">
-      <h2>Trail</h2>
-      <label><input id="trailEnabled" type="checkbox" checked> Activer</label>
-
-      <label>Intensité <span class="value" id="trailVal"></span></label>
-      <input id="trail" type="range" min="0" max="0.98" step="0.01" value="0.50" />
-
-      <label>Mode</label>
-      <select id="trailMode">
-        <option value="simple">Simple</option>
-        <option value="feedback" selected>Feedback</option>
-      </select>
-    </div>
-
-    <div class="group">
       <h2>Dreamy Glow</h2>
       <label><input id="dreamyEnabled" type="checkbox" checked /> Activer</label>
 
@@ -263,8 +249,6 @@
     glow: document.getElementById('glow'),
     glowGrainResponse: document.getElementById('glowGrainResponse'),
     glowMode: document.getElementById('glowMode'),
-    trail: document.getElementById('trail'),
-    trailMode: document.getElementById('trailMode'),
     dreamyGlow: document.getElementById('dreamyGlow'),
     dreamyGrainResponse: document.getElementById('dreamyGrainResponse'),
     dreamyEdgeBoost: document.getElementById('dreamyEdgeBoost'),
@@ -298,7 +282,6 @@
     ghostDecay: document.getElementById('ghostDecay'),
     colorEnabled: document.getElementById('colorEnabled'),
     glowEnabled: document.getElementById('glowEnabled'),
-    trailEnabled: document.getElementById('trailEnabled'),
     dreamyEnabled: document.getElementById('dreamyEnabled'),
     fullscreenBtn: document.getElementById('fullscreenBtn'),
   };
@@ -359,7 +342,6 @@ function particleSpeedDisplayPxPerSec() {
     size: document.getElementById('sizeVal'),
     glow: document.getElementById('glowVal'),
     glowGrainResponse: document.getElementById('glowGrainResponseVal'),
-    trail: document.getElementById('trailVal'),
     dreamy: document.getElementById('dreamyVal'),
     dreamyGrainResponse: document.getElementById('dreamyGrainResponseVal'),
     dreamyEdgeBoost: document.getElementById('dreamyEdgeBoostVal'),
@@ -792,8 +774,6 @@ vec3 col = base * (0.82 + mask * 0.92);
     uniform sampler2D u_prev;
     uniform vec2 u_resolution;
     uniform float u_time;
-    uniform float u_trail;
-    uniform float u_trailMode;
     uniform float u_glow;
     uniform float u_glowMode;
     uniform float u_dreamyGlow;
@@ -1082,7 +1062,6 @@ vec3 col = base * (0.82 + mask * 0.92);
       bool hasDreamy = (u_dreamyGlow > 0.001);
       bool hasGrain = (u_filmGrain > 0.5 && u_grainAmount > 0.01);
       bool hasFlare = (u_lensMode > 0.5);
-      bool hasTrail = (u_trail > 0.001);
 
       vec3 preChromatic = sampleScene(uv);
       vec3 base;
@@ -1109,7 +1088,7 @@ vec3 col = base * (0.82 + mask * 0.92);
         base = preChromatic;
       }
 
-      if (!hasGlow && !hasDreamy && !hasGrain && !hasFlare && !hasTrail && u_colorEnabled < 0.5) {
+      if (!hasGlow && !hasDreamy && !hasGrain && !hasFlare && u_colorEnabled < 0.5) {
         gl_FragColor = vec4(base, 1.0);
         return;
       }
@@ -1152,11 +1131,6 @@ vec3 col = base * (0.82 + mask * 0.92);
         float edgeMask = smoothstep(0.92, 0.995, edgeMetric);
         float edgeBoost = 1.0 + edgeMask * u_dreamyEdgeBoost;
         combined += dreamy * (0.35 + u_dreamyGlow * 0.85) * edgeBoost;
-      }
-      if (hasTrail) {
-        vec3 prev = texture2D(u_prev, uv).rgb;
-        prev *= (u_trailMode < 0.5) ? 0.96 : 0.985;
-        combined += prev * u_trail;
       }
       vec3 flareCol = vec3(0.0);
       if (hasFlare) {
@@ -1247,8 +1221,6 @@ vec3 col = base * (0.82 + mask * 0.92);
     u_prev: gl.getUniformLocation(postProgram, 'u_prev'),
     u_resolution: gl.getUniformLocation(postProgram, 'u_resolution'),
     u_time: gl.getUniformLocation(postProgram, 'u_time'),
-    u_trail: gl.getUniformLocation(postProgram, 'u_trail'),
-    u_trailMode: gl.getUniformLocation(postProgram, 'u_trailMode'),
     u_glow: gl.getUniformLocation(postProgram, 'u_glow'),
     u_glowMode: gl.getUniformLocation(postProgram, 'u_glowMode'),
     u_dreamyGlow: gl.getUniformLocation(postProgram, 'u_dreamyGlow'),
@@ -1558,11 +1530,16 @@ async function toggleFullscreen() {
     const count = particleCountFromSlider();
     particles = new Array(count);
     particleData = new Float32Array(count * 4);
-    bufferInitialized = false;    initFlowSeeds();
+    bufferInitialized = false;
+    initFlowSeeds();
     flowOffset = [rand(0, 100), rand(0, 100)];
     rebuildFlowField(0);
     for (let i = 0; i < count; i++) {
-      const p = { x: 0, y: 0, vx: 0, vy: 0, z: Math.random(), bright: 0, life: 0, fade: 1, exiting: false, exitLife: 0, internalExitAt: 0, fadeInDur: 0, fadeOutDur: 0, seed: rand(0, 1000) };
+      const p = {
+        x: 0, y: 0, vx: 0, vy: 0, z: Math.random(), bright: 0,
+        life: 0, fade: 1, exiting: false, exitLife: 0, internalExitAt: 0,
+        fadeInDur: 0, fadeOutDur: 0, seed: rand(0, 1000),
+      };
       spawnParticleForRespawn(p, Math.random());
       particles[i] = p;
     }
@@ -1832,11 +1809,11 @@ async function toggleFullscreen() {
     gl.uniform1f(particleLocs.u_dpr, state.dpr);
     gl.uniform1f(particleLocs.u_pseudo3dSize, controls.pseudo3dSize.checked ? 1.0 : 0.0);
     const particleShape =
-  controls.particleShape.value === 'pixel' ? 1 :
-  controls.particleShape.value === 'flowline' ? 2 :
-  controls.particleShape.value === 'softsquare' ? 3 :
-  controls.particleShape.value === 'core' ? 4 : 0;
-gl.uniform1f(particleLocs.u_particleShape, particleShape);
+      controls.particleShape.value === 'pixel' ? 1 :
+      controls.particleShape.value === 'flowline' ? 2 :
+      controls.particleShape.value === 'softsquare' ? 3 :
+      controls.particleShape.value === 'core' ? 4 : 0;
+    gl.uniform1f(particleLocs.u_particleShape, particleShape);
     gl.uniform3fv(particleLocs.u_accents, accentCache);
     gl.uniform1i(particleLocs.u_accentCount, accentCountCache);
     gl.uniform1f(particleLocs.u_colorEnabled, controls.colorEnabled.checked ? 1 : 0);
@@ -1871,8 +1848,6 @@ gl.uniform1f(particleLocs.u_particleShape, particleShape);
     gl.uniform1i(postLocs.u_prev, 1);
     gl.uniform2f(postLocs.u_resolution, state.width, state.height);
     gl.uniform1f(postLocs.u_time, t);
-    gl.uniform1f(postLocs.u_trail, (controls.trailEnabled && controls.trailEnabled.checked) ? +controls.trail.value : 0.0);
-    gl.uniform1f(postLocs.u_trailMode, controls.trailMode.value === 'feedback' ? 1 : 0);
     gl.uniform1f(postLocs.u_glow, (controls.glowEnabled && controls.glowEnabled.checked) ? +controls.glow.value : 0.0);
     const glowMode =
       controls.glowMode.value === 'post' ? 1 :
@@ -1938,7 +1913,6 @@ gl.uniform1f(particleLocs.u_particleShape, particleShape);
     valueEls.particleCount.textContent = particleCountFromSlider().toLocaleString('fr-FR');    valueEls.speed.textContent = Math.round(particleSpeedDisplayPxPerSec()).toLocaleString('fr-FR') + ' px/s';
     valueEls.size.textContent = (+controls.size.value).toFixed(1) + ' px';
     valueEls.glow.textContent = (+controls.glow.value).toFixed(2);
-    valueEls.trail.textContent = (+controls.trail.value).toFixed(2);
     valueEls.dreamy.textContent = (+controls.dreamyGlow.value).toFixed(2);
     valueEls.dreamyEdgeBoost.textContent = (+controls.dreamyEdgeBoost.value).toFixed(2);
     valueEls.grainAmount.textContent = (+controls.grainAmount.value).toFixed(2);
