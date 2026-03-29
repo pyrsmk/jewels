@@ -2390,8 +2390,21 @@ async function toggleFullscreen() {
       }
 
       const flow = sampleFlowField(p.x, p.y);
-      const targetVx = flow[0] * speed * depthFactor;
-      const targetVy = flow[1] * speed * depthFactor;
+      let targetVx = flow[0] * speed * depthFactor;
+      let targetVy = flow[1] * speed * depthFactor;
+
+      // Atténuer la composante perpendiculaire près des bords pour éviter les vides
+      const dir = controls.flowDirection.value;
+      if (dir === 'horizontal' || dir === 'horizontal-rev') {
+        // Flux horizontal : la déviation est en Y, les bords sont haut/bas
+        const edgeProximity = Math.max(0, (Math.abs(p.y) - 0.6) / 0.4); // 0 → 1 dans les 40% proches du bord
+        targetVy *= 1.0 - edgeProximity * edgeProximity;
+      } else if (dir === 'vertical' || dir === 'vertical-rev') {
+        // Flux vertical : la déviation est en X, les bords sont gauche/droite
+        const edgeProximity = Math.max(0, (Math.abs(p.x) - 0.6) / 0.4);
+        targetVx *= 1.0 - edgeProximity * edgeProximity;
+      }
+
       const response = 0.06 + speed * 0.08;
       p.vx += (targetVx - p.vx) * response;
       p.vy += (targetVy - p.vy) * response;
