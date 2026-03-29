@@ -926,7 +926,7 @@ if (shape < 0.5) {
 } else if (shape < 1.5) {
   // Pixel
   sizeNorm = 1.16;
-  vec2 q = pr / sizeNorm;
+  vec2 q = p / sizeNorm;
   float d = max(abs(q.x), abs(q.y)) - 0.78;
   if (d > 0.0) discard;
   mask = 0.92;
@@ -945,7 +945,7 @@ if (shape < 0.5) {
 } else if (shape < 3.5) {
   // Carré soft
   sizeNorm = 1.08;
-  vec2 q = pr / sizeNorm;
+  vec2 q = p / sizeNorm;
   float box = max(abs(q.x), abs(q.y));
   float soft = smoothstep(0.95, 0.2, box);
   float inner = smoothstep(0.6, 0.0, box);
