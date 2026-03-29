@@ -91,6 +91,153 @@
       <button id="addColor" type="button">Ajouter une couleur</button>
     </div>
 
+
+
+    <div class="group">
+      <h2>Chromatic Noise</h2>
+      <label><input id="chromaticNoiseEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="chromaticNoiseVal"></span></label>
+      <input id="chromaticNoise" type="range" min="0" max="4" step="0.01" value="0.18" />
+
+      <label>Vitesse <span class="value" id="chromaticNoiseSpeedVal"></span></label>
+      <input id="chromaticNoiseSpeed" type="range" min="0" max="8" step="0.01" value="2.10" />
+
+      <label>Échelle <span class="value" id="chromaticNoiseScaleVal"></span></label>
+      <input id="chromaticNoiseScale" type="range" min="0.4" max="8" step="0.01" value="2.80" />
+    </div>
+
+    <div class="group">
+      <h2>Color Shimmer</h2>
+      <label><input id="colorShimmerEnabled" type="checkbox" /> Activer</label><label>Intensité <span class="value" id="colorShimmerVal"></span></label>
+      <input id="colorShimmer" type="range" min="0" max="3" step="0.01" value="0.20" />
+
+      <label>Vitesse <span class="value" id="colorShimmerSpeedVal"></span></label>
+      <input id="colorShimmerSpeed" type="range" min="0" max="3" step="0.01" value="0.60" />
+
+      <label>Échelle <span class="value" id="colorShimmerScaleVal"></span></label>
+      <input id="colorShimmerScale" type="range" min="0.2" max="4" step="0.01" value="1.10" />
+
+      <label>Couleurs</label>
+      <select id="colorShimmerPalette">
+        <option value="all" selected>Toutes</option>
+        <option value="warm">Chaudes</option>
+        <option value="cool">Froides</option>
+        <option value="fluo">Fluos</option>
+        <option value="cyberpunk">Cyberpunk</option>
+        <option value="aurora">Aurore boréale</option>
+        <option value="fire">Feu</option>
+        <option value="sunset">Sunset</option>
+        <option value="toxic">Toxic</option>
+        <option value="ice">Glace</option>
+        <option value="midnight">Minuit</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <h2>RGB Split dynamique</h2>
+      <label><input id="rgbSplitEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="rgbSplitVal"></span></label>
+      <input id="rgbSplit" type="range" min="0" max="4" step="0.01" value="0.22" />
+
+      <label>Vitesse <span class="value" id="rgbSplitSpeedVal"></span></label>
+      <input id="rgbSplitSpeed" type="range" min="0" max="8" step="0.01" value="2.20" />
+
+      <label>Échelle <span class="value" id="rgbSplitScaleVal"></span></label>
+      <input id="rgbSplitScale" type="range" min="0.2" max="8" step="0.01" value="2.00" />
+    </div>
+
+    <div class="group">
+      <h2>Pixel Sorting local</h2>
+      <label><input id="pixelSortEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="pixelSortVal"></span></label>
+      <input id="pixelSort" type="range" min="0" max="4" step="0.01" value="0.20" />
+
+      <label>Vitesse <span class="value" id="pixelSortSpeedVal"></span></label>
+      <input id="pixelSortSpeed" type="range" min="0" max="6" step="0.01" value="1.40" />
+
+      <label>Longueur <span class="value" id="pixelSortScaleVal"></span></label>
+      <input id="pixelSortScale" type="range" min="0.2" max="8" step="0.01" value="2.50" />
+    </div>
+
+    <div class="group">
+      <h2>Temporal Ghosting</h2>
+      <label><input id="temporalGhostEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="temporalGhostOpacityVal"></span></label>
+      <input id="temporalGhostOpacity" type="range" min="0" max="1" step="0.01" value="0.50" />
+
+      <label>Force <span class="value" id="temporalGhostVal"></span></label>
+      <input id="temporalGhost" type="range" min="0" max="1.8" step="0.01" value="0.20" />
+
+      <label>Décalage RGB <span class="value" id="temporalGhostRgbShiftVal"></span></label>
+      <input id="temporalGhostRgbShift" type="range" min="0" max="6" step="0.01" value="0.80" />
+
+      <label>Vitesse <span class="value" id="temporalGhostSpeedVal"></span></label>
+      <input id="temporalGhostSpeed" type="range" min="0" max="6" step="0.01" value="1.20" />
+
+      <label>Décalage <span class="value" id="temporalGhostScaleVal"></span></label>
+      <input id="temporalGhostScale" type="range" min="0.2" max="6" step="0.01" value="1.50" />
+    </div>
+
+    <div class="group">
+      <h2>Block Glitch</h2>
+      <label><input id="blockGlitchEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="blockGlitchVal"></span></label>
+      <input id="blockGlitch" type="range" min="0" max="4" step="0.01" value="0.20" />
+
+      <label>Vitesse <span class="value" id="blockGlitchSpeedVal"></span></label>
+      <input id="blockGlitchSpeed" type="range" min="0" max="10" step="0.01" value="2.00" />
+
+      <label>Taille blocs <span class="value" id="blockGlitchScaleVal"></span></label>
+      <input id="blockGlitchScale" type="range" min="0.2" max="8" step="0.01" value="1.50" />
+    </div>
+
+    <div class="group">
+      <h2>Data Moshing light</h2>
+      <label><input id="dataMoshEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="dataMoshVal"></span></label>
+      <input id="dataMosh" type="range" min="0" max="4" step="0.01" value="0.22" />
+
+      <label>Vitesse <span class="value" id="dataMoshSpeedVal"></span></label>
+      <input id="dataMoshSpeed" type="range" min="0" max="8" step="0.01" value="1.50" />
+
+      <label>Trainée <span class="value" id="dataMoshScaleVal"></span></label>
+      <input id="dataMoshScale" type="range" min="0.2" max="8" step="0.01" value="2.20" />
+    </div>
+
+    <div class="group">
+      <h2>Bit Depth Flicker</h2>
+      <label><input id="bitDepthEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="bitDepthVal"></span></label>
+      <input id="bitDepth" type="range" min="0" max="4" step="0.01" value="0.18" />
+
+      <label>Vitesse <span class="value" id="bitDepthSpeedVal"></span></label>
+      <input id="bitDepthSpeed" type="range" min="0" max="10" step="0.01" value="3.20" />
+
+      <label>Quantification <span class="value" id="bitDepthScaleVal"></span></label>
+      <input id="bitDepthScale" type="range" min="0.2" max="8" step="0.01" value="2.00" />
+    </div>
+
+    <div class="group">
+      <h2>UV Warp glitch</h2>
+      <label><input id="uvWarpEnabled" type="checkbox" /> Activer</label>
+
+      <label>Intensité <span class="value" id="uvWarpVal"></span></label>
+      <input id="uvWarp" type="range" min="0" max="4" step="0.01" value="0.18" />
+
+      <label>Vitesse <span class="value" id="uvWarpSpeedVal"></span></label>
+      <input id="uvWarpSpeed" type="range" min="0" max="8" step="0.01" value="1.30" />
+
+      <label>Échelle <span class="value" id="uvWarpScaleVal"></span></label>
+      <input id="uvWarpScale" type="range" min="0.2" max="8" step="0.01" value="1.60" />
+    </div>
+
     <div class="group">
       <h2>Glow</h2>
       <label><input id="glowEnabled" type="checkbox" checked> Activer</label>
@@ -286,6 +433,45 @@
     ghostDiffusion: document.getElementById('ghostDiffusion'),
     ghostDecay: document.getElementById('ghostDecay'),
     colorEnabled: document.getElementById('colorEnabled'),
+    chromaticNoiseEnabled: document.getElementById('chromaticNoiseEnabled'),
+    chromaticNoise: document.getElementById('chromaticNoise'),
+    chromaticNoiseSpeed: document.getElementById('chromaticNoiseSpeed'),
+    chromaticNoiseScale: document.getElementById('chromaticNoiseScale'),
+    colorShimmerEnabled: document.getElementById('colorShimmerEnabled'),
+    colorShimmerPalette: document.getElementById('colorShimmerPalette'),
+    colorShimmer: document.getElementById('colorShimmer'),
+    colorShimmerSpeed: document.getElementById('colorShimmerSpeed'),
+    colorShimmerScale: document.getElementById('colorShimmerScale'),
+    rgbSplitEnabled: document.getElementById('rgbSplitEnabled'),
+    rgbSplit: document.getElementById('rgbSplit'),
+    rgbSplitSpeed: document.getElementById('rgbSplitSpeed'),
+    rgbSplitScale: document.getElementById('rgbSplitScale'),
+    pixelSortEnabled: document.getElementById('pixelSortEnabled'),
+    pixelSort: document.getElementById('pixelSort'),
+    pixelSortSpeed: document.getElementById('pixelSortSpeed'),
+    pixelSortScale: document.getElementById('pixelSortScale'),
+    temporalGhostEnabled: document.getElementById('temporalGhostEnabled'),
+    temporalGhost: document.getElementById('temporalGhost'),
+    temporalGhostOpacity: document.getElementById('temporalGhostOpacity'),
+    temporalGhostRgbShift: document.getElementById('temporalGhostRgbShift'),
+    temporalGhostSpeed: document.getElementById('temporalGhostSpeed'),
+    temporalGhostScale: document.getElementById('temporalGhostScale'),
+    blockGlitchEnabled: document.getElementById('blockGlitchEnabled'),
+    blockGlitch: document.getElementById('blockGlitch'),
+    blockGlitchSpeed: document.getElementById('blockGlitchSpeed'),
+    blockGlitchScale: document.getElementById('blockGlitchScale'),
+    dataMoshEnabled: document.getElementById('dataMoshEnabled'),
+    dataMosh: document.getElementById('dataMosh'),
+    dataMoshSpeed: document.getElementById('dataMoshSpeed'),
+    dataMoshScale: document.getElementById('dataMoshScale'),
+    bitDepthEnabled: document.getElementById('bitDepthEnabled'),
+    bitDepth: document.getElementById('bitDepth'),
+    bitDepthSpeed: document.getElementById('bitDepthSpeed'),
+    bitDepthScale: document.getElementById('bitDepthScale'),
+    uvWarpEnabled: document.getElementById('uvWarpEnabled'),
+    uvWarp: document.getElementById('uvWarp'),
+    uvWarpSpeed: document.getElementById('uvWarpSpeed'),
+    uvWarpScale: document.getElementById('uvWarpScale'),
     glowEnabled: document.getElementById('glowEnabled'),
     dreamyEnabled: document.getElementById('dreamyEnabled'),
     fullscreenBtn: document.getElementById('fullscreenBtn'),
@@ -369,7 +555,37 @@ function particleSpeedDisplayPxPerSec() {
     ghostSpacing: document.getElementById('ghostSpacingVal'),
     ghostSize: document.getElementById('ghostSizeVal'),
     ghostDiffusion: document.getElementById('ghostDiffusionVal'),
-    ghostDecay: document.getElementById('ghostDecayVal'),  };
+    ghostDecay: document.getElementById('ghostDecayVal'),
+    chromaticNoise: document.getElementById('chromaticNoiseVal'),
+    chromaticNoiseSpeed: document.getElementById('chromaticNoiseSpeedVal'),
+    chromaticNoiseScale: document.getElementById('chromaticNoiseScaleVal'),
+    colorShimmer: document.getElementById('colorShimmerVal'),
+    colorShimmerSpeed: document.getElementById('colorShimmerSpeedVal'),
+    colorShimmerScale: document.getElementById('colorShimmerScaleVal'),
+    rgbSplit: document.getElementById('rgbSplitVal'),
+    rgbSplitSpeed: document.getElementById('rgbSplitSpeedVal'),
+    rgbSplitScale: document.getElementById('rgbSplitScaleVal'),
+    pixelSort: document.getElementById('pixelSortVal'),
+    pixelSortSpeed: document.getElementById('pixelSortSpeedVal'),
+    pixelSortScale: document.getElementById('pixelSortScaleVal'),
+    temporalGhost: document.getElementById('temporalGhostVal'),
+    temporalGhostOpacity: document.getElementById('temporalGhostOpacityVal'),
+    temporalGhostRgbShift: document.getElementById('temporalGhostRgbShiftVal'),
+    temporalGhostSpeed: document.getElementById('temporalGhostSpeedVal'),
+    temporalGhostScale: document.getElementById('temporalGhostScaleVal'),
+    blockGlitch: document.getElementById('blockGlitchVal'),
+    blockGlitchSpeed: document.getElementById('blockGlitchSpeedVal'),
+    blockGlitchScale: document.getElementById('blockGlitchScaleVal'),
+    dataMosh: document.getElementById('dataMoshVal'),
+    dataMoshSpeed: document.getElementById('dataMoshSpeedVal'),
+    dataMoshScale: document.getElementById('dataMoshScaleVal'),
+    bitDepth: document.getElementById('bitDepthVal'),
+    bitDepthSpeed: document.getElementById('bitDepthSpeedVal'),
+    bitDepthScale: document.getElementById('bitDepthScaleVal'),
+    uvWarp: document.getElementById('uvWarpVal'),
+    uvWarpSpeed: document.getElementById('uvWarpSpeedVal'),
+    uvWarpScale: document.getElementById('uvWarpScaleVal'),
+  };
 
   const colorList = document.getElementById('colors');
   const addColorBtn = document.getElementById('addColor');
@@ -810,6 +1026,36 @@ vec3 col = base * (0.82 + mask * 0.92);
     uniform vec3 u_accents[8];
     uniform int u_accentCount;
     uniform float u_colorEnabled;
+    uniform float u_chromaticNoise;
+    uniform float u_chromaticNoiseSpeed;
+    uniform float u_chromaticNoiseScale;
+    uniform float u_colorShimmer;
+    uniform float u_colorShimmerPalette;
+    uniform float u_colorShimmerSpeed;
+    uniform float u_colorShimmerScale;
+    uniform float u_rgbSplit;
+    uniform float u_rgbSplitSpeed;
+    uniform float u_rgbSplitScale;
+    uniform float u_pixelSort;
+    uniform float u_pixelSortSpeed;
+    uniform float u_pixelSortScale;
+    uniform float u_temporalGhost;
+    uniform float u_temporalGhostOpacity;
+    uniform float u_temporalGhostRgbShift;
+    uniform float u_temporalGhostSpeed;
+    uniform float u_temporalGhostScale;
+    uniform float u_blockGlitch;
+    uniform float u_blockGlitchSpeed;
+    uniform float u_blockGlitchScale;
+    uniform float u_dataMosh;
+    uniform float u_dataMoshSpeed;
+    uniform float u_dataMoshScale;
+    uniform float u_bitDepth;
+    uniform float u_bitDepthSpeed;
+    uniform float u_bitDepthScale;
+    uniform float u_uvWarp;
+    uniform float u_uvWarpSpeed;
+    uniform float u_uvWarpScale;
 
     vec3 sampleScene(vec2 uv) { return texture2D(u_scene, uv).rgb; }
 
@@ -898,6 +1144,242 @@ vec3 col = base * (0.82 + mask * 0.92);
 
     float grainHash(vec2 p) {
       return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+    }
+
+    float noise21(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      float a = grainHash(i);
+      float b = grainHash(i + vec2(1.0, 0.0));
+      float c = grainHash(i + vec2(0.0, 1.0));
+      float d = grainHash(i + vec2(1.0, 1.0));
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+    }
+
+    vec3 chromaticNoise(vec2 uv, vec2 fragCoord, float time) {
+      float scale = max(u_chromaticNoiseScale, 0.001);
+      vec2 pFine = fragCoord * (0.009 * scale);
+      vec2 pCoarse = fragCoord * (0.0035 * scale);
+      float t = time * u_chromaticNoiseSpeed;
+      vec3 fine = vec3(
+        noise21(pFine + vec2(t * 0.83, -t * 0.41) + 7.1),
+        noise21(pFine * 1.23 + vec2(-t * 0.57, t * 0.91) + 29.4),
+        noise21(pFine * 0.91 + vec2(t * 1.09, t * 0.37) + 53.8)
+      ) - 0.5;
+      vec3 coarse = vec3(
+        noise21(pCoarse + vec2(-t * 0.21, t * 0.17) + 11.0),
+        noise21(pCoarse * 1.07 + vec2(t * 0.13, -t * 0.19) + 37.0),
+        noise21(pCoarse * 0.94 + vec2(-t * 0.16, t * 0.23) + 71.0)
+      ) - 0.5;
+      vec3 n = fine * 0.65 + coarse * 0.95;
+      float lum = dot(sampleScene(uv), vec3(0.2126, 0.7152, 0.0722));
+      float mask = 0.60 + smoothstep(0.0, 0.75, lum) * 0.40;
+      return n * (0.34 * u_chromaticNoise) * mask;
+    }
+
+    vec3 colorShimmer(vec2 uv, float time) {
+      float scale = max(u_colorShimmerScale, 0.001);
+      float t = time * u_colorShimmerSpeed;
+
+      vec2 p1 = uv * (1.45 * scale);
+      vec2 p2 = uv * (1.05 * scale);
+      vec2 p3 = uv * (1.85 * scale);
+
+      float n1 = noise21(p1 + vec2(t * 0.12, -t * 0.09) + 3.0);
+      float n2 = noise21(p2 + vec2(-t * 0.08, t * 0.11) + 17.0);
+      float n3 = noise21(p3 + vec2(t * 0.06, t * 0.14) + 31.0);
+
+      vec3 c1;
+      vec3 c2;
+      vec3 c3;
+      float amp = 1.0;
+
+      if (u_colorShimmerPalette < 0.5) {
+        // Toutes = base d'origine, non restreinte à une famille précise
+        vec3 centered = vec3(n1, n2, n3) * 2.0 - 1.0;
+        vec3 outCol = centered * vec3(1.25, 0.85, 1.45);
+        float lum = dot(sampleScene(uv), vec3(0.2126, 0.7152, 0.0722));
+        float lumaMask = 0.45 + smoothstep(0.01, 0.80, lum) * 0.55;
+        return outCol * (0.24 * u_colorShimmer) * lumaMask;
+      } else if (u_colorShimmerPalette < 1.5) {
+        // Chaudes : rouge / orange / or
+        c1 = vec3(1.40, 0.18, 0.08);
+        c2 = vec3(1.34, 0.52, 0.06);
+        c3 = vec3(1.08, 0.84, 0.14);
+        amp = 2.60;
+      } else if (u_colorShimmerPalette < 2.5) {
+        // Froides : cyan / bleu / violet froid
+        c1 = vec3(0.08, 0.98, 1.34);
+        c2 = vec3(0.10, 0.34, 1.42);
+        c3 = vec3(0.44, 0.24, 1.14);
+        amp = 2.50;
+      } else if (u_colorShimmerPalette < 3.5) {
+        // Fluos : magenta / cyan électrique / vert acide
+        c1 = vec3(1.60, 0.02, 1.12);
+        c2 = vec3(0.00, 1.18, 1.48);
+        c3 = vec3(0.50, 1.54, 0.02);
+        amp = 2.90;
+      } else if (u_colorShimmerPalette < 4.5) {
+        // Cyberpunk : magenta néon / violet électrique / violet-rose
+        c1 = vec3(1.10, 0.02, 1.30);
+        c2 = vec3(0.55, 0.02, 1.60);
+        c3 = vec3(0.90, 0.02, 1.50);
+        amp = 2.80;
+      } else if (u_colorShimmerPalette < 5.5) {
+        // Aurore boréale : cyan menthe / vert émeraude / violet lavande
+        c1 = vec3(0.04, 1.42, 1.02);
+        c2 = vec3(0.06, 1.48, 0.46);
+        c3 = vec3(0.72, 0.28, 1.30);
+        amp = 2.60;
+      } else if (u_colorShimmerPalette < 6.5) {
+        // Feu : rouge profond / orange vif / blanc incandescent
+        c1 = vec3(1.54, 0.06, 0.02);
+        c2 = vec3(1.48, 0.58, 0.00);
+        c3 = vec3(1.52, 1.34, 0.40);
+        amp = 2.70;
+      } else if (u_colorShimmerPalette < 7.5) {
+        // Sunset : corail / orange brûlé / violet crépuscule
+        c1 = vec3(1.52, 0.30, 0.28);
+        c2 = vec3(1.38, 0.54, 0.06);
+        c3 = vec3(0.72, 0.10, 1.10);
+        amp = 2.60;
+      } else if (u_colorShimmerPalette < 8.5) {
+        // Toxic : vert acide / jaune-vert fluo / blanc verdâtre
+        c1 = vec3(0.22, 1.56, 0.02);
+        c2 = vec3(0.84, 1.50, 0.00);
+        c3 = vec3(0.60, 1.44, 0.52);
+        amp = 2.80;
+      } else if (u_colorShimmerPalette < 9.5) {
+        // Glace : bleu pâle / cyan givré / blanc bleuté
+        c1 = vec3(0.36, 0.72, 1.46);
+        c2 = vec3(0.28, 1.20, 1.38);
+        c3 = vec3(0.74, 1.02, 1.48);
+        amp = 2.40;
+      } else {
+        // Minuit : bleu nuit / indigo / violet profond
+        c1 = vec3(0.04, 0.10, 1.40);
+        c2 = vec3(0.28, 0.04, 1.30);
+        c3 = vec3(0.54, 0.06, 1.10);
+        amp = 2.50;
+      }
+
+      float s1 = (n1 - 0.5) * 2.0;
+      float s2 = (n2 - 0.5) * 2.0;
+      float s3 = (n3 - 0.5) * 2.0;
+
+      vec3 paletteSignal = max(c1 * s1 + c2 * s2 + c3 * s3, 0.0);
+      float pulse = 0.78 + 0.22 * sin((uv.x + uv.y) * (5.0 + scale * 1.4) + t * 1.6);
+      float lum = dot(sampleScene(uv), vec3(0.2126, 0.7152, 0.0722));
+      float lumaMask = 0.45 + smoothstep(0.01, 0.80, lum) * 0.55;
+
+      return paletteSignal * amp * (0.24 * u_colorShimmer) * pulse * lumaMask;
+    }
+
+    vec2 safeUv(vec2 uv) {
+      return clamp(uv, vec2(0.001), vec2(0.999));
+    }
+
+    vec3 applyRgbSplit(vec3 color, vec2 uv, float time) {
+      float t = time * (0.7 + u_rgbSplitSpeed * 1.4);
+      float scale = 0.7 + u_rgbSplitScale * 1.6;
+      vec2 cell = floor(uv * vec2(24.0, 14.0) * scale);
+      float event = smoothstep(0.62, 0.98, noise21(cell + vec2(floor(t * 2.0), 13.0)));
+      vec2 dir = normalize(vec2(noise21(cell + 21.0) - 0.5, noise21(cell + 57.0) - 0.5) + vec2(0.001, 0.0));
+      vec2 shift = dir * event * u_rgbSplit * (0.008 + 0.02 * noise21(cell + 89.0));
+      vec3 split;
+      split.r = sampleScene(safeUv(uv + shift)).r;
+      split.g = sampleScene(uv).g;
+      split.b = sampleScene(safeUv(uv - shift)).b;
+      return mix(color, split, clamp(event * u_rgbSplit * 0.55, 0.0, 1.0));
+    }
+
+    vec3 applyPixelSort(vec3 color, vec2 uv, float time) {
+      float t = time * (0.5 + u_pixelSortSpeed * 1.2);
+      float len = (0.004 + 0.035 * u_pixelSort) * (0.8 + 0.35 * u_pixelSortScale);
+      float band = smoothstep(0.56, 0.95, noise21(vec2(floor(uv.y * (60.0 + 60.0 * u_pixelSortScale)), floor(t * 3.0))));
+      vec3 best = color;
+      float bestLum = dot(best, vec3(0.2126, 0.7152, 0.0722));
+      for (int i = 1; i <= 4; i++) {
+        float fi = float(i);
+        vec2 suv = safeUv(uv + vec2(len * fi, 0.0));
+        vec3 s = sampleScene(suv);
+        float lum = dot(s, vec3(0.2126, 0.7152, 0.0722));
+        if (lum > bestLum) {
+          bestLum = lum;
+          best = s;
+        }
+      }
+      return mix(color, best, clamp(band * u_pixelSort * 0.45, 0.0, 1.0));
+    }
+
+    vec3 applyTemporalGhost(vec3 color, vec2 uv, float time) {
+      float t = time * (0.5 + u_temporalGhostSpeed);
+      vec2 jitterA = vec2(
+        noise21(uv * (8.0 + u_temporalGhostScale * 4.0) + vec2(t, 1.7)) - 0.5,
+        noise21(uv.yx * (7.0 + u_temporalGhostScale * 3.0) + vec2(-t, 3.9)) - 0.5
+      ) * (0.03 * u_temporalGhost * (0.6 + 0.4 * u_temporalGhostScale));
+
+      vec2 rgbShift = vec2(
+        noise21(uv * (11.0 + u_temporalGhostScale * 2.0) + vec2(t * 1.7, 9.3)) - 0.5,
+        noise21(uv.yx * (10.0 + u_temporalGhostScale * 2.5) + vec2(-t * 1.3, 5.1)) - 0.5
+      ) * (0.012 * u_temporalGhostRgbShift);
+
+      vec3 ghostBase = texture2D(u_prev, safeUv(uv + jitterA)).rgb;
+      vec3 ghostRgb;
+      ghostRgb.r = texture2D(u_prev, safeUv(uv + jitterA + rgbShift)).r;
+      ghostRgb.g = ghostBase.g;
+      ghostRgb.b = texture2D(u_prev, safeUv(uv + jitterA - rgbShift)).b;
+
+      float chromaMask = smoothstep(0.0, 0.2, u_temporalGhostRgbShift);
+      vec3 ghost = mix(ghostBase, ghostRgb, chromaMask);
+
+      vec3 effected = clamp(color + ghost * (0.55 * u_temporalGhost), 0.0, 1.0);
+      return mix(color, effected, clamp(u_temporalGhostOpacity, 0.0, 1.0));
+    }
+
+    vec3 applyBlockGlitch(vec3 color, vec2 uv, float time) {
+      float t = floor(time * (2.0 + u_blockGlitchSpeed * 3.0));
+      float scale = 6.0 + u_blockGlitchScale * 10.0;
+      vec2 grid = vec2(14.0, 8.0) * scale;
+      vec2 cell = floor(uv * grid);
+      float gate = smoothstep(0.78, 0.995, noise21(cell + vec2(t, 7.0)));
+      vec2 offs = vec2(
+        (noise21(cell + vec2(17.0, t * 0.71)) - 0.5) * 0.28,
+        (noise21(cell + vec2(47.0, t * 0.53)) - 0.5) * 0.10
+      ) * u_blockGlitch;
+      vec3 block = sampleScene(safeUv((cell + 0.5) / grid + offs));
+      block = mix(block, block.bgr, smoothstep(0.55, 0.95, noise21(cell + vec2(91.0, t))));
+      return mix(color, block, clamp(gate * u_blockGlitch * 0.5, 0.0, 1.0));
+    }
+
+    vec3 applyDataMosh(vec3 color, vec2 uv, float time) {
+      float t = floor(time * (1.0 + u_dataMoshSpeed * 2.5));
+      float trail = (0.01 + 0.05 * u_dataMosh) * (0.7 + 0.3 * u_dataMoshScale);
+      float gate = smoothstep(0.60, 0.98, noise21(vec2(floor(uv.y * (18.0 + u_dataMoshScale * 22.0)), t)));
+      vec3 smearA = texture2D(u_prev, safeUv(uv - vec2(trail, 0.0))).rgb;
+      vec3 smearB = sampleScene(safeUv(uv - vec2(trail * 1.8, 0.0))).rgb;
+      vec3 smear = mix(smearA, smearB, 0.5);
+      return mix(color, smear + (smear - color) * 0.45, clamp(gate * u_dataMosh * 0.42, 0.0, 1.0));
+    }
+
+    vec3 applyBitDepth(vec3 color, vec2 uv, float time) {
+      float t = floor(time * (2.0 + u_bitDepthSpeed * 4.0));
+      float flicker = 0.55 + 0.45 * noise21(vec2(floor(uv.y * 10.0), t));
+      float levels = max(2.0, 48.0 - u_bitDepthScale * 5.5 - u_bitDepth * 6.5 - flicker * 10.0 * u_bitDepth);
+      vec3 q = floor(color * levels) / levels;
+      return mix(color, q, clamp(u_bitDepth * 0.45 + flicker * u_bitDepth * 0.15, 0.0, 1.0));
+    }
+
+    vec3 applyUvWarp(vec3 color, vec2 uv, float time) {
+      float t = time * (0.5 + u_uvWarpSpeed);
+      float scale = 1.2 + u_uvWarpScale * 1.5;
+      vec2 warp = vec2(
+        noise21(uv * vec2(4.0, 11.0) * scale + vec2(t * 0.31, -t * 0.23)) - 0.5,
+        noise21(uv * vec2(7.0, 5.0) * scale + vec2(-t * 0.27, t * 0.19)) - 0.5
+      ) * (0.04 * u_uvWarp);
+      vec3 warped = sampleScene(safeUv(uv + warp));
+      return mix(color, warped, clamp(u_uvWarp * 0.65, 0.0, 1.0));
     }
 
     float analogGrain(vec2 p, float t) {
@@ -1072,6 +1554,15 @@ vec3 col = base * (0.82 + mask * 0.92);
       bool hasDreamy = (u_dreamyGlow > 0.001);
       bool hasGrain = (u_filmGrain > 0.5 && u_grainAmount > 0.01);
       bool hasFlare = (u_lensMode > 0.5);
+      bool hasChromaticNoise = (u_chromaticNoise > 0.001);
+      bool hasColorShimmer = (u_colorShimmer > 0.001);
+      bool hasRgbSplit = (u_rgbSplit > 0.001);
+      bool hasPixelSort = (u_pixelSort > 0.001);
+      bool hasTemporalGhost = (u_temporalGhost > 0.001);
+      bool hasBlockGlitch = (u_blockGlitch > 0.001);
+      bool hasDataMosh = (u_dataMosh > 0.001);
+      bool hasBitDepth = (u_bitDepth > 0.001);
+      bool hasUvWarp = (u_uvWarp > 0.001);
 
       vec3 preChromatic = sampleScene(uv);
       vec3 base;
@@ -1098,7 +1589,7 @@ vec3 col = base * (0.82 + mask * 0.92);
         base = preChromatic;
       }
 
-      if (!hasGlow && !hasDreamy && !hasGrain && !hasFlare && u_colorEnabled < 0.5) {
+      if (!hasGlow && !hasDreamy && !hasGrain && !hasFlare && !hasChromaticNoise && !hasColorShimmer && !hasRgbSplit && !hasPixelSort && !hasTemporalGhost && !hasBlockGlitch && !hasDataMosh && !hasBitDepth && !hasUvWarp && u_colorEnabled < 0.5) {
         gl_FragColor = vec4(base, 1.0);
         return;
       }
@@ -1198,6 +1689,34 @@ vec3 col = base * (0.82 + mask * 0.92);
 
         combined = clamp(combined + vec3(grain) * (0.10 * u_grainAmount) * mask * localWeight, 0.0, 1.0);
       }
+      if (hasColorShimmer) {
+        vec3 shimmer = colorShimmer(uv, u_time);
+        combined = clamp(combined + shimmer + combined * shimmer * 0.35, 0.0, 1.0);
+      }
+      if (hasChromaticNoise) {
+        combined = clamp(combined + chromaticNoise(uv, gl_FragCoord.xy, u_time), 0.0, 1.0);
+      }
+      if (hasRgbSplit) {
+        combined = applyRgbSplit(combined, uv, u_time);
+      }
+      if (hasPixelSort) {
+        combined = applyPixelSort(combined, uv, u_time);
+      }
+      if (hasTemporalGhost) {
+        combined = applyTemporalGhost(combined, uv, u_time);
+      }
+      if (hasBlockGlitch) {
+        combined = applyBlockGlitch(combined, uv, u_time);
+      }
+      if (hasDataMosh) {
+        combined = applyDataMosh(combined, uv, u_time);
+      }
+      if (hasBitDepth) {
+        combined = applyBitDepth(combined, uv, u_time);
+      }
+      if (hasUvWarp) {
+        combined = applyUvWarp(combined, uv, u_time);
+      }
       gl_FragColor = vec4(combined, 1.0);
     }
   `;
@@ -1262,6 +1781,36 @@ vec3 col = base * (0.82 + mask * 0.92);
     u_accents: gl.getUniformLocation(postProgram, 'u_accents'),
     u_accentCount: gl.getUniformLocation(postProgram, 'u_accentCount'),
     u_colorEnabled: gl.getUniformLocation(postProgram, 'u_colorEnabled'),
+    u_chromaticNoise: gl.getUniformLocation(postProgram, 'u_chromaticNoise'),
+    u_chromaticNoiseSpeed: gl.getUniformLocation(postProgram, 'u_chromaticNoiseSpeed'),
+    u_chromaticNoiseScale: gl.getUniformLocation(postProgram, 'u_chromaticNoiseScale'),
+    u_colorShimmer: gl.getUniformLocation(postProgram, 'u_colorShimmer'),
+    u_colorShimmerPalette: gl.getUniformLocation(postProgram, 'u_colorShimmerPalette'),
+    u_colorShimmerSpeed: gl.getUniformLocation(postProgram, 'u_colorShimmerSpeed'),
+    u_colorShimmerScale: gl.getUniformLocation(postProgram, 'u_colorShimmerScale'),
+    u_rgbSplit: gl.getUniformLocation(postProgram, 'u_rgbSplit'),
+    u_rgbSplitSpeed: gl.getUniformLocation(postProgram, 'u_rgbSplitSpeed'),
+    u_rgbSplitScale: gl.getUniformLocation(postProgram, 'u_rgbSplitScale'),
+    u_pixelSort: gl.getUniformLocation(postProgram, 'u_pixelSort'),
+    u_pixelSortSpeed: gl.getUniformLocation(postProgram, 'u_pixelSortSpeed'),
+    u_pixelSortScale: gl.getUniformLocation(postProgram, 'u_pixelSortScale'),
+    u_temporalGhost: gl.getUniformLocation(postProgram, 'u_temporalGhost'),
+    u_temporalGhostOpacity: gl.getUniformLocation(postProgram, 'u_temporalGhostOpacity'),
+    u_temporalGhostRgbShift: gl.getUniformLocation(postProgram, 'u_temporalGhostRgbShift'),
+    u_temporalGhostSpeed: gl.getUniformLocation(postProgram, 'u_temporalGhostSpeed'),
+    u_temporalGhostScale: gl.getUniformLocation(postProgram, 'u_temporalGhostScale'),
+    u_blockGlitch: gl.getUniformLocation(postProgram, 'u_blockGlitch'),
+    u_blockGlitchSpeed: gl.getUniformLocation(postProgram, 'u_blockGlitchSpeed'),
+    u_blockGlitchScale: gl.getUniformLocation(postProgram, 'u_blockGlitchScale'),
+    u_dataMosh: gl.getUniformLocation(postProgram, 'u_dataMosh'),
+    u_dataMoshSpeed: gl.getUniformLocation(postProgram, 'u_dataMoshSpeed'),
+    u_dataMoshScale: gl.getUniformLocation(postProgram, 'u_dataMoshScale'),
+    u_bitDepth: gl.getUniformLocation(postProgram, 'u_bitDepth'),
+    u_bitDepthSpeed: gl.getUniformLocation(postProgram, 'u_bitDepthSpeed'),
+    u_bitDepthScale: gl.getUniformLocation(postProgram, 'u_bitDepthScale'),
+    u_uvWarp: gl.getUniformLocation(postProgram, 'u_uvWarp'),
+    u_uvWarpSpeed: gl.getUniformLocation(postProgram, 'u_uvWarpSpeed'),
+    u_uvWarpScale: gl.getUniformLocation(postProgram, 'u_uvWarpScale'),
   };
 
   const particleBuffer = gl.createBuffer();
@@ -1970,6 +2519,36 @@ async function toggleFullscreen() {
     gl.uniform3fv(postLocs.u_accents, accentCache);
     gl.uniform1i(postLocs.u_accentCount, accentCountCache);
     gl.uniform1f(postLocs.u_colorEnabled, controls.colorEnabled.checked ? 1 : 0);
+    gl.uniform1f(postLocs.u_chromaticNoise, controls.chromaticNoiseEnabled.checked ? +controls.chromaticNoise.value : 0.0);
+    gl.uniform1f(postLocs.u_chromaticNoiseSpeed, +controls.chromaticNoiseSpeed.value);
+    gl.uniform1f(postLocs.u_chromaticNoiseScale, +controls.chromaticNoiseScale.value);
+    gl.uniform1f(postLocs.u_colorShimmer, controls.colorShimmerEnabled.checked ? +controls.colorShimmer.value : 0.0);
+    gl.uniform1f(postLocs.u_colorShimmerPalette, ({ all: 0.0, warm: 1.0, cool: 2.0, fluo: 3.0, cyberpunk: 4.0, aurora: 5.0, fire: 6.0, sunset: 7.0, toxic: 8.0, ice: 9.0, midnight: 10.0 }[controls.colorShimmerPalette.value] ?? 0.0));
+    gl.uniform1f(postLocs.u_colorShimmerSpeed, +controls.colorShimmerSpeed.value);
+    gl.uniform1f(postLocs.u_colorShimmerScale, +controls.colorShimmerScale.value);
+    gl.uniform1f(postLocs.u_rgbSplit, controls.rgbSplitEnabled.checked ? +controls.rgbSplit.value : 0.0);
+    gl.uniform1f(postLocs.u_rgbSplitSpeed, +controls.rgbSplitSpeed.value);
+    gl.uniform1f(postLocs.u_rgbSplitScale, +controls.rgbSplitScale.value);
+    gl.uniform1f(postLocs.u_pixelSort, controls.pixelSortEnabled.checked ? +controls.pixelSort.value : 0.0);
+    gl.uniform1f(postLocs.u_pixelSortSpeed, +controls.pixelSortSpeed.value);
+    gl.uniform1f(postLocs.u_pixelSortScale, +controls.pixelSortScale.value);
+    gl.uniform1f(postLocs.u_temporalGhost, controls.temporalGhostEnabled.checked ? +controls.temporalGhost.value : 0.0);
+    gl.uniform1f(postLocs.u_temporalGhostOpacity, +controls.temporalGhostOpacity.value);
+    gl.uniform1f(postLocs.u_temporalGhostRgbShift, +controls.temporalGhostRgbShift.value);
+    gl.uniform1f(postLocs.u_temporalGhostSpeed, +controls.temporalGhostSpeed.value);
+    gl.uniform1f(postLocs.u_temporalGhostScale, +controls.temporalGhostScale.value);
+    gl.uniform1f(postLocs.u_blockGlitch, controls.blockGlitchEnabled.checked ? +controls.blockGlitch.value : 0.0);
+    gl.uniform1f(postLocs.u_blockGlitchSpeed, +controls.blockGlitchSpeed.value);
+    gl.uniform1f(postLocs.u_blockGlitchScale, +controls.blockGlitchScale.value);
+    gl.uniform1f(postLocs.u_dataMosh, controls.dataMoshEnabled.checked ? +controls.dataMosh.value : 0.0);
+    gl.uniform1f(postLocs.u_dataMoshSpeed, +controls.dataMoshSpeed.value);
+    gl.uniform1f(postLocs.u_dataMoshScale, +controls.dataMoshScale.value);
+    gl.uniform1f(postLocs.u_bitDepth, controls.bitDepthEnabled.checked ? +controls.bitDepth.value : 0.0);
+    gl.uniform1f(postLocs.u_bitDepthSpeed, +controls.bitDepthSpeed.value);
+    gl.uniform1f(postLocs.u_bitDepthScale, +controls.bitDepthScale.value);
+    gl.uniform1f(postLocs.u_uvWarp, controls.uvWarpEnabled.checked ? +controls.uvWarp.value : 0.0);
+    gl.uniform1f(postLocs.u_uvWarpSpeed, +controls.uvWarpSpeed.value);
+    gl.uniform1f(postLocs.u_uvWarpScale, +controls.uvWarpScale.value);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -2010,7 +2589,37 @@ async function toggleFullscreen() {
     valueEls.ghostSpacing.textContent = (+controls.ghostSpacing.value).toFixed(2);
     valueEls.ghostSize.textContent = (+controls.ghostSize.value).toFixed(2);
     valueEls.ghostDiffusion.textContent = (+controls.ghostDiffusion.value).toFixed(2);
-    valueEls.ghostDecay.textContent = (+controls.ghostDecay.value).toFixed(2);    if (valueEls.glowGrainResponse) valueEls.glowGrainResponse.textContent = (+controls.glowGrainResponse.value).toFixed(2);
+    valueEls.ghostDecay.textContent = (+controls.ghostDecay.value).toFixed(2);
+    if (valueEls.chromaticNoise) valueEls.chromaticNoise.textContent = (+controls.chromaticNoise.value).toFixed(2);
+    if (valueEls.chromaticNoiseSpeed) valueEls.chromaticNoiseSpeed.textContent = (+controls.chromaticNoiseSpeed.value).toFixed(2);
+    if (valueEls.chromaticNoiseScale) valueEls.chromaticNoiseScale.textContent = (+controls.chromaticNoiseScale.value).toFixed(2);
+    if (valueEls.colorShimmer) valueEls.colorShimmer.textContent = (+controls.colorShimmer.value).toFixed(2);
+    if (valueEls.colorShimmerSpeed) valueEls.colorShimmerSpeed.textContent = (+controls.colorShimmerSpeed.value).toFixed(2);
+    if (valueEls.colorShimmerScale) valueEls.colorShimmerScale.textContent = (+controls.colorShimmerScale.value).toFixed(2);
+    if (valueEls.rgbSplit) valueEls.rgbSplit.textContent = (+controls.rgbSplit.value).toFixed(2);
+    if (valueEls.rgbSplitSpeed) valueEls.rgbSplitSpeed.textContent = (+controls.rgbSplitSpeed.value).toFixed(2);
+    if (valueEls.rgbSplitScale) valueEls.rgbSplitScale.textContent = (+controls.rgbSplitScale.value).toFixed(2);
+    if (valueEls.pixelSort) valueEls.pixelSort.textContent = (+controls.pixelSort.value).toFixed(2);
+    if (valueEls.pixelSortSpeed) valueEls.pixelSortSpeed.textContent = (+controls.pixelSortSpeed.value).toFixed(2);
+    if (valueEls.pixelSortScale) valueEls.pixelSortScale.textContent = (+controls.pixelSortScale.value).toFixed(2);
+    if (valueEls.temporalGhost) valueEls.temporalGhost.textContent = (+controls.temporalGhost.value).toFixed(2);
+    if (valueEls.temporalGhostOpacity) valueEls.temporalGhostOpacity.textContent = (+controls.temporalGhostOpacity.value).toFixed(2);
+    if (valueEls.temporalGhostRgbShift) valueEls.temporalGhostRgbShift.textContent = (+controls.temporalGhostRgbShift.value).toFixed(2);
+    if (valueEls.temporalGhostSpeed) valueEls.temporalGhostSpeed.textContent = (+controls.temporalGhostSpeed.value).toFixed(2);
+    if (valueEls.temporalGhostScale) valueEls.temporalGhostScale.textContent = (+controls.temporalGhostScale.value).toFixed(2);
+    if (valueEls.blockGlitch) valueEls.blockGlitch.textContent = (+controls.blockGlitch.value).toFixed(2);
+    if (valueEls.blockGlitchSpeed) valueEls.blockGlitchSpeed.textContent = (+controls.blockGlitchSpeed.value).toFixed(2);
+    if (valueEls.blockGlitchScale) valueEls.blockGlitchScale.textContent = (+controls.blockGlitchScale.value).toFixed(2);
+    if (valueEls.dataMosh) valueEls.dataMosh.textContent = (+controls.dataMosh.value).toFixed(2);
+    if (valueEls.dataMoshSpeed) valueEls.dataMoshSpeed.textContent = (+controls.dataMoshSpeed.value).toFixed(2);
+    if (valueEls.dataMoshScale) valueEls.dataMoshScale.textContent = (+controls.dataMoshScale.value).toFixed(2);
+    if (valueEls.bitDepth) valueEls.bitDepth.textContent = (+controls.bitDepth.value).toFixed(2);
+    if (valueEls.bitDepthSpeed) valueEls.bitDepthSpeed.textContent = (+controls.bitDepthSpeed.value).toFixed(2);
+    if (valueEls.bitDepthScale) valueEls.bitDepthScale.textContent = (+controls.bitDepthScale.value).toFixed(2);
+    if (valueEls.uvWarp) valueEls.uvWarp.textContent = (+controls.uvWarp.value).toFixed(2);
+    if (valueEls.uvWarpSpeed) valueEls.uvWarpSpeed.textContent = (+controls.uvWarpSpeed.value).toFixed(2);
+    if (valueEls.uvWarpScale) valueEls.uvWarpScale.textContent = (+controls.uvWarpScale.value).toFixed(2);
+    if (valueEls.glowGrainResponse) valueEls.glowGrainResponse.textContent = (+controls.glowGrainResponse.value).toFixed(2);
     if (valueEls.dreamyGrainResponse) valueEls.dreamyGrainResponse.textContent = (+controls.dreamyGrainResponse.value).toFixed(2);
     if (valueEls.lensFlareGrainResponse) valueEls.lensFlareGrainResponse.textContent = (+controls.lensFlareGrainResponse.value).toFixed(2);
   }
