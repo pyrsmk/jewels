@@ -1,8 +1,4 @@
 - réagir au son : pulsation sur intensité du bloom, luminosité globale, taille des particules, rapidité de déplacement
-- nouvelles particules
-  - flocons de neige
-  - glitter
-  - pierres précieuses
 - nouvelles sources :
   - bandes horizontales/verticales
   - https://vincentgarreau.com/particles.js/

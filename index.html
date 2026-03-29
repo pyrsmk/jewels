@@ -57,6 +57,7 @@
         <option value="flowline">Flows</option>
         <option value="softsquare">Carré soft</option>
         <option value="core">Core</option>
+        <option value="glitter">Glitter</option>
       </select>
 
       <label>Mouvement</label>
@@ -809,11 +810,13 @@ function particleSpeedDisplayPxPerSec() {
     varying float v_depth;
     varying float v_alpha;
     varying vec2 v_sceneUv;
+    varying float v_seed;
     void main() {
       vec2 pos = a_data.xy + u_camera;
       gl_Position = vec4(pos, 0.0, 1.0);
       v_sceneUv = pos * 0.5 + 0.5;
       v_alpha = a_data.w;
+      v_seed = a_data.z;
       float depth = mix(1.0, 0.25 + a_data.z * 0.95, u_pseudo3d);
       float sizePx = u_size;
       sizePx *= mix(1.0, mix(0.7, 1.0, depth), u_pseudo3dSize);
@@ -827,10 +830,12 @@ function particleSpeedDisplayPxPerSec() {
     varying float v_depth;
     varying float v_alpha;
     varying vec2 v_sceneUv;
+    varying float v_seed;
     uniform vec3 u_accents[8];
     uniform int u_accentCount;
     uniform float u_colorEnabled;
     uniform float u_particleShape;
+    uniform float u_time;
 
     vec3 paletteColor(float t) {
       if (u_accentCount <= 0) return vec3(0.02, 0.035, 0.09);
@@ -948,7 +953,7 @@ if (shape < 0.5) {
   mask = soft * (0.6 + inner * 0.4);
   halo = smoothstep(1.1, 0.35, box) * 0.15;
 
-} else {
+} else if (shape < 4.5) {
   // Core
   sizeNorm = 1.05;
   vec2 qs = p / sizeNorm;
@@ -958,6 +963,21 @@ if (shape < 0.5) {
   float c2 = smoothstep(0.8, 0.0, rs);
   mask = c1 * 0.62 + c2 * 0.46;
   halo = smoothstep(1.0, 0.35, rs) * 0.18;
+
+} else {
+  // Glitter : carré scintillant qui occupe la taille réelle du sprite
+  float seed = hash21(floor(v_sceneUv * 1024.0));
+  float flickerPhase = fract(seed * 13.7 + u_time * (0.8 + seed * 1.4));
+  float flicker = smoothstep(0.0, 0.15, flickerPhase) * smoothstep(0.45, 0.20, flickerPhase);
+  // Légère rotation aléatoire par particule
+  vec2 q = rot((seed - 0.5) * 0.52) * p;
+  float sq = max(abs(q.x), abs(q.y));
+  if (sq > 0.90) discard;
+  float face = smoothstep(0.90, 0.68, sq);
+  float bright = smoothstep(0.90, 0.0, sq);
+  mask = face * (0.55 + flicker * 0.45);
+  sparkle = bright * (0.5 + flicker * 0.8);
+  halo = smoothstep(1.0, 0.82, sq) * 0.12;
 }
 
 vec3 col = base * (0.82 + mask * 0.92);
@@ -1737,6 +1757,7 @@ vec3 col = base * (0.82 + mask * 0.92);
     u_accents: gl.getUniformLocation(particleProgram, 'u_accents'),
     u_accentCount: gl.getUniformLocation(particleProgram, 'u_accentCount'),
     u_colorEnabled: gl.getUniformLocation(particleProgram, 'u_colorEnabled'),
+    u_time: gl.getUniformLocation(particleProgram, 'u_time'),
   };
 
   const blitLocs = {
@@ -2416,7 +2437,7 @@ async function toggleFullscreen() {
     updateFlareEvent(t);
   }
 
-  function renderParticles() {
+  function renderParticles(t) {
     gl.bindFramebuffer(gl.FRAMEBUFFER, state.sceneTex.fbo);
     gl.viewport(0, 0, state.width, state.height);
     gl.disable(gl.DEPTH_TEST);
@@ -2438,8 +2459,10 @@ async function toggleFullscreen() {
       controls.particleShape.value === 'pixel' ? 1 :
       controls.particleShape.value === 'flowline' ? 2 :
       controls.particleShape.value === 'softsquare' ? 3 :
-      controls.particleShape.value === 'core' ? 4 : 0;
+      controls.particleShape.value === 'core' ? 4 :
+      controls.particleShape.value === 'glitter' ? 5 : 0;
     gl.uniform1f(particleLocs.u_particleShape, particleShape);
+    gl.uniform1f(particleLocs.u_time, t);
     gl.uniform3fv(particleLocs.u_accents, accentCache);
     gl.uniform1i(particleLocs.u_accentCount, accentCountCache);
     gl.uniform1f(particleLocs.u_colorEnabled, controls.colorEnabled.checked ? 1 : 0);
@@ -2669,7 +2692,7 @@ async function toggleFullscreen() {
     const dt = Math.min(now - last, 1 / 20);
     last = now;
     update(dt, now);
-    renderParticles();
+    renderParticles(now);
     renderPost(now);
     requestAnimationFrame(frame);
   }
