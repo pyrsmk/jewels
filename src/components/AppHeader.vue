@@ -1,6 +1,6 @@
 <template>
   <div class="header">
-    <h1>Jewels</h1>
+    <h1>Jewels <span class="version">v{{ version }}</span></h1>
     <div class="spacer"></div>
     <button class="fullscreen" type="button" @click="$emit('toggleFullscreen')">
       {{ isFullscreen ? 'Quitter le plein écran' : 'Plein écran' }}
@@ -16,6 +16,8 @@ defineProps({
   isFullscreen: { type: Boolean, default: false },
 });
 defineEmits(['toggleFullscreen']);
+
+const version = __APP_VERSION__;
 </script>
 
 <style scoped>
@@ -27,6 +29,7 @@ defineEmits(['toggleFullscreen']);
   margin-bottom: 10px;
 }
 .header h1 { margin: 0; font-size: 15px; }
+.version { font-size: 11px; color: #8f9bb3; font-weight: normal; }
 .spacer { flex: 1; }
 .fullscreen { width: 125px; }
 .fps { font-size: 12px; color: #8f9bb3; white-space: nowrap; }
