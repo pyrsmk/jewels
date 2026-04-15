@@ -16,7 +16,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 const props = defineProps({
   subjects: { type: Array, default: () => [] },
@@ -24,6 +24,17 @@ const props = defineProps({
   subjectRegistry: { type: Array, default: () => [] },
   effectRegistry: { type: Array, default: () => [] },
 });
+
+const emit = defineEmits(['settings-change']);
+
+watch(
+  () => [
+    ...props.subjects.map((s) => s.options),
+    ...props.effects.map((e) => e.options),
+  ],
+  () => emit('settings-change'),
+  { deep: true },
+);
 
 const subjectEntries = computed(() =>
   props.subjects

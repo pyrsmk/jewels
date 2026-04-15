@@ -11,6 +11,7 @@
       :effects="engine.effects"
       :subject-registry="engine.subjectRegistry"
       :effect-registry="engine.effectRegistry"
+      @settings-change="onSettingsChange"
     />
   </div>
   <CanvasView
@@ -34,6 +35,10 @@ const engine = shallowRef(null);
 
 function onEngineReady(eng) {
   engine.value = eng;
+}
+
+function onSettingsChange() {
+  engine.value?.settingsController.persistToUrl();
 }
 </script>
 

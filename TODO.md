@@ -1,4 +1,3 @@
-- dreamy glow : random d'application aux bords pour que ce soit plus organique
 - refacto UI
 - nouvelles sources :
   - fluides (un peu comme de la peinture sur de l'eau)

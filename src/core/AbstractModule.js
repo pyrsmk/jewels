@@ -33,12 +33,11 @@ export class AbstractModule {
   }
 
   setParameters(saved) {
-    for (const id of this.controlIds) {
-      const el = this.getControl(id);
-      if (el) this._applyControlValue(el, saved[id]);
+    for (const key of Object.keys(saved)) {
+      if (key in this.options) {
+        this.options[key] = saved[key];
+      }
     }
-    this.syncOptionsFromUI();
-    this.syncValueDisplays();
   }
 
   _applyControlValue(el, value) {
