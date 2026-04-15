@@ -23,7 +23,7 @@
       <option value="vertical-rev">De haut en bas</option>
       <option value="vertical">De bas en haut</option>
     </select>
-    <label>
+    <label v-if="instance.options.flowDirection !== 'free'">
       Imperfections de surface
       <input
         type="checkbox"
