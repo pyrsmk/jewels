@@ -1,6 +1,19 @@
-- réagir au son : pulsation sur intensité du bloom, luminosité globale, taille des particules, rapidité de déplacement
+- refacto
+  - on éclate en Vue 3
+- renommer "cercles" en "perles"
+- vortex qui se déplacent beaucoup plus, avec un slider de vitesse de déplacement
+- améliorer le déplacement des particules pour un côté plus organique
+- dreamy glow : random d'application aux bords pour que ce soit plus organique
 - nouvelles sources :
+  - fluides (un peu comme de la peinture sur de l'eau)
   - bandes horizontales/verticales
   - https://vincentgarreau.com/particles.js/
   - figures géométriques ?
-- grosse refacto : découpage et modularisation
+- effets
+  - ambient occlusion
+  - pixellisation
+  - pixel desert
+  - trails
+- particules
+  - nouveau déplacement : https://www.youtube.com/watch?v=f6rK8ZAag9E&list=PL17dHu1NtlTPkxvhcagKgEB9IGeoHz5w6&index=106
+- réagir au son : pulsation sur intensité du bloom, luminosité globale, taille des particules, rapidité de déplacement
