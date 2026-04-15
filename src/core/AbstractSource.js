@@ -1,12 +1,12 @@
 import { AbstractModule } from './AbstractModule.js';
 
-export class AbstractSubject extends AbstractModule {
+export class AbstractSource extends AbstractModule {
   update(context) {
     throw new Error(`${this.constructor.name}.update(context) must be implemented`);
   }
 
-  renderSubject(context) {
-    throw new Error(`${this.constructor.name}.renderSubject(context) must be implemented`);
+  renderSource(context) {
+    throw new Error(`${this.constructor.name}.renderSource(context) must be implemented`);
   }
 
   getDrawCount() {
@@ -34,7 +34,7 @@ export class AbstractSubject extends AbstractModule {
       gl,
       locs: this.locs,
     };
-    this.renderSubject(renderContext);
+    this.renderSource(renderContext);
 
     for (const effect of context.effects ?? []) {
       effect.applyScenePass(renderContext);

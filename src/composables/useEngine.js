@@ -5,7 +5,7 @@ import { PostProcessor } from '../core/PostProcessor.js';
 import { SettingsController } from '../core/SettingsController.js';
 import { FrameLoopController } from '../core/FrameLoopController.js';
 import { effectRegistry } from '../registry/effectRegistry.js';
-import { subjectRegistry } from '../registry/subjectRegistry.js';
+import { sourceRegistry } from '../registry/sourceRegistry.js';
 
 export async function useEngine(canvas) {
   const gl = canvas.getContext('webgl', {
@@ -22,22 +22,22 @@ export async function useEngine(canvas) {
 
   const runtimeConfig = { frameHistoryLimit: 5, frameHistoryScale: 0.5 };
 
-  const [subjectClasses, effectClasses] = await Promise.all([
-    Promise.all(subjectRegistry.map((r) => r.classLoader())),
+  const [sourceClasses, effectClasses] = await Promise.all([
+    Promise.all(sourceRegistry.map((r) => r.classLoader())),
     Promise.all(effectRegistry.map((r) => r.classLoader())),
   ]);
 
-  const subjects = subjectClasses.map((Cls) => markRaw(Cls.deserialize({})));
+  const sources = sourceClasses.map((Cls) => markRaw(Cls.deserialize({})));
   const effects = effectClasses.map((Cls) => markRaw(Cls.deserialize({})));
 
-  const moduleHost = new ModuleHost({ subjects, effects });
+  const moduleHost = new ModuleHost({ sources, effects });
 
   const pipelineRuntime = new PipelineRuntime(canvas, gl, state, runtimeConfig, moduleHost);
 
   const colorTintEffect = moduleHost.findEffectByClassName('ColorTintEffect');
   const settingsController = new SettingsController(moduleHost);
   const postProcessor = new PostProcessor({ moduleHost, pipelineRuntime });
-  const particleSubject = moduleHost.getSubjects()[0];
+  const particleSource = moduleHost.getSources()[0];
 
   function setupAllModules() {
     moduleHost.setupAllModules((extra = {}) => pipelineRuntime.buildPassContext(extra));
@@ -55,7 +55,7 @@ export async function useEngine(canvas) {
     if (w === state.width && h === state.height && dpr === state.dpr) return;
     pipelineRuntime.resizeTargets(w, h, dpr);
     resizeAllModules();
-    particleSubject.reseedParticles();
+    particleSource.reseedParticles();
   }
 
   function executeEffectStages(t) {
@@ -67,7 +67,7 @@ export async function useEngine(canvas) {
   }
 
   function renderFrame(t) {
-    moduleHost.renderSubjects((extra = {}) => pipelineRuntime.buildPassContext({
+    moduleHost.renderSources((extra = {}) => pipelineRuntime.buildPassContext({
       time: t,
       effects: moduleHost.getEffects(),
       ...extra,
@@ -113,13 +113,13 @@ export async function useEngine(canvas) {
     moduleHost,
     pipelineRuntime,
     colorTintEffect,
-    particleSubject,
+    particleSource,
     frameLoopController,
     settingsController,
     resize,
-    subjectRegistry,
+    sourceRegistry,
     effectRegistry,
-    subjects,
+    sources,
     effects,
   };
 }

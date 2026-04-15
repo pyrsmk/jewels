@@ -1,21 +1,21 @@
 import { EffectStack } from './EffectStack.js';
 
 export class ModuleHost {
-  constructor({ subjects = [], effects = [] } = {}) {
-    this.subjects = subjects;
+  constructor({ sources = [], effects = [] } = {}) {
+    this.sources = sources;
     this.effects = effects;
   }
 
   getAllModules() {
-    return [...this.subjects, ...this.effects];
+    return [...this.sources, ...this.effects];
   }
 
   getEffects() {
     return [...this.effects];
   }
 
-  getSubjects() {
-    return [...this.subjects];
+  getSources() {
+    return [...this.sources];
   }
 
   findEffectByClassName(className) {
@@ -40,7 +40,7 @@ export class ModuleHost {
 
   buildAllUI(groupFinder) {
     const mappings = [
-      ...this.subjects.map((s) => [s, s.constructor.uiTitle || s.constructor.name]),
+      ...this.sources.map((s) => [s, s.constructor.uiTitle || s.constructor.name]),
       ...this.effects.map((e) => [e, e.constructor.uiTitle || e.constructor.name]),
     ];
 
@@ -87,15 +87,15 @@ export class ModuleHost {
     }
   }
 
-  updateSubjects(contextFactory) {
-    for (const subject of this.subjects) {
-      subject.update?.(contextFactory({}));
+  updateSources(contextFactory) {
+    for (const source of this.sources) {
+      source.update?.(contextFactory({}));
     }
   }
 
-  renderSubjects(contextFactory) {
-    for (const subject of this.subjects) {
-      subject.renderScenePass(contextFactory({}));
+  renderSources(contextFactory) {
+    for (const source of this.sources) {
+      source.renderScenePass(contextFactory({}));
     }
   }
 

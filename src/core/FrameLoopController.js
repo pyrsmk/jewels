@@ -38,7 +38,7 @@ export class FrameLoopController {
     const now = nowMs / 1000;
     const dt = this.getDelta(now);
 
-    this.moduleHost.updateSubjects((extra = {}) => this.pipelineRuntime.buildPassContext({
+    this.moduleHost.updateSources((extra = {}) => this.pipelineRuntime.buildPassContext({
       deltaTime: dt,
       time: now,
       ...extra,

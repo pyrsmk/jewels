@@ -1,9 +1,9 @@
-import { AbstractSubject } from '../core/AbstractSubject.js';
+import { AbstractSource } from '../core/AbstractSource.js';
 import { sharedShaderLibrary } from '../core/SharedShaderLibrary.js';
 import { createProgram } from '../utils/webgl.js';
 import { rand, clamp, smooth, fbm } from '../utils/math.js';
 
-export class ParticleSubject extends AbstractSubject {
+export class ParticleSource extends AbstractSource {
   static uiTitle = 'Particules';
 
   constructor(options = {}) {
@@ -611,7 +611,7 @@ void main() {
     this.uploadParticles();
   }
 
-  renderSubject({ gl, locs, time, dpr }) {
+  renderSource({ gl, locs, time, dpr }) {
     gl.uniform2f(locs.u_camera, 0.0, 0.0);
     gl.uniform1f(locs.u_size, +(this.options.size ?? 9));
     gl.uniform1f(locs.u_dpr, dpr ?? 1);

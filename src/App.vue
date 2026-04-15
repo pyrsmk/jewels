@@ -7,9 +7,9 @@
     />
     <ControlPanel
       v-if="engine"
-      :subjects="engine.subjects"
+      :sources="engine.sources"
       :effects="engine.effects"
-      :subject-registry="engine.subjectRegistry"
+      :source-registry="engine.sourceRegistry"
       :effect-registry="engine.effectRegistry"
       @settings-change="onSettingsChange"
     />

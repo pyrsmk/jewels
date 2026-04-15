@@ -64,8 +64,8 @@ export class LensFlareEffect extends EffectInterface {
   }
 
   findEdgeClusterAnchor(useLeftEdge, context = {}) {
-    const subject = context.moduleHost.getSubjects()[0];
-    const particles = subject?.particles || [];
+    const source = context.moduleHost.getSources()[0];
+    const particles = source?.particles || [];
     const w = Math.max(context.state.width, 1);
     const h = Math.max(context.state.height, 1);
     const edgeDistanceUv = (+(this.options.flareEdgeDistance ?? 0)) / w;

@@ -1,8 +1,8 @@
 <template>
   <div class="controls">
     <component
-      v-for="(entry, i) in subjectEntries"
-      :key="'subject-' + i"
+      v-for="(entry, i) in sourceEntries"
+      :key="'source-' + i"
       :is="entry.component"
       :instance="entry.instance"
     />
@@ -19,9 +19,9 @@
 import { computed, watch } from 'vue';
 
 const props = defineProps({
-  subjects: { type: Array, default: () => [] },
+  sources: { type: Array, default: () => [] },
   effects: { type: Array, default: () => [] },
-  subjectRegistry: { type: Array, default: () => [] },
+  sourceRegistry: { type: Array, default: () => [] },
   effectRegistry: { type: Array, default: () => [] },
 });
 
@@ -29,17 +29,17 @@ const emit = defineEmits(['settings-change']);
 
 watch(
   () => [
-    ...props.subjects.map((s) => s.options),
+    ...props.sources.map((s) => s.options),
     ...props.effects.map((e) => e.options),
   ],
   () => emit('settings-change'),
   { deep: true },
 );
 
-const subjectEntries = computed(() =>
-  props.subjects
+const sourceEntries = computed(() =>
+  props.sources
     .map((instance) => {
-      const reg = props.subjectRegistry.find((r) => r.className === instance.constructor.name);
+      const reg = props.sourceRegistry.find((r) => r.className === instance.constructor.name);
       return { instance, component: reg?.component };
     })
     .filter((e) => e.component)
