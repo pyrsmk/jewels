@@ -1,6 +1,3 @@
-- renommer "cercles" en "perles"
-- vortex qui se déplacent beaucoup plus, avec un slider de vitesse de déplacement
-- améliorer le déplacement des particules pour un côté plus organique
 - dreamy glow : random d'application aux bords pour que ce soit plus organique
 - nouvelles sources :
   - fluides (un peu comme de la peinture sur de l'eau)

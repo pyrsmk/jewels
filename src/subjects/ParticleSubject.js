@@ -8,16 +8,18 @@ export class ParticleSubject extends AbstractSubject {
 
   constructor(options = {}) {
     const defaults = {
-      particleShape: 'circle',
+      particleShape: 'pearls',
       flowDirection: 'free',
       surfaceImperfections: false,
       particleCount: 0.316,
       speed: 0.047,
       size: 9,
+      particleJitter: 0.3,
     };
     super(
       { ...defaults, ...options },
-      ['particleShape', 'flowDirection', 'surfaceImperfections', 'particleCount', 'speed', 'size'],
+      ['particleShape', 'flowDirection', 'surfaceImperfections', 'particleCount', 'speed', 'size',
+        'particleJitter'],
       ['particleCountVal', 'speedVal', 'sizeVal'],
     );
     this.gl = null;
@@ -111,7 +113,7 @@ void main() {
   float sizeNorm = 1.0;
   float randRot = (hash21(floor(v_sceneUv * 512.0)) - 0.5) * 0.4;
   if (shape < 0.5) {
-    // Cercle
+    // Pearls
     sizeNorm = 1.00;
     vec2 ps = p / sizeNorm;
     float rs = length(ps);
@@ -276,14 +278,20 @@ void main() {
 
   initFlowSeeds() {
     this.vortexSeeds = [];
-    const count = 4;
+    const count = 5;
     const strength = 0.0065;
     for (let i = 0; i < count; i++) {
       this.vortexSeeds.push({
-        x: rand(-0.7, 0.7),
-        y: rand(-0.7, 0.7),
+        x: 0,
+        y: 0,
         sign: Math.random() > 0.5 ? 1 : -1,
         phase: rand(0, Math.PI * 2),
+        freqA: rand(0.018, 0.038),
+        freqB: rand(0.011, 0.025),
+        freqC: rand(0.031, 0.055),
+        ampA: rand(0.20, 0.32),
+        ampB: rand(0.10, 0.20),
+        ampC: rand(0.05, 0.12),
         strength,
       });
     }
@@ -355,14 +363,28 @@ void main() {
     return [vx / len, vy / len];
   }
 
-  fieldVortex(x, y, t) {
+  updateVortexPositions(t) {
+    for (let i = 0; i < this.vortexSeeds.length; i++) {
+      const s = this.vortexSeeds[i];
+      const offsetX =
+        Math.sin(t * s.freqA + s.phase) * s.ampA +
+        Math.sin(t * s.freqB + s.phase * 1.37) * s.ampB +
+        Math.sin(t * s.freqC + s.phase * 0.71) * s.ampC;
+      const offsetY =
+        Math.cos(t * s.freqA + s.phase * 1.13) * s.ampA +
+        Math.cos(t * s.freqB + s.phase * 0.89) * s.ampB +
+        Math.cos(t * s.freqC + s.phase * 1.54) * s.ampC;
+      s.cx = clamp(offsetX, -0.95, 0.95);
+      s.cy = clamp(offsetY, -0.95, 0.95);
+    }
+  }
+
+  fieldVortex(x, y) {
     let vx = 0.0, vy = 0.0;
     for (let i = 0; i < this.vortexSeeds.length; i++) {
       const s = this.vortexSeeds[i];
-      const cx = clamp(s.x + Math.sin(t * 0.05 + s.phase) * 0.18, -0.95, 0.95);
-      const cy = clamp(s.y + Math.cos(t * 0.04 + s.phase * 1.13) * 0.18, -0.95, 0.95);
-      const dx = x - cx;
-      const dy = y - cy;
+      const dx = x - s.cx;
+      const dy = y - s.cy;
       const d2 = Math.max(dx * dx + dy * dy, 0.08);
       vx += (-dy / d2) * s.strength * s.sign;
       vy += (dx / d2) * s.strength * s.sign;
@@ -399,11 +421,11 @@ void main() {
     } else {
       vx += bd[0] * 0.0045;
       vy += bd[1] * 0.0045;
-      const vA = this.fieldVortex(x, y, t);
-      const vB = this.fieldVortex(x + flowRadius, y, t);
-      const vC = this.fieldVortex(x - flowRadius, y, t);
-      const vD = this.fieldVortex(x, y + flowRadius, t);
-      const vE = this.fieldVortex(x, y - flowRadius, t);
+      const vA = this.fieldVortex(x, y);
+      const vB = this.fieldVortex(x + flowRadius, y);
+      const vC = this.fieldVortex(x - flowRadius, y);
+      const vD = this.fieldVortex(x, y + flowRadius);
+      const vE = this.fieldVortex(x, y - flowRadius);
       const vortex = [
         (vA[0] + vB[0] + vC[0] + vD[0] + vE[0]) / 5,
         (vA[1] + vB[1] + vC[1] + vD[1] + vE[1]) / 5,
@@ -416,9 +438,11 @@ void main() {
   }
 
   rebuildFlowField(t) {
+    this.updateVortexPositions(t);
     const cols = this.flowField.cols;
     const rows = this.flowField.rows;
-    const data = this.flowField.vectors;
+    const flowData = this.flowField.vectors;
+
     let ptr = 0;
     for (let gy = 0; gy < rows; gy++) {
       const y = -1.0 + (gy / (rows - 1)) * 2.0;
@@ -426,16 +450,14 @@ void main() {
         const x = -1.0 + (gx / (cols - 1)) * 2.0;
         const flow = this.computeFlowRaw(x, y, t);
         const drift = this.fieldNoise(x + 5.0, y - 3.0, t * 0.9 + 17.0);
-        data[ptr++] = flow[0] + drift[0] * 0.00008;
-        data[ptr++] = flow[1] + drift[1] * 0.00008;
+        flowData[ptr] = flow[0] + drift[0] * 0.00008;
+        flowData[ptr + 1] = flow[1] + drift[1] * 0.00008;
+        ptr += 2;
       }
     }
   }
 
-  sampleFlowField(x, y) {
-    const cols = this.flowField.cols;
-    const rows = this.flowField.rows;
-    const data = this.flowField.vectors;
+  sampleField(data, cols, rows, x, y) {
     const fx = clamp((x * 0.5 + 0.5) * (cols - 1), 0, cols - 1);
     const fy = clamp((y * 0.5 + 0.5) * (rows - 1), 0, rows - 1);
     const x0 = Math.floor(fx);
@@ -453,6 +475,11 @@ void main() {
     const vx1 = data[i01] * (1 - tx) + data[i11] * tx;
     const vy1 = data[i01 + 1] * (1 - tx) + data[i11 + 1] * tx;
     return [vx0 * (1 - ty) + vx1 * ty, vy0 * (1 - ty) + vy1 * ty];
+  }
+
+  sampleFlowField(x, y) {
+    const { cols, rows, vectors } = this.flowField;
+    return this.sampleField(vectors, cols, rows, x, y);
   }
 
   shouldRespawn(p) {
@@ -503,6 +530,10 @@ void main() {
       const p = {
         x: 0, y: 0, vx: 0, vy: 0, z: Math.random(), bright: 0,
         life: 0, fade: 1, fadeInDur: 0, fadeOutDur: 0,
+        noiseOffsetX: rand(0, 100),
+        noiseOffsetY: rand(0, 100),
+        jitterVx: 0, jitterVy: 0,
+        jitterAge: Math.floor(Math.random() * 4),
       };
       this.spawnParticleForRespawn(p, Math.random(), true);
       this.particles[i] = p;
@@ -543,6 +574,19 @@ void main() {
       const flow = this.sampleFlowField(p.x, p.y);
       let targetVx = flow[0] * speed * depthFactor;
       let targetVy = flow[1] * speed * depthFactor;
+      const jitter = this.options.particleJitter ?? 0.3;
+      if (jitter > 0) {
+        p.jitterAge++;
+        if (p.jitterAge >= 4) {
+          p.jitterAge = 0;
+          const jn = this.fieldNoise(p.x + p.noiseOffsetX, p.y + p.noiseOffsetY, t * 0.4);
+          p.jitterVx = jn[0];
+          p.jitterVy = jn[1];
+        }
+        const jitterScale = jitter * jitter * 0.012;
+        targetVx += p.jitterVx * jitterScale * speed * depthFactor;
+        targetVy += p.jitterVy * jitterScale * speed * depthFactor;
+      }
       const dir = this.getFlowDirection();
       if (dir === 'horizontal' || dir === 'horizontal-rev') {
         const edgeProximity = Math.max(0, (Math.abs(p.y) - 0.6) / 0.4);
@@ -571,7 +615,7 @@ void main() {
     gl.uniform2f(locs.u_camera, 0.0, 0.0);
     gl.uniform1f(locs.u_size, +(this.options.size ?? 9));
     gl.uniform1f(locs.u_dpr, dpr ?? 1);
-    const shapeValue = this.options.particleShape ?? 'circle';
+    const shapeValue = this.options.particleShape ?? 'pearls';
     const particleShape = shapeValue === 'pixel' ? 1
       : shapeValue === 'flowline' ? 2
       : shapeValue === 'softsquare' ? 3

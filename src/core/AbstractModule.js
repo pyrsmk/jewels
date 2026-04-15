@@ -1,6 +1,8 @@
+import { reactive } from 'vue';
+
 export class AbstractModule {
   constructor(options = {}, controlIds = [], valueIds = []) {
-    this.options = { ...options };
+    this.options = reactive({ ...options });
     this.controlIds = [...controlIds];
     this.valueIds = [...valueIds];
     this.root = null;
