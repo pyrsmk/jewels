@@ -1,5 +1,3 @@
-- refacto
-  - on éclate en Vue 3
 - renommer "cercles" en "perles"
 - vortex qui se déplacent beaucoup plus, avec un slider de vitesse de déplacement
 - améliorer le déplacement des particules pour un côté plus organique

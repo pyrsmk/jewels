@@ -1,0 +1,41 @@
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #050507;
+  color: #ddd;
+  font: 12px/1.35 system-ui, sans-serif;
+}
+#app {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+.group {
+  margin: 0 0 12px;
+  padding: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 8px;
+}
+.group h2 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
+label {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  margin: 6px 0;
+}
+input[type="range"], select, button { width: 100%; }
+input[type="checkbox"] { justify-self: end; }
+.value { min-width: 50px; text-align: right; color: #aaa; }
+button {
+  background: #181a22;
+  color: #ddd;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 6px;
+  padding: 7px 8px;
+  cursor: pointer;
+}
+button:hover { background: #202434; }
