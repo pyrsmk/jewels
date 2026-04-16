@@ -2,7 +2,7 @@
   <div class="header">
     <h1 class="title">Jewels <span class="version">v{{ version }}</span></h1>
     <div class="spacer"></div>
-    <div class="fps">{{ fps }} FPS</div>
+    <div v-if="hasSource" class="fps">{{ fps }} FPS</div>
     <div class="spacer"></div>
     <Button
       icon="add"
@@ -47,6 +47,15 @@ const version = __APP_VERSION__;
 }
 .version { font-size: 11px; color: #8f9bb3; font-weight: normal; }
 .spacer { flex: 1; }
-.fps { font-size: 12px; color: #8f9bb3; white-space: nowrap; }
+.fps {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #b07fff;
+  background: rgba(160, 100, 255, 0.18);
+  border-radius: 4px;
+  padding: 2px 7px;
+  white-space: nowrap;
+}
 :deep(.btn) { width: auto; }
 </style>
