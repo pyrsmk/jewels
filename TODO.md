@@ -1,4 +1,3 @@
-- corriger le chargement des settings (et vérifier l'enregistrement aussi)
 - remplacer les icônes sur tous les boutons
 
 - lens flare : taille min/max à corriger/renommer

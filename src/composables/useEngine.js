@@ -61,6 +61,33 @@ export async function useEngine(canvas) {
     executeEffectStages(t);
   }
 
+  async function restoreFromUrl() {
+    try {
+      const url = new URL(window.location.href);
+      const encoded = url.searchParams.get('settings');
+      if (!encoded) return;
+      const decoded = decodeURIComponent(escape(atob(encoded)));
+      const settings = JSON.parse(decoded);
+      if (!settings || typeof settings !== 'object') return;
+
+      for (const reg of sourceRegistry) {
+        if (!settings[reg.className]) continue;
+        await addSource(reg.className);
+      }
+
+      for (const reg of effectRegistry) {
+        if (!settings[reg.className]) continue;
+        await addEffect(reg.className);
+      }
+
+      moduleHost.applySettings(settings);
+      sources.value = [...moduleHost.sources];
+      effects.value = [...moduleHost.effects];
+    } catch (err) {
+      console.warn(`Impossible de restaurer les paramètres depuis l'URL :`, err);
+    }
+  }
+
   async function addSource(className) {
     const entry = sourceRegistry.find((r) => r.className === className);
     if (!entry) throw new Error(`Source inconnue : ${className}`);
@@ -107,6 +134,7 @@ export async function useEngine(canvas) {
   }
 
   resize();
+  await restoreFromUrl();
 
   const frameLoopController = new FrameLoopController({
     moduleHost,
