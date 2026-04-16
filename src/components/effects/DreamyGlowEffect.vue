@@ -19,7 +19,7 @@
       @input="instance.options.dreamyGrainResponse = +$event.target.value"
     />
     <label>
-      Edge boost
+      Amplification aux bords
       <span class="value">{{ (+(instance.options.dreamyEdgeBoost ?? 3)).toFixed(2) }}</span>
     </label>
     <input

@@ -4,7 +4,7 @@ export class BlockGlitchEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      blockGlitch: 0.20,
+      blockGlitch: 1.39,
       blockGlitchSpeed: 2.00,
       blockGlitchScale: 1.50,
     };
@@ -17,7 +17,7 @@ export class BlockGlitchEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_blockGlitch, +(this.options.blockGlitch ?? 0.20));
+    gl.uniform1f(locs.u_blockGlitch, +(this.options.blockGlitch ?? 1.39));
     gl.uniform1f(locs.u_blockGlitchSpeed, +(this.options.blockGlitchSpeed ?? 2.00));
     gl.uniform1f(locs.u_blockGlitchScale, +(this.options.blockGlitchScale ?? 1.50));
   }

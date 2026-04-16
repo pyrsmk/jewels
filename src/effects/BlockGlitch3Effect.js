@@ -4,9 +4,9 @@ export class BlockGlitch3Effect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      bg3: 0.22,
+      bg3: 1.50,
       bg3Speed: 1.50,
-      bg3Scale: 2.20,
+      bg3Scale: 1.50,
     };
     super({ ...defaults, ...options },
       ['bg3', 'bg3Speed', 'bg3Scale'],
@@ -17,9 +17,9 @@ export class BlockGlitch3Effect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_bg3, +(this.options.bg3 ?? 0.22));
+    gl.uniform1f(locs.u_bg3, +(this.options.bg3 ?? 1.50));
     gl.uniform1f(locs.u_bg3Speed, +(this.options.bg3Speed ?? 1.50));
-    gl.uniform1f(locs.u_bg3Scale, +(this.options.bg3Scale ?? 2.20));
+    gl.uniform1f(locs.u_bg3Scale, +(this.options.bg3Scale ?? 1.50));
   }
 
   getPostShaderUniforms() {
@@ -42,7 +42,7 @@ export class BlockGlitch3Effect extends EffectInterface {
     return `
   vec3 applyBlockGlitch3(vec3 color, vec2 uv, float time) {
     time = mod(time, 3600.0);
-    float scale = 1.0 / max(u_bg3Scale, 0.001);
+    float scale = max(u_bg3Scale, 0.001);
     float phase = floor(time * u_bg3Speed * 6.0);
     vec2 grid = floor(uv * vec2(32.0, 18.0) * scale);
     float gate = step(0.78, noise21(grid + vec2(phase, 13.0)));

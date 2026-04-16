@@ -2,11 +2,11 @@
   <ControlGroup title="RGB Split">
     <label>
       Intensité
-      <span class="value">{{ (+(instance.options.rgbSplit ?? 0.22)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.rgbSplit ?? 1.80)).toFixed(2) }}</span>
     </label>
     <input
-      type="range" min="0" max="4" step="0.01"
-      :value="instance.options.rgbSplit ?? 0.22"
+      type="range" min="0" max="1.8" step="0.01"
+      :value="instance.options.rgbSplit ?? 1.80"
       @input="instance.options.rgbSplit = +$event.target.value"
     />
     <label>

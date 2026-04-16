@@ -27,14 +27,14 @@ export const effectRegistry = [
   },
   {
     className: 'LensFlareEffect',
-    label: 'Halo lumineux',
+    label: 'Halo',
     classLoader: () => import('../effects/LensFlareEffect.js').then((m) => m.LensFlareEffect),
     componentLoader: () => import('../components/effects/LensFlareEffect.vue'),
     component: defineAsyncComponent(() => import('../components/effects/LensFlareEffect.vue')),
   },
   {
     className: 'ColorTintEffect',
-    label: 'Teinte colorée 1',
+    label: 'Teinte 1',
     classLoader: () => import('../effects/ColorTintEffect.js').then((m) => m.ColorTintEffect),
     componentLoader: () => import('../components/effects/ColorTintEffect.vue'),
     component: defineAsyncComponent(() => import('../components/effects/ColorTintEffect.vue')),
@@ -47,18 +47,8 @@ export const effectRegistry = [
     component: defineAsyncComponent(() => import('../components/effects/GrainEffect.vue')),
   },
   {
-    className: 'ChromaticNoiseEffect',
-    label: 'Bruit chromatique',
-    classLoader: () => import('../effects/ChromaticNoiseEffect.js')
-      .then((m) => m.ChromaticNoiseEffect),
-    componentLoader: () => import('../components/effects/ChromaticNoiseEffect.vue'),
-    component: defineAsyncComponent(
-      () => import('../components/effects/ChromaticNoiseEffect.vue')
-    ),
-  },
-  {
     className: 'ColorShimmerEffect',
-    label: 'Teinte colorée 2',
+    label: 'Teinte 2',
     classLoader: () => import('../effects/ColorShimmerEffect.js')
       .then((m) => m.ColorShimmerEffect),
     componentLoader: () => import('../components/effects/ColorShimmerEffect.vue'),
@@ -102,7 +92,7 @@ export const effectRegistry = [
   },
   {
     className: 'BlockGlitchEffect',
-    label: 'Blocs glitch 1',
+    label: 'Blocs 1',
     classLoader: () => import('../effects/BlockGlitchEffect.js').then((m) => m.BlockGlitchEffect),
     componentLoader: () => import('../components/effects/BlockGlitchEffect.vue'),
     component: defineAsyncComponent(
@@ -111,7 +101,7 @@ export const effectRegistry = [
   },
   {
     className: 'BlockGlitch2Effect',
-    label: 'Blocs glitch 2',
+    label: 'Blocs 2',
     classLoader: () => import('../effects/BlockGlitch2Effect.js')
       .then((m) => m.BlockGlitch2Effect),
     componentLoader: () => import('../components/effects/BlockGlitch2Effect.vue'),
@@ -121,7 +111,7 @@ export const effectRegistry = [
   },
   {
     className: 'BlockGlitch3Effect',
-    label: 'Blocs glitch 3',
+    label: 'Blocs 3',
     classLoader: () => import('../effects/BlockGlitch3Effect.js')
       .then((m) => m.BlockGlitch3Effect),
     componentLoader: () => import('../components/effects/BlockGlitch3Effect.vue'),
@@ -135,5 +125,15 @@ export const effectRegistry = [
     classLoader: () => import('../effects/CRTEffect.js').then((m) => m.CRTEffect),
     componentLoader: () => import('../components/effects/CRTEffect.vue'),
     component: defineAsyncComponent(() => import('../components/effects/CRTEffect.vue')),
+  },
+  {
+    className: 'ChromaticNoiseEffect',
+    label: 'Teinte 3',
+    classLoader: () => import('../effects/ChromaticNoiseEffect.js')
+      .then((m) => m.ChromaticNoiseEffect),
+    componentLoader: () => import('../components/effects/ChromaticNoiseEffect.vue'),
+    component: defineAsyncComponent(
+      () => import('../components/effects/ChromaticNoiseEffect.vue')
+    ),
   },
 ];

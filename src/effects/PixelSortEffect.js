@@ -4,32 +4,29 @@ export class PixelSortEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      hGlitch: 0.20,
-      hGlitchSpeed: 1.40,
-      hGlitchScale: 2.50,
-      hGlitchThreshold: 0.05,
+      hGlitch: 1.0,
+      hGlitchSpeed: 1.20,
+      hGlitchScale: 0,
     };
     super({ ...defaults, ...options },
-      ['hGlitch', 'hGlitchSpeed', 'hGlitchScale', 'hGlitchThreshold'],
-      ['hGlitchVal', 'hGlitchSpeedVal', 'hGlitchScaleVal', 'hGlitchThresholdVal']
+      ['hGlitch', 'hGlitchSpeed', 'hGlitchScale'],
+      ['hGlitchVal', 'hGlitchSpeedVal', 'hGlitchScaleVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_hGlitch, +(this.options.hGlitch ?? 0.20));
-    gl.uniform1f(locs.u_hGlitchSpeed, +(this.options.hGlitchSpeed ?? 1.40));
-    gl.uniform1f(locs.u_hGlitchScale, +(this.options.hGlitchScale ?? 2.50));
-    gl.uniform1f(locs.u_hGlitchThreshold, +(this.options.hGlitchThreshold ?? 0.05));
+    gl.uniform1f(locs.u_hGlitch, +(this.options.hGlitch ?? 1.0));
+    gl.uniform1f(locs.u_hGlitchSpeed, +(this.options.hGlitchSpeed ?? 1.20));
+    gl.uniform1f(locs.u_hGlitchScale, +(this.options.hGlitchScale ?? 0));
   }
 
   getPostShaderUniforms() {
     return `
   uniform float u_hGlitch;
   uniform float u_hGlitchSpeed;
-  uniform float u_hGlitchScale;
-  uniform float u_hGlitchThreshold;`;
+  uniform float u_hGlitchScale;`;
   }
 
   getPostShaderGuards() {
@@ -53,18 +50,16 @@ export class PixelSortEffect extends EffectInterface {
     )));
     vec3 best = color;
     float bestLum = dot(best, vec3(0.2126, 0.7152, 0.0722));
-    for (int i = 1; i <= 4; i++) {
-      float fi = float(i);
-      vec3 s = sampleScene(uv + vec2(len * fi, 0.0));
+    for (int i = -4; i <= 4; i++) {
+      if (i == 0) continue;
+      vec3 s = sampleScene(uv + vec2(len * float(i), 0.0));
       float lum = dot(s, vec3(0.2126, 0.7152, 0.0722));
       if (lum > bestLum) {
         bestLum = lum;
         best = s;
       }
     }
-    float sourceLum = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    float sourceMask = smoothstep(u_hGlitchThreshold * 0.15, u_hGlitchThreshold, sourceLum);
-    return mix(color, best, clamp(band * u_hGlitch * 0.45 * sourceMask, 0.0, 1.0));
+    return mix(color, best, clamp(band * u_hGlitch, 0.0, 1.0));
   }`;
   }
 

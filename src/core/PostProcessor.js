@@ -30,8 +30,7 @@ export class PostProcessor {
     const { pipelineRuntime, moduleHost } = this;
     const effects = moduleHost.getEffects();
     const gl = pipelineRuntime.gl;
-    const fallbackTex = pipelineRuntime.getAltPostTarget().tex;
-    const prevTexture = pipelineRuntime.getPreviousFrameTexture(fallbackTex);
+    const prevTexture = pipelineRuntime.getPreviousFrameTexture(pipelineRuntime.getSceneTarget().tex);
     let inputTex = pipelineRuntime.getSceneTarget().tex;
     let lastOut = null;
 

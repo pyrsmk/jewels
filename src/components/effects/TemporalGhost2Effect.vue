@@ -1,15 +1,15 @@
 <template>
   <ControlGroup>
-    <label>Intensité <span class="value">{{ (+(instance.options.tg2Opacity ?? 0.50)).toFixed(2) }}</span></label>
+    <label>Intensité <span class="value">{{ (+(instance.options.tg2Opacity ?? 1.00)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="1" step="0.01"
-      :value="instance.options.tg2Opacity ?? 0.50"
+      :value="instance.options.tg2Opacity ?? 1.00"
       @input="instance.options.tg2Opacity = +$event.target.value"
     />
-    <label>Force <span class="value">{{ (+(instance.options.tg2 ?? 0.20)).toFixed(2) }}</span></label>
+    <label>Amplitude <span class="value">{{ (+(instance.options.tg2 ?? 1.25)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="1.8" step="0.01"
-      :value="instance.options.tg2 ?? 0.20"
+      :value="instance.options.tg2 ?? 1.25"
       @input="instance.options.tg2 = +$event.target.value"
     />
     <label>Décalage RGB <span class="value">{{ (+(instance.options.tg2RgbShift ?? 0.80)).toFixed(2) }}</span></label>

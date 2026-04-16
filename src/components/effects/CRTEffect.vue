@@ -2,20 +2,20 @@
   <ControlGroup title="CRT">
     <label>
       Intensité
-      <span class="value">{{ (+(instance.options.crt ?? 0.60)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.crt ?? 1.00)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="1" step="0.01"
-      :value="instance.options.crt ?? 0.60"
+      :value="instance.options.crt ?? 1.00"
       @input="instance.options.crt = +$event.target.value"
     />
     <label>
       Scanlines
-      <span class="value">{{ (+(instance.options.crtScanlines ?? 0.40)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.crtScanlines ?? 0.60)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="1" step="0.01"
-      :value="instance.options.crtScanlines ?? 0.40"
+      :value="instance.options.crtScanlines ?? 0.60"
       @input="instance.options.crtScanlines = +$event.target.value"
     />
     <label>
@@ -28,30 +28,30 @@
       @input="instance.options.crtScanlinesSize = +$event.target.value"
     />
     <label>
-      Flickering
-      <span class="value">{{ (+(instance.options.crtFlicker ?? 0.25)).toFixed(2) }}</span>
+      Scintillement
+      <span class="value">{{ (+(instance.options.crtFlicker ?? 0.70)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="1" step="0.01"
-      :value="instance.options.crtFlicker ?? 0.25"
+      :value="instance.options.crtFlicker ?? 0.70"
       @input="instance.options.crtFlicker = +$event.target.value"
     />
     <label>
       Vignette
-      <span class="value">{{ (+(instance.options.crtVignette ?? 0.02)).toFixed(4) }}</span>
+      <span class="value">{{ (+(instance.options.crtVignette ?? 0.03)).toFixed(3) }}</span>
     </label>
     <input
-      type="range" min="0" max="0.05" step="0.0001"
-      :value="instance.options.crtVignette ?? 0.02"
+      type="range" min="0" max="0.05" step="0.001"
+      :value="instance.options.crtVignette ?? 0.03"
       @input="instance.options.crtVignette = +$event.target.value"
     />
     <label>
       Phosphore
-      <span class="value">{{ (+(instance.options.crtPhosphore ?? 0.20)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.crtPhosphore ?? 0.30)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="1" step="0.01"
-      :value="instance.options.crtPhosphore ?? 0.20"
+      :value="instance.options.crtPhosphore ?? 0.30"
       @input="instance.options.crtPhosphore = +$event.target.value"
     />
   </ControlGroup>

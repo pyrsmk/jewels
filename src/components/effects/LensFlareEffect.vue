@@ -63,7 +63,7 @@
       @input="instance.options.flareDuration = +$event.target.value"
     />
     <label>
-      Taille min
+      Borne min de déclenchement
       <span class="value">{{ (+(instance.options.flareMin ?? 10)).toFixed(1) }}</span>
     </label>
     <input
@@ -72,7 +72,7 @@
       @input="instance.options.flareMin = +$event.target.value"
     />
     <label>
-      Taille max
+      Borne max de déclenchement
       <span class="value">{{ (+(instance.options.flareMax ?? 60)).toFixed(1) }}</span>
     </label>
     <input
@@ -144,29 +144,29 @@
     />
     <label>
       Espacement
-      <span class="value">{{ (+(instance.options.ghostSpacing ?? 0.18)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.ghostSpacing ?? 0.17)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0.05" max="0.40" step="0.01"
-      :value="instance.options.ghostSpacing ?? 0.18"
+      :value="instance.options.ghostSpacing ?? 0.17"
       @input="instance.options.ghostSpacing = +$event.target.value"
     />
     <label>
       Taille fantôme
-      <span class="value">{{ (+(instance.options.ghostSize ?? 2)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.ghostSize ?? 1.8)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0.2" max="2.5" step="0.01"
-      :value="instance.options.ghostSize ?? 2"
+      :value="instance.options.ghostSize ?? 1.8"
       @input="instance.options.ghostSize = +$event.target.value"
     />
     <label>
       Diffusion fantôme
-      <span class="value">{{ (+(instance.options.ghostDiffusion ?? 4)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.ghostDiffusion ?? 2.5)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0.2" max="4.0" step="0.01"
-      :value="instance.options.ghostDiffusion ?? 4"
+      :value="instance.options.ghostDiffusion ?? 2.5"
       @input="instance.options.ghostDiffusion = +$event.target.value"
     />
     <label>

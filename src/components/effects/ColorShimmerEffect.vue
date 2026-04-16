@@ -1,12 +1,21 @@
 <template>
   <ControlGroup title="Color Shimmer">
+    <label>Mode</label>
+    <select
+      :value="instance.options.colorTint2Mode ?? 'source'"
+      @change="instance.options.colorTint2Mode = $event.target.value"
+    >
+      <option value="source">Source</option>
+      <option value="background">Fond</option>
+      <option value="both">Les deux</option>
+    </select>
     <label>
       Intensité
-      <span class="value">{{ (+(instance.options.colorTint2 ?? 0.20)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.colorTint2 ?? 3.00)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="3" step="0.01"
-      :value="instance.options.colorTint2 ?? 0.20"
+      :value="instance.options.colorTint2 ?? 3.00"
       @input="instance.options.colorTint2 = +$event.target.value"
     />
     <label>

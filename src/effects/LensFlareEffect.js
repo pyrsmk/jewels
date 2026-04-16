@@ -22,9 +22,9 @@ export class LensFlareEffect extends EffectInterface {
       ghostEnabled: true,
       ghostIntensity: 0.3,
       ghostCount: 2,
-      ghostSpacing: 0.18,
-      ghostSize: 2,
-      ghostDiffusion: 4,
+      ghostSpacing: 0.17,
+      ghostSize: 1.8,
+      ghostDiffusion: 2.5,
       ghostDecay: 0.50,
     };
     super({ ...defaults, ...options },
@@ -53,6 +53,8 @@ export class LensFlareEffect extends EffectInterface {
       fadeOut: 0,
       anchor: { x: 0.5, y: 0.5, s: 0 },
     };
+    this._lastFlareMin = this.options.flareMin;
+    this._lastFlareMax = this.options.flareMax;
     this.scheduleNextFlare(0);
   }
 
@@ -136,6 +138,14 @@ export class LensFlareEffect extends EffectInterface {
 
   update({ time, moduleHost: mh, state: st } = {}) {
     const t = time ?? 0;
+    if (
+      this._lastFlareMin !== this.options.flareMin ||
+      this._lastFlareMax !== this.options.flareMax
+    ) {
+      this._lastFlareMin = this.options.flareMin;
+      this._lastFlareMax = this.options.flareMax;
+      if (!this.flareEvent.active) this.scheduleNextFlare(t);
+    }
     if (!this.options.lensFlare) {
       this.flareEvent.active = false;
       this.flareEvent.nextAt = Infinity;
@@ -208,9 +218,9 @@ export class LensFlareEffect extends EffectInterface {
     gl.uniform1f(locs.u_ghostEnabled, !!this.options.ghostEnabled ? 1.0 : 0.0);
     gl.uniform1f(locs.u_ghostIntensity, +(this.options.ghostIntensity ?? 0.3));
     gl.uniform1f(locs.u_ghostCount, +(this.options.ghostCount ?? 2));
-    gl.uniform1f(locs.u_ghostSpacing, +(this.options.ghostSpacing ?? 0.18));
-    gl.uniform1f(locs.u_ghostSize, +(this.options.ghostSize ?? 2));
-    gl.uniform1f(locs.u_ghostDiffusion, +(this.options.ghostDiffusion ?? 4));
+    gl.uniform1f(locs.u_ghostSpacing, +(this.options.ghostSpacing ?? 0.17));
+    gl.uniform1f(locs.u_ghostSize, +(this.options.ghostSize ?? 1.8));
+    gl.uniform1f(locs.u_ghostDiffusion, +(this.options.ghostDiffusion ?? 2.5));
     gl.uniform1f(locs.u_ghostDecay, +(this.options.ghostDecay ?? 0.50));
     gl.uniform2f(locs.u_flarePos, this.flareState.x, this.flareState.y);
     gl.uniform1f(locs.u_flareStrength, this.flareState.s * 1.6);
@@ -357,11 +367,11 @@ export class LensFlareEffect extends EffectInterface {
         vec2 gp = mix(p, center, t);
         vec2 d2 = uv - gp;
         float fall = mix(1.0, exp(-idx * 2.2), decay);
-        float ghostSize = max(sizeBase / min(u_resolution.x, u_resolution.y), 0.0001);
+        float ghostSize = max(sizeBase * 0.08, 0.001);
         float ghostDiff = max(diffBase, 0.05);
         float ghostR = length(d2);
         float ghost = exp(-pow(ghostR / (ghostSize + 0.0001), 1.55));
-        ghost *= exp(-ghostR * ghostDiff * 3.0);
+        ghost *= exp(-ghostR * (1.0 / max(ghostDiff, 0.05)) * 2.0);
         c += tint * ghost * st * u_ghostIntensity * fall;
       }
     }

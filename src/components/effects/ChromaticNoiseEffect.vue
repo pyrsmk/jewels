@@ -1,12 +1,21 @@
 <template>
   <ControlGroup>
+    <label>Mode</label>
+    <select
+      :value="instance.options.chromaticNoiseMode ?? 'source'"
+      @change="instance.options.chromaticNoiseMode = $event.target.value"
+    >
+      <option value="source">Source</option>
+      <option value="background">Fond</option>
+      <option value="both">Les deux</option>
+    </select>
     <label>
       Intensité
-      <span class="value">{{ (+(instance.options.chromaticNoise ?? 0.18)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.chromaticNoise ?? 4.00)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="4" step="0.01"
-      :value="instance.options.chromaticNoise ?? 0.18"
+      :value="instance.options.chromaticNoise ?? 4.00"
       @input="instance.options.chromaticNoise = +$event.target.value"
     />
     <label>

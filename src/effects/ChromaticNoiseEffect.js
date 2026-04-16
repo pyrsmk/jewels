@@ -4,12 +4,13 @@ export class ChromaticNoiseEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      chromaticNoise: 0.18,
+      chromaticNoise: 4.00,
       chromaticNoiseSpeed: 2.10,
       chromaticNoiseScale: 2.80,
+      chromaticNoiseMode: 'source',
     };
     super({ ...defaults, ...options },
-      ['chromaticNoise', 'chromaticNoiseSpeed', 'chromaticNoiseScale'],
+      ['chromaticNoise', 'chromaticNoiseSpeed', 'chromaticNoiseScale', 'chromaticNoiseMode'],
       ['chromaticNoiseVal', 'chromaticNoiseSpeedVal', 'chromaticNoiseScaleVal']
     );
   }
@@ -17,16 +18,19 @@ export class ChromaticNoiseEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_chromaticNoise, +(this.options.chromaticNoise ?? 0.18));
+    gl.uniform1f(locs.u_chromaticNoise, +(this.options.chromaticNoise ?? 4.00));
     gl.uniform1f(locs.u_chromaticNoiseSpeed, +(this.options.chromaticNoiseSpeed ?? 2.10));
     gl.uniform1f(locs.u_chromaticNoiseScale, +(this.options.chromaticNoiseScale ?? 2.80));
+    const modeMap = { source: 0.0, background: 1.0, both: 2.0 };
+    gl.uniform1f(locs.u_chromaticNoiseMode, modeMap[this.options.chromaticNoiseMode ?? 'source'] ?? 0.0);
   }
 
   getPostShaderUniforms() {
     return `
   uniform float u_chromaticNoise;
   uniform float u_chromaticNoiseSpeed;
-  uniform float u_chromaticNoiseScale;`;
+  uniform float u_chromaticNoiseScale;
+  uniform float u_chromaticNoiseMode;`;
   }
 
   getPostShaderGuards() {
@@ -58,7 +62,14 @@ export class ChromaticNoiseEffect extends EffectInterface {
     ) - 0.5;
     vec3 n = fine * 0.65 + coarse * 0.95;
     float lum = dot(sampleScene(uv), vec3(0.2126, 0.7152, 0.0722));
-    float mask = 0.60 + smoothstep(0.0, 0.75, lum) * 0.40;
+    float mask;
+    if (u_chromaticNoiseMode < 0.5) {
+      mask = smoothstep(0.0, 0.4, lum);
+    } else if (u_chromaticNoiseMode < 1.5) {
+      mask = smoothstep(0.4, 0.0, lum);
+    } else {
+      mask = 1.0;
+    }
     return n * (0.34 * u_chromaticNoise) * mask;
   }`;
   }

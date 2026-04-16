@@ -4,9 +4,9 @@ export class GlowEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      glow: 1.30,
+      glow: 1.0,
       glowGrainResponse: 1.0,
-      glowMode: 'post',
+      glowMode: 'post2',
     };
     super({ ...defaults, ...options },
       ['glow', 'glowGrainResponse', 'glowMode'],

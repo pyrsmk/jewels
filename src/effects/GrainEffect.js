@@ -5,7 +5,7 @@ export class GrainEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
       grainMode: 'celluloid',
-      grainAmount: 3.0,
+      grainAmount: 6.0,
     };
     super({ ...defaults, ...options }, ['grainMode', 'grainAmount'], ['grainAmountVal']);
   }
@@ -16,7 +16,7 @@ export class GrainEffect extends EffectInterface {
     const modeValue = this.options.grainMode ?? 'celluloid';
     const grainMode = modeValue === 'static' ? 1 : modeValue === 'celluloid' ? 2 : 0;
     gl.uniform1f(locs.u_grainMode, grainMode);
-    gl.uniform1f(locs.u_grainAmount, +(this.options.grainAmount ?? 3.0));
+    gl.uniform1f(locs.u_grainAmount, +(this.options.grainAmount ?? 6.0));
   }
 
   getPostShaderUniforms() {
