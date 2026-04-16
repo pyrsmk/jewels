@@ -5,7 +5,7 @@
     </template>
     <div class="effect-grid">
       <Button
-        v-for="entry in effectRegistry"
+        v-for="entry in sortedRegistry"
         :key="entry.className"
         :label="entry.label"
         icon="add"
@@ -17,11 +17,16 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import OverlayModal from './OverlayModal.vue';
 import Button from './Button.vue';
 
-defineProps({ effectRegistry: { type: Array, required: true } });
+const props = defineProps({ effectRegistry: { type: Array, required: true } });
 defineEmits(['add', 'close']);
+
+const sortedRegistry = computed(() =>
+  [...props.effectRegistry].sort((a, b) => a.label.localeCompare(b.label, 'fr'))
+);
 </script>
 
 <style scoped>

@@ -61,7 +61,7 @@
       @update:model-value="instance.options.size = $event"
     />
     <SliderControl
-      label="Turbulence"
+      label="Chaos"
       :model-value="instance.options.particleJitter ?? 0.3"
       :min="0" :max="1" :step="0.01"
       :display-fn="v => Math.round(v * 100) + ' %'"

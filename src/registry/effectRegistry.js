@@ -24,19 +24,19 @@ export const effectRegistry = [
   },
   {
     className: 'LensFlareEffect',
-    label: 'Lens flare',
+    label: 'Halo lumineux',
     classLoader: () => import('../effects/LensFlareEffect.js').then((m) => m.LensFlareEffect),
     component: defineAsyncComponent(() => import('../components/effects/LensFlareEffect.vue')),
   },
   {
     className: 'ColorTintEffect',
-    label: 'Teinte colorée',
+    label: 'Teinte colorée 1',
     classLoader: () => import('../effects/ColorTintEffect.js').then((m) => m.ColorTintEffect),
     component: defineAsyncComponent(() => import('../components/effects/ColorTintEffect.vue')),
   },
   {
     className: 'GrainEffect',
-    label: 'Grain',
+    label: 'Grain de film',
     classLoader: () => import('../effects/GrainEffect.js').then((m) => m.GrainEffect),
     component: defineAsyncComponent(() => import('../components/effects/GrainEffect.vue')),
   },
@@ -51,7 +51,7 @@ export const effectRegistry = [
   },
   {
     className: 'ColorShimmerEffect',
-    label: 'Scintillement',
+    label: 'Teinte colorée 2',
     classLoader: () => import('../effects/ColorShimmerEffect.js')
       .then((m) => m.ColorShimmerEffect),
     component: defineAsyncComponent(
@@ -66,13 +66,13 @@ export const effectRegistry = [
   },
   {
     className: 'PixelSortEffect',
-    label: 'Pixel sort',
+    label: 'Glitchs horizontaux',
     classLoader: () => import('../effects/PixelSortEffect.js').then((m) => m.PixelSortEffect),
     component: defineAsyncComponent(() => import('../components/effects/PixelSortEffect.vue')),
   },
   {
     className: 'TemporalGhostEffect',
-    label: 'Fantôme temporel',
+    label: 'Ghost 1',
     classLoader: () => import('../effects/TemporalGhostEffect.js')
       .then((m) => m.TemporalGhostEffect),
     component: defineAsyncComponent(
@@ -81,7 +81,7 @@ export const effectRegistry = [
   },
   {
     className: 'TemporalGhost2Effect',
-    label: 'Fantôme temporel 2',
+    label: 'Ghost 2',
     classLoader: () => import('../effects/TemporalGhost2Effect.js')
       .then((m) => m.TemporalGhost2Effect),
     component: defineAsyncComponent(
@@ -90,7 +90,7 @@ export const effectRegistry = [
   },
   {
     className: 'BlockGlitchEffect',
-    label: 'Glitch bloc',
+    label: 'Blocs glitch 1',
     classLoader: () => import('../effects/BlockGlitchEffect.js').then((m) => m.BlockGlitchEffect),
     component: defineAsyncComponent(
       () => import('../components/effects/BlockGlitchEffect.vue')
@@ -98,7 +98,7 @@ export const effectRegistry = [
   },
   {
     className: 'BlockGlitch2Effect',
-    label: 'Glitch bloc 2',
+    label: 'Blocs glitch 2',
     classLoader: () => import('../effects/BlockGlitch2Effect.js')
       .then((m) => m.BlockGlitch2Effect),
     component: defineAsyncComponent(
@@ -107,7 +107,7 @@ export const effectRegistry = [
   },
   {
     className: 'BlockGlitch3Effect',
-    label: 'Glitch bloc 3',
+    label: 'Blocs glitch 3',
     classLoader: () => import('../effects/BlockGlitch3Effect.js')
       .then((m) => m.BlockGlitch3Effect),
     component: defineAsyncComponent(
@@ -116,7 +116,7 @@ export const effectRegistry = [
   },
   {
     className: 'CRTEffect',
-    label: 'CRT',
+    label: 'Écran CRT',
     classLoader: () => import('../effects/CRTEffect.js').then((m) => m.CRTEffect),
     component: defineAsyncComponent(() => import('../components/effects/CRTEffect.vue')),
   },

@@ -1,54 +1,54 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class PixelSortEffect extends EffectInterface {
-  static uiTitle = 'Pixel Sorting local';
+  static uiTitle = 'Glitchs horizontaux';
 
   constructor(options = {}) {
     const defaults = {
-      pixelSort: 0.20,
-      pixelSortSpeed: 1.40,
-      pixelSortScale: 2.50,
-      pixelSortThreshold: 0.05,
+      hGlitch: 0.20,
+      hGlitchSpeed: 1.40,
+      hGlitchScale: 2.50,
+      hGlitchThreshold: 0.05,
     };
     super({ ...defaults, ...options },
-      ['pixelSort', 'pixelSortSpeed', 'pixelSortScale', 'pixelSortThreshold'],
-      ['pixelSortVal', 'pixelSortSpeedVal', 'pixelSortScaleVal', 'pixelSortThresholdVal']
+      ['hGlitch', 'hGlitchSpeed', 'hGlitchScale', 'hGlitchThreshold'],
+      ['hGlitchVal', 'hGlitchSpeedVal', 'hGlitchScaleVal', 'hGlitchThresholdVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_pixelSort, +(this.options.pixelSort ?? 0.20));
-    gl.uniform1f(locs.u_pixelSortSpeed, +(this.options.pixelSortSpeed ?? 1.40));
-    gl.uniform1f(locs.u_pixelSortScale, +(this.options.pixelSortScale ?? 2.50));
-    gl.uniform1f(locs.u_pixelSortThreshold, +(this.options.pixelSortThreshold ?? 0.05));
+    gl.uniform1f(locs.u_hGlitch, +(this.options.hGlitch ?? 0.20));
+    gl.uniform1f(locs.u_hGlitchSpeed, +(this.options.hGlitchSpeed ?? 1.40));
+    gl.uniform1f(locs.u_hGlitchScale, +(this.options.hGlitchScale ?? 2.50));
+    gl.uniform1f(locs.u_hGlitchThreshold, +(this.options.hGlitchThreshold ?? 0.05));
   }
 
   getPostShaderUniforms() {
     return `
-  uniform float u_pixelSort;
-  uniform float u_pixelSortSpeed;
-  uniform float u_pixelSortScale;
-  uniform float u_pixelSortThreshold;`;
+  uniform float u_hGlitch;
+  uniform float u_hGlitchSpeed;
+  uniform float u_hGlitchScale;
+  uniform float u_hGlitchThreshold;`;
   }
 
   getPostShaderGuards() {
     return `
-    bool hasPixelSort = (u_pixelSort > 0.001);`;
+    bool hasHGlitch = (u_hGlitch > 0.001);`;
   }
 
   getPostShaderGuardSymbol() {
-    return 'hasPixelSort';
+    return 'hasHGlitch';
   }
 
   getPostShaderHelpers() {
     return `
   vec3 applyPixelSort(vec3 color, vec2 uv, float time) {
-    float t = time * (0.5 + u_pixelSortSpeed * 1.2);
-    float len = (0.004 + 0.035 * u_pixelSort) * (0.8 + 0.35 * u_pixelSortScale);
+    float t = time * (0.5 + u_hGlitchSpeed * 1.2);
+    float len = (0.004 + 0.035 * u_hGlitch) * (0.8 + 0.35 * u_hGlitchScale);
     float band = smoothstep(0.56, 0.95, noise21(vec2(
-      floor(uv.y * (60.0 + 60.0 * u_pixelSortScale)),
+      floor(uv.y * (60.0 + 60.0 * u_hGlitchScale)),
       floor(t * 3.0)
     )));
     vec3 best = color;
@@ -63,14 +63,14 @@ export class PixelSortEffect extends EffectInterface {
       }
     }
     float sourceLum = dot(color, vec3(0.2126, 0.7152, 0.0722));
-    float sourceMask = smoothstep(u_pixelSortThreshold * 0.15, u_pixelSortThreshold, sourceLum);
-    return mix(color, best, clamp(band * u_pixelSort * 0.45 * sourceMask, 0.0, 1.0));
+    float sourceMask = smoothstep(u_hGlitchThreshold * 0.15, u_hGlitchThreshold, sourceLum);
+    return mix(color, best, clamp(band * u_hGlitch * 0.45 * sourceMask, 0.0, 1.0));
   }`;
   }
 
   getPostShaderPostCode() {
     return `
-    if (hasPixelSort) {
+    if (hasHGlitch) {
       combined = applyPixelSort(combined, uv, u_time);
     }`;
   }

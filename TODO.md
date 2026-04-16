@@ -1,7 +1,8 @@
-- renommer les effets
-- corriger le chargement des settings (et vérifier l'enregistrement aussi)
+- ajouter un bouton de suppression sur les sources et effets
 - corriger le drag n drop
+- corriger le chargement des settings (et vérifier l'enregistrement aussi)
 - remplacer les icônes sur tous les boutons
+- bruit chromatique, mode d'application : source (par défaut), fond, les deux
 - revoir les valeurs par défaut pour chaque effet
 - amélioration UI
 - nouvelles sources :
