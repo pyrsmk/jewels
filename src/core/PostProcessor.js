@@ -1,41 +1,57 @@
+import { EffectStack } from './EffectStack.js';
+
 export class PostProcessor {
   constructor({ moduleHost, pipelineRuntime }) {
     this.moduleHost = moduleHost;
     this.pipelineRuntime = pipelineRuntime;
-    this.lastPostChainRebuildKey = '';
+    this.effectProgramCache = new Map();
   }
 
-  resetPostChain() {
+  _getRebuildKey(effect, effectStack) {
+    return `${effect.constructor.name}:${effect.getRebuildKey?.({ effectStack }) ?? ''}`;
+  }
+
+  _getOrBuildProgram(effect, effectStack) {
+    const key = this._getRebuildKey(effect, effectStack);
+    if (!this.effectProgramCache.has(key)) {
+      const program = this.pipelineRuntime.buildEffectProgram(effect, effectStack);
+      const locs = this.pipelineRuntime.buildEffectLocs(program);
+      this.effectProgramCache.set(key, { program, locs });
+    }
+    return this.effectProgramCache.get(key);
+  }
+
+  invalidateCache() {
+    this.effectProgramCache.clear();
     this.pipelineRuntime.resetPostChain();
   }
 
-  render(t, deps = {}) {
+  render(t) {
     const { pipelineRuntime, moduleHost } = this;
-    const postChainRebuildKey = pipelineRuntime.buildPostChainRebuildKey(moduleHost.getEffects());
-    if (postChainRebuildKey !== this.lastPostChainRebuildKey) {
-      this.lastPostChainRebuildKey = postChainRebuildKey;
-      this.resetPostChain();
-      pipelineRuntime.rebuildPostProgram();
-    }
-
-    const out = pipelineRuntime.getNextPostTarget();
+    const effects = moduleHost.getEffects();
+    const gl = pipelineRuntime.gl;
     const fallbackTex = pipelineRuntime.getAltPostTarget().tex;
     const prevTexture = pipelineRuntime.getPreviousFrameTexture(fallbackTex);
-    const sceneTexture = pipelineRuntime.getSceneTarget().tex;
+    let inputTex = pipelineRuntime.getSceneTarget().tex;
+    let lastOut = null;
 
-    pipelineRuntime.bindPostBuffer(out, t);
-    pipelineRuntime.bindPostInputs(sceneTexture, prevTexture);
+    for (const effect of effects) {
+      const effectStack = new EffectStack(effects, effect);
+      const { program, locs } = this._getOrBuildProgram(effect, effectStack);
+      const out = pipelineRuntime.getNextPostTarget();
+      pipelineRuntime.bindEffectPass(program, locs, inputTex, out.fbo, prevTexture, t);
+      effect.transform({ gl, locs, time: t, effectStack });
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      inputTex = out.tex;
+      lastOut = out;
+    }
 
-    moduleHost.transformEffects((extra = {}) => pipelineRuntime.buildPassContext({
-      time: t,
-      locs: pipelineRuntime.postLocs,
-      ...deps,
-      ...extra,
-    }));
-
-    pipelineRuntime.gl.drawArrays(pipelineRuntime.gl.TRIANGLE_STRIP, 0, 4);
-
-    pipelineRuntime.blitToScreen(out.tex);
-    pipelineRuntime.pushFrameHistory(out.tex);
+    if (lastOut) {
+      pipelineRuntime.blitToScreen(lastOut.tex);
+      pipelineRuntime.pushFrameHistory(lastOut.tex);
+    } else {
+      pipelineRuntime.blitToScreen(inputTex);
+      pipelineRuntime.pushFrameHistory(inputTex);
+    }
   }
 }

@@ -39,12 +39,12 @@ export class ChromaticAberrationEffect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyChromaticAberration(vec2 uv, vec2 px) {
-    vec3 preChromatic = sampleScene(uv);
+    vec3 base = sampleScene(uv);
     vec3 chromatic;
     if (u_chromaticMode < 0.5) {
       vec2 shift = px * (1.25 * u_chromaticOffset);
       chromatic.r = sampleScene(uv + shift).r;
-      chromatic.g = preChromatic.g;
+      chromatic.g = base.g;
       chromatic.b = sampleScene(uv - shift).b;
     } else {
       vec2 centered = uv - 0.5;
@@ -56,7 +56,7 @@ export class ChromaticAberrationEffect extends EffectInterface {
       vec2 dir = dirLen > 0.0001 ? centered / dirLen : vec2(0.0);
       vec2 shift = dir * px * (1.25 * u_chromaticOffset + edge * 5.0 * u_chromaticOffset) * edge;
       chromatic.r = sampleScene(uv + shift).r;
-      chromatic.g = preChromatic.g;
+      chromatic.g = base.g;
       chromatic.b = sampleScene(uv - shift).b;
     }
     return chromatic;

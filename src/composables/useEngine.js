@@ -112,6 +112,7 @@ export async function useEngine(canvas) {
     const instance = markRaw(Cls.deserialize({}));
     moduleHost.addEffect(instance);
     effects.value = [...moduleHost.effects];
+    postProcessor.invalidateCache();
     instance.setup(contextFactory({}));
     instance.resize(contextFactory({}));
     return instance;
@@ -126,11 +127,13 @@ export async function useEngine(canvas) {
   function removeEffect(instance) {
     moduleHost.removeEffect(instance);
     effects.value = [...moduleHost.effects];
+    postProcessor.invalidateCache();
   }
 
   function reorderEffects(newOrder) {
     moduleHost.reorderEffects(newOrder);
     effects.value = [...moduleHost.effects];
+    postProcessor.invalidateCache();
   }
 
   resize();

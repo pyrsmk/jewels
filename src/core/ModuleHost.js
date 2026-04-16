@@ -1,5 +1,3 @@
-import { EffectStack } from './EffectStack.js';
-
 export class ModuleHost {
   constructor({ sources = [], effects = [] } = {}) {
     this.sources = sources;
@@ -96,15 +94,6 @@ export class ModuleHost {
   renderSources(contextFactory) {
     for (const source of this.sources) {
       source.renderScenePass(contextFactory({}));
-    }
-  }
-
-  transformEffects(contextFactory) {
-    const effects = this.effects;
-    for (const effect of effects) {
-      effect.transform(contextFactory({
-        effectStack: new EffectStack(effects, effect),
-      }));
     }
   }
 
