@@ -42,6 +42,7 @@ export class RGBSplitEffect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyRgbSplit(vec3 color, vec2 uv, float time) {
+    time = mod(time, 3600.0);
     float t = time * (0.7 + u_rgbSplitSpeed * 1.4);
     float scale = 0.7 + u_rgbSplitScale * 1.6;
     vec2 cell = floor(uv * vec2(24.0, 14.0) * scale);

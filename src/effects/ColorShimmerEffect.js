@@ -51,6 +51,7 @@ export class ColorShimmerEffect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 colorShimmer(vec2 uv, float time) {
+    time = mod(time, 3600.0);
     float scale = max(u_colorTint2Scale, 0.001);
     float t = time * u_colorTint2Speed;
     vec2 p1 = uv * (1.45 * scale);

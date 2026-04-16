@@ -48,6 +48,7 @@ export class TemporalGhost2Effect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyTemporalGhost2(vec3 color, vec2 uv, float time) {
+    time = mod(time, 3600.0);
     float t = time * (0.5 + u_tg2Speed);
     vec2 jitterA = vec2(
       noise21(uv * (8.0 + u_tg2Scale * 4.0) + vec2(t, 1.7)) - 0.5,

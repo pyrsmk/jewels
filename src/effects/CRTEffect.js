@@ -52,6 +52,7 @@ export class CRTEffect extends EffectInterface {
     return `
   vec3 applyCRT(vec3 color, vec2 uv, float time) {
     vec3 result = color;
+    time = mod(time, 3600.0);
 
     // Scanlines
     if (u_crtScanlines > 0.001) {

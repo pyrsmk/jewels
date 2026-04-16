@@ -54,6 +54,7 @@ export class TemporalGhostEffect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyTemporalGhost(vec3 color, vec2 uv, float time) {
+    time = mod(time, 3600.0);
     vec2 pxGhost = (1.0 / u_resolution) * max(u_temporalGhostScale, 0.001) * 6.0;
     float phase = time * u_temporalGhostSpeed;
     vec2 drift = vec2(sin(phase) * pxGhost.x, cos(phase * 0.73) * pxGhost.y);

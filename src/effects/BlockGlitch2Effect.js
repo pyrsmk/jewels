@@ -42,6 +42,7 @@ export class BlockGlitch2Effect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyBlockGlitch2(vec3 color, vec2 uv, float time) {
+    time = mod(time, 3600.0);
     float t = floor(time * (2.0 + u_bg2Speed * 3.0));
     float scale = 6.0 + u_bg2Scale * 10.0;
     vec2 grid = vec2(14.0, 8.0) * scale;

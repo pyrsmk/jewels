@@ -42,6 +42,7 @@ export class BlockGlitch3Effect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyBlockGlitch3(vec3 color, vec2 uv, float time) {
+    time = mod(time, 3600.0);
     float scale = 1.0 / max(u_bg3Scale, 0.001);
     float phase = floor(time * u_bg3Speed * 6.0);
     vec2 grid = floor(uv * vec2(32.0, 18.0) * scale);

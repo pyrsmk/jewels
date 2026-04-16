@@ -42,6 +42,7 @@ export class ChromaticNoiseEffect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 chromaticNoise(vec2 uv, vec2 fragCoord, float time) {
+    time = mod(time, 3600.0);
     float scale = max(u_chromaticNoiseScale, 0.001);
     vec2 pFine = fragCoord * (0.009 * scale);
     vec2 pCoarse = fragCoord * (0.0035 * scale);

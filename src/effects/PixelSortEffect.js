@@ -45,6 +45,7 @@ export class PixelSortEffect extends EffectInterface {
   getPostShaderHelpers() {
     return `
   vec3 applyPixelSort(vec3 color, vec2 uv, float time) {
+    time = mod(time, 3600.0);
     float t = time * (0.5 + u_hGlitchSpeed * 1.2);
     float len = (0.004 + 0.035 * u_hGlitch) * (0.8 + 0.35 * u_hGlitchScale);
     float band = smoothstep(0.56, 0.95, noise21(vec2(
