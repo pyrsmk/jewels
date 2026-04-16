@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup :title="instance.constructor.uiTitle ?? 'Fantôme temporel 2'">
+  <ControlGroup>
     <label>Intensité <span class="value">{{ (+(instance.options.tg2Opacity ?? 0.50)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="1" step="0.01"

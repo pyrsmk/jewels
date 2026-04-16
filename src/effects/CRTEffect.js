@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class CRTEffect extends EffectInterface {
-  static uiTitle = 'Écran CRT';
 
   constructor(options = {}) {
     const defaults = {

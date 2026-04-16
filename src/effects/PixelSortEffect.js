@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class PixelSortEffect extends EffectInterface {
-  static uiTitle = 'Glitchs horizontaux';
 
   constructor(options = {}) {
     const defaults = {

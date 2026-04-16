@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup :title="instance.constructor.uiTitle ?? 'Bruit chromatique'">
+  <ControlGroup>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.chromaticNoise ?? 0.18)).toFixed(2) }}</span>

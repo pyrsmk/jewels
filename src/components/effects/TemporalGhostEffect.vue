@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup :title="instance.constructor.uiTitle ?? 'Temporal Ghost'">
+  <ControlGroup>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.temporalGhostOpacity ?? 0.50)).toFixed(2) }}</span>

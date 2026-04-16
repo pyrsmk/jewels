@@ -2,7 +2,6 @@ import { EffectInterface } from '../core/EffectInterface.js';
 import { clamp, smooth } from '../utils/math.js';
 
 export class LensFlareEffect extends EffectInterface {
-  static uiTitle = 'Lens flare';
 
   constructor(options = {}) {
     const defaults = {

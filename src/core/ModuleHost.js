@@ -40,8 +40,8 @@ export class ModuleHost {
 
   buildAllUI(groupFinder) {
     const mappings = [
-      ...this.sources.map((s) => [s, s.constructor.uiTitle || s.constructor.name]),
-      ...this.effects.map((e) => [e, e.constructor.uiTitle || e.constructor.name]),
+      ...this.sources.map((s) => [s,s.constructor.name]),
+      ...this.effects.map((e) => [e,e.constructor.name]),
     ];
 
     for (const [module, title] of mappings) {

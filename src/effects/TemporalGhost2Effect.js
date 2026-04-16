@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class TemporalGhost2Effect extends EffectInterface {
-  static uiTitle = 'Temporal Ghosting 2';
 
   constructor(options = {}) {
     const defaults = {

@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class BlockGlitch2Effect extends EffectInterface {
-  static uiTitle = 'Block Glitch 2';
 
   constructor(options = {}) {
     const defaults = {

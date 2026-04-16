@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class GlowEffect extends EffectInterface {
-  static uiTitle = 'Glow';
 
   constructor(options = {}) {
     const defaults = {

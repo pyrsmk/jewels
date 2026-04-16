@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class RGBSplitEffect extends EffectInterface {
-  static uiTitle = 'RGB Split dynamique';
 
   constructor(options = {}) {
     const defaults = {

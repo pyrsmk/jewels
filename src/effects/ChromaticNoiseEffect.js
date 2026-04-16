@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ChromaticNoiseEffect extends EffectInterface {
-  static uiTitle = 'Chromatic Noise';
 
   constructor(options = {}) {
     const defaults = {

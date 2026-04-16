@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup :title="instance.constructor.uiTitle ?? 'Block Glitch 2'">
+  <ControlGroup>
     <label>Intensité <span class="value">{{ (+(instance.options.bg2 ?? 0.20)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="4" step="0.01"

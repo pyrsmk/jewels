@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class GrainEffect extends EffectInterface {
-  static uiTitle = 'Grain';
 
   constructor(options = {}) {
     const defaults = {

@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ChromaticAberrationEffect extends EffectInterface {
-  static uiTitle = 'Aberration chromatique';
 
   constructor(options = {}) {
     const defaults = {

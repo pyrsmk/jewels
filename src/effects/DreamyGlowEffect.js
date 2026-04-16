@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class DreamyGlowEffect extends EffectInterface {
-  static uiTitle = 'Dreamy Glow';
 
   constructor(options = {}) {
     const defaults = {

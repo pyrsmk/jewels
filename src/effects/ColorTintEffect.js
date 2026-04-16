@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ColorTintEffect extends EffectInterface {
-  static uiTitle = 'Couleurs';
 
   constructor(options = {}) {
     const defaults = {};

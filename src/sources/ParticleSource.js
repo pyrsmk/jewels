@@ -4,7 +4,6 @@ import { createProgram } from '../utils/webgl.js';
 import { rand, clamp, smooth, fbm } from '../utils/math.js';
 
 export class ParticleSource extends AbstractSource {
-  static uiTitle = 'Particules';
 
   constructor(options = {}) {
     const defaults = {

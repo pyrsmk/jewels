@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup :title="instance.constructor.uiTitle ?? 'Glitchs horizontaux'">
+  <ControlGroup>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.hGlitch ?? 0.20)).toFixed(2) }}</span>

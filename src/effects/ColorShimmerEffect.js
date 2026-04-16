@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ColorShimmerEffect extends EffectInterface {
-  static uiTitle = 'Teinte colorée 2';
 
   constructor(options = {}) {
     const defaults = {
