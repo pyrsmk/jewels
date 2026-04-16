@@ -3,10 +3,10 @@
     <div class="source-item__header" @click="$emit('toggle')">
       <span class="source-item__badge">SOURCE</span>
       <span class="source-item__label">{{ label }}</span>
-      <span class="material-icons source-item__chevron">
-        {{ expanded ? 'expand_less' : 'expand_more' }}
+      <span class="material-symbols-outlined source-item__chevron">
+        {{ expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
       </span>
-      <span class="material-icons source-item__delete" @click.stop="$emit('delete')">delete</span>
+      <span class="material-symbols-outlined source-item__delete" @click.stop="$emit('delete')">delete</span>
     </div>
     <div class="source-item__body" :class="{ 'source-item__body--expanded': expanded }">
       <div class="source-item__body-inner">

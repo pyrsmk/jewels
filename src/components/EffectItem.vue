@@ -5,7 +5,7 @@
   >
     <div class="effect-item__header" @click="$emit('toggle')">
       <span
-        class="material-icons effect-item__handle"
+        class="material-symbols-outlined effect-item__handle"
         :draggable="draggable"
         @dragstart.stop="draggable && $emit('dragstart', $event)"
         @dragend.stop="$emit('dragend', $event)"
@@ -13,10 +13,10 @@
       >drag_indicator</span>
       <span class="effect-item__badge">EFFET</span>
       <span class="effect-item__label">{{ label }}</span>
-      <span class="material-icons effect-item__chevron">
-        {{ expanded ? 'expand_less' : 'expand_more' }}
+      <span class="material-symbols-outlined effect-item__chevron">
+        {{ expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
       </span>
-      <span class="material-icons effect-item__delete" @click.stop="$emit('delete')">delete</span>
+      <span class="material-symbols-outlined effect-item__delete" @click.stop="$emit('delete')">delete</span>
     </div>
     <div class="effect-item__body" :class="{ 'effect-item__body--expanded': expanded }">
       <div class="effect-item__body-inner">

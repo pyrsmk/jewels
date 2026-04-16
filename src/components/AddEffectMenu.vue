@@ -8,7 +8,7 @@
         v-for="entry in sortedRegistry"
         :key="entry.className"
         :label="entry.label"
-        icon="add"
+        icon="texture"
         size="xl"
         :disabled="activeClassNames.includes(entry.className)"
         @click="$emit('add', entry.className)"

@@ -11,7 +11,7 @@
         v-for="entry in sourceRegistry"
         :key="entry.className"
         :label="entry.label"
-        icon="add"
+        icon="ev_shadow"
         size="xl"
         @click="$emit('add', entry.className)"
       />

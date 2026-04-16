@@ -1,5 +1,3 @@
-- remplacer les icônes sur tous les boutons
-
 - lens flare : taille min/max à corriger/renommer
 - aberration chromatique : renommer "particules" en "source", mode en haut, désactiver largeur quand on est en mode source
 - bruit chromatique, mode d'application : source (par défaut), fond, les deux

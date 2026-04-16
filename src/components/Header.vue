@@ -5,7 +5,7 @@
     <div v-if="hasSource" class="fps">{{ fps }} FPS</div>
     <div class="spacer"></div>
     <Button
-      icon="add"
+      icon="texture_add"
       tooltip="Ajouter un effet"
       :disabled="!hasSource"
       @click="$emit('openAddEffect')"

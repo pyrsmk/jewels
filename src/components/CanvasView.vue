@@ -3,7 +3,7 @@
     <canvas ref="canvasRef"></canvas>
     <div class="canvas-overlay">
       <div v-if="!hasSource" class="canvas-add-source">
-        <Button icon="add_circle" label="Ajouter une source" size="xxl" @click="$emit('openAddSource')" />
+        <Button icon="ev_shadow_add" label="Ajouter une source" size="xxl" @click="$emit('openAddSource')" />
       </div>
     </div>
   </div>

@@ -1,6 +1,6 @@
 <template>
   <button type="button" :title="tooltip" :class="['btn', `btn--${variant}`, `btn--${size}`]" :disabled="disabled" @click="$emit('click')">
-    <span v-if="icon" class="material-icons">{{ icon }}</span>
+    <span v-if="icon" class="material-symbols-outlined">{{ icon }}</span>
     <span v-if="label" class="btn__label">{{ label }}</span>
   </button>
 </template>
@@ -36,19 +36,19 @@ defineEmits(['click']);
 }
 .btn:hover:not(:disabled) { background: #202434; }
 .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-.material-icons { font-size: 18px; }
+.material-symbols-outlined { font-size: 18px; }
 .btn--xl {
   padding: 12px 18px;
   font-size: 15px;
   border-radius: 8px;
   gap: 10px;
 }
-.btn--xl .material-icons { font-size: 22px; }
+.btn--xl .material-symbols-outlined { font-size: 22px; }
 .btn--xxl {
   padding: 18px 28px;
   font-size: 20px;
   border-radius: 10px;
   gap: 14px;
 }
-.btn--xxl .material-icons { font-size: 40px; }
+.btn--xxl .material-symbols-outlined { font-size: 40px; }
 </style>
