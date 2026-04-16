@@ -1,4 +1,4 @@
-- vérifier le calcul du FPS
+- renommer les effets
 - corriger le chargement des settings (et vérifier l'enregistrement aussi)
 - corriger le drag n drop
 - remplacer les icônes sur tous les boutons

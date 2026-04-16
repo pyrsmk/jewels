@@ -209,7 +209,7 @@ ${earlyExit}
     float grainResponseMask = 1.0;
 ${chunks.pre}
 
-    combined = smoothstep(vec3(0.0), vec3(1.4), combined);
+
 
 ${chunks.post}
     gl_FragColor = vec4(combined, 1.0);

@@ -31,6 +31,14 @@
         @change="instance.options.surfaceImperfections = $event.target.checked"
       />
     </label>
+    <label>
+      Fondu sur les bords
+      <input
+        type="checkbox"
+        :checked="instance.options.edgeFade ?? true"
+        @change="instance.options.edgeFade = $event.target.checked"
+      />
+    </label>
     <SliderControl
       label="Nombre"
       :model-value="instance.options.particleCount ?? 0.316"

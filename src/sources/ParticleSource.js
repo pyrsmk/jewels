@@ -15,11 +15,12 @@ export class ParticleSource extends AbstractSource {
       speed: 0.047,
       size: 9,
       particleJitter: 0.3,
+      edgeFade: true,
     };
     super(
       { ...defaults, ...options },
       ['particleShape', 'flowDirection', 'surfaceImperfections', 'particleCount', 'speed', 'size',
-        'particleJitter'],
+        'particleJitter', 'edgeFade'],
       ['particleCountVal', 'speedVal', 'sizeVal'],
     );
     this.gl = null;
@@ -495,6 +496,7 @@ void main() {
     const fadeInSec = p.fadeInDur || 3.0;
     const fadeOutSec = p.fadeOutDur || 1.9;
     const fadeIn = clamp(p.life / fadeInSec, 0, 1);
+    if (!this.options.edgeFade) return fadeIn;
     let exitFade = 1;
     const dir = this.getFlowDirection();
     const fadeDist = 0.15 + (fadeOutSec * 0.25);
