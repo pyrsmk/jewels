@@ -59,6 +59,17 @@ export class PipelineRuntime {
     if (this.state.sceneB?.fbo) clearFbo(this.gl, this.state.sceneB.fbo);
   }
 
+  clearScene() {
+    const { gl, state } = this;
+    if (state.sceneTex?.fbo) clearFbo(gl, state.sceneTex.fbo);
+    this.resetPostChain();
+    this.clearFrameHistory();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.viewport(0, 0, state.width, state.height);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  }
+
   pushFrameHistory(texture) {
     this.state.frameHistory.unshift({
       texture,

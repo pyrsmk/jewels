@@ -1,4 +1,3 @@
-- ajouter un bouton de suppression sur les sources et effets
 - corriger le drag n drop
 - corriger le chargement des settings (et vérifier l'enregistrement aussi)
 - remplacer les icônes sur tous les boutons

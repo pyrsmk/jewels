@@ -15,6 +15,8 @@
       :effect-registry="engine.effectRegistry"
       @settings-change="onSettingsChange"
       @reorder-effects="onReorderEffects"
+      @delete-source="onDeleteSource"
+      @delete-effect="onDeleteEffect"
     />
   </div>
   <CanvasView
@@ -64,6 +66,16 @@ async function onAddEffect(className) {
 
 function onReorderEffects(newOrder) {
   engine.value?.reorderEffects(newOrder);
+}
+
+function onDeleteEffect(instance) {
+  engine.value?.removeEffect(instance);
+}
+
+function onDeleteSource(instance) {
+  if (!engine.value) return;
+  engine.value.removeSource(instance);
+  [...engine.value.effects.value].forEach((e) => engine.value.removeEffect(e));
 }
 
 function onSettingsChange() {

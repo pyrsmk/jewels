@@ -14,6 +14,7 @@
       <span class="material-icons effect-item__chevron">
         {{ expanded ? 'expand_less' : 'expand_more' }}
       </span>
+      <span class="material-icons effect-item__delete" @click.stop="$emit('delete')">delete</span>
     </div>
     <div v-if="expanded" class="effect-item__body">
       <slot />
@@ -28,7 +29,7 @@ defineProps({
   expanded: { type: Boolean, default: false },
   draggable: { type: Boolean, default: false },
 });
-defineEmits(['toggle', 'dragstart', 'dragend', 'dragover']);
+defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'dragover']);
 </script>
 
 <style scoped>
@@ -63,5 +64,13 @@ defineEmits(['toggle', 'dragstart', 'dragend', 'dragover']);
 }
 .effect-item__label { flex: 1; font-size: 12px; font-weight: 600; color: #ddd; }
 .effect-item__chevron { font-size: 16px; color: #8f9bb3; }
+.effect-item__delete {
+  font-size: 16px;
+  color: #8f9bb3;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+}
+.effect-item__delete:hover { color: #ff6b6b; }
 .effect-item__body { padding: 10px; }
 </style>

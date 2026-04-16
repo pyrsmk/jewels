@@ -86,6 +86,12 @@ export async function useEngine(canvas) {
     return instance;
   }
 
+  function removeSource(instance) {
+    moduleHost.removeSource(instance);
+    sources.value = [...moduleHost.sources];
+    pipelineRuntime.clearScene();
+  }
+
   function removeEffect(instance) {
     moduleHost.removeEffect(instance);
     effects.value = [...moduleHost.effects];
@@ -118,6 +124,7 @@ export async function useEngine(canvas) {
     sourceRegistry,
     effectRegistry,
     addSource,
+    removeSource,
     addEffect,
     removeEffect,
     reorderEffects,

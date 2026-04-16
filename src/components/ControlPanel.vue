@@ -7,6 +7,7 @@
       :label="entry.label"
       :expanded="expandedId === 'source-' + i"
       @toggle="toggleExpanded('source-' + i)"
+      @delete="$emit('delete-source', entry.instance)"
     >
       <component :is="entry.component" :instance="entry.instance" />
     </SourceItem>
@@ -23,6 +24,7 @@
         :expanded="expandedId === 'effect-' + i"
         :draggable="expandedId === null"
         @toggle="toggleExpanded('effect-' + i)"
+        @delete="$emit('delete-effect', entry.instance)"
         @dragstart="onDragStart(i)"
         @dragend="onDragEnd"
         @dragover="onDragOver(i)"
@@ -44,7 +46,7 @@ const props = defineProps({
   sourceRegistry: { type: Array, default: () => [] },
   effectRegistry: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['settings-change', 'reorder-effects']);
+const emit = defineEmits(['settings-change', 'reorder-effects', 'delete-source', 'delete-effect']);
 
 const expandedId = ref(null);
 const dragIndex = ref(null);
