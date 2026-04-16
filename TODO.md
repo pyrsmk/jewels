@@ -1,5 +1,3 @@
-- quand un effet est déjà ajouté, on ne peut pas l'ajouter une seconde fois, donc il faut le griser dans la liste
-- quand on ouvre un effet/source, ça ferme l'autre qui est ouvert
 - corriger le chargement des settings (et vérifier l'enregistrement aussi)
 - remplacer les icônes sur tous les boutons
 

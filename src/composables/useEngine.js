@@ -64,6 +64,7 @@ export async function useEngine(canvas) {
   async function addSource(className) {
     const entry = sourceRegistry.find((r) => r.className === className);
     if (!entry) throw new Error(`Source inconnue : ${className}`);
+    if (moduleHost.sources.some((s) => s.constructor.name === className)) return;
     entry.componentLoader?.();
     const Cls = await entry.classLoader();
     const instance = markRaw(Cls.deserialize({}));
@@ -78,6 +79,7 @@ export async function useEngine(canvas) {
   async function addEffect(className) {
     const entry = effectRegistry.find((r) => r.className === className);
     if (!entry) throw new Error(`Effet inconnu : ${className}`);
+    if (moduleHost.effects.some((e) => e.constructor.name === className)) return;
     entry.componentLoader?.();
     const Cls = await entry.classLoader();
     const instance = markRaw(Cls.deserialize({}));

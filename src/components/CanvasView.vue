@@ -3,21 +3,8 @@
     <canvas ref="canvasRef"></canvas>
     <div class="canvas-overlay">
       <div v-if="!hasSource" class="canvas-add-source">
-        <Button icon="add_circle" label="Ajouter une source" size="xxl" @click="onClickAddSource" />
+        <Button icon="add_circle" label="Ajouter une source" size="xxl" @click="$emit('openAddSource')" />
       </div>
-      <AddSourceMenu
-        v-if="showAddSource"
-        :source-registry="sourceRegistry"
-        :has-source="hasSource"
-        @add="onAddSource"
-        @close="showAddSource = false"
-      />
-      <AddEffectMenu
-        v-if="showAddEffect"
-        :effect-registry="effectRegistry"
-        @add="onAddEffect"
-        @close="showAddEffect = false"
-      />
     </div>
   </div>
 </template>
@@ -26,20 +13,14 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useEngine } from '../composables/useEngine.js';
 import Button from './Button.vue';
-import AddSourceMenu from './AddSourceMenu.vue';
-import AddEffectMenu from './AddEffectMenu.vue';
 
 const props = defineProps({
   hasSource: { type: Boolean, default: false },
-  showAddEffect: { type: Boolean, default: false },
-  sourceRegistry: { type: Array, default: () => [] },
-  effectRegistry: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['engineReady', 'fpsUpdate', 'fullscreenChange', 'addSource', 'addEffect', 'closeAddEffect']);
+const emit = defineEmits(['engineReady', 'fpsUpdate', 'fullscreenChange', 'openAddSource']);
 
 const wrapRef = ref(null);
 const canvasRef = ref(null);
-const showAddSource = ref(false);
 let engine = null;
 let resizeObserver = null;
 
@@ -77,20 +58,6 @@ async function toggleFullscreen() {
   }
 }
 
-function onClickAddSource() {
-  showAddSource.value = true;
-}
-
-function onAddSource(className) {
-  emit('addSource', className);
-  showAddSource.value = false;
-}
-
-function onAddEffect(className) {
-  emit('addEffect', className);
-  emit('closeAddEffect');
-}
-
 defineExpose({ toggleFullscreen });
 </script>
 
@@ -117,7 +84,6 @@ canvas { width: 100%; height: 100%; display: block; }
   inset: 0;
   pointer-events: none;
 }
-.canvas-overlay > * { pointer-events: auto; }
 .canvas-add-source {
   position: absolute;
   inset: 0;

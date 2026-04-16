@@ -22,16 +22,29 @@
   <CanvasView
     ref="canvasViewRef"
     :has-source="hasSource"
-    :show-add-effect="showAddEffect"
-    :source-registry="engine?.sourceRegistry ?? []"
-    :effect-registry="engine?.effectRegistry ?? []"
     @engine-ready="onEngineReady"
     @fps-update="fps = $event"
     @fullscreen-change="isFullscreen = $event"
-    @add-source="onAddSource"
-    @add-effect="onAddEffect"
-    @close-add-effect="showAddEffect = false"
+    @open-add-source="showAddSource = true"
   />
+  <Transition name="overlay">
+    <AddSourceMenu
+      v-if="showAddSource"
+      :source-registry="engine?.sourceRegistry ?? []"
+      :has-source="hasSource"
+      @add="onAddSource"
+      @close="showAddSource = false"
+    />
+  </Transition>
+  <Transition name="overlay">
+    <AddEffectMenu
+      v-if="showAddEffect"
+      :effect-registry="engine?.effectRegistry ?? []"
+      :active-class-names="effects.map(e => e.constructor.name)"
+      @add="onAddEffect"
+      @close="showAddEffect = false"
+    />
+  </Transition>
 </template>
 
 <script setup>
@@ -39,11 +52,14 @@ import { ref, shallowRef, computed } from 'vue';
 import Header from './components/Header.vue';
 import CanvasView from './components/CanvasView.vue';
 import ControlPanel from './components/ControlPanel.vue';
+import AddSourceMenu from './components/AddSourceMenu.vue';
+import AddEffectMenu from './components/AddEffectMenu.vue';
 
 const canvasViewRef = ref(null);
 const fps = ref(0);
 const isFullscreen = ref(false);
 const engine = shallowRef(null);
+const showAddSource = ref(false);
 const showAddEffect = ref(false);
 
 const sources = computed(() => engine.value?.sources.value ?? []);
@@ -57,11 +73,13 @@ function onEngineReady(eng) {
 async function onAddSource(className) {
   if (!engine.value) return;
   await engine.value.addSource(className);
+  showAddSource.value = false;
 }
 
 async function onAddEffect(className) {
   if (!engine.value) return;
   await engine.value.addEffect(className);
+  showAddEffect.value = false;
 }
 
 function onReorderEffects(newOrder) {
@@ -91,5 +109,13 @@ function onSettingsChange() {
   flex-direction: column;
   overflow: hidden;
   border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.2s ease;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
 }
 </style>

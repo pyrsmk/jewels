@@ -19,13 +19,14 @@ defineEmits(['close']);
 
 <style scoped>
 .overlay-backdrop {
-  position: absolute;
+  position: fixed;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.55);
   z-index: 100;
+  pointer-events: auto;
 }
 .overlay-modal {
   background: #13141c;
@@ -45,5 +46,13 @@ defineEmits(['close']);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   margin-bottom: 4px;
+}
+.overlay-enter-active,
+.overlay-leave-active {
+  transition: opacity 0.2s ease;
+}
+.overlay-enter-from,
+.overlay-leave-to {
+  opacity: 0;
 }
 </style>

@@ -10,6 +10,7 @@
         :label="entry.label"
         icon="add"
         size="xl"
+        :disabled="activeClassNames.includes(entry.className)"
         @click="$emit('add', entry.className)"
       />
     </div>
@@ -21,7 +22,10 @@ import { computed } from 'vue';
 import OverlayModal from './OverlayModal.vue';
 import Button from './Button.vue';
 
-const props = defineProps({ effectRegistry: { type: Array, required: true } });
+const props = defineProps({
+  effectRegistry: { type: Array, required: true },
+  activeClassNames: { type: Array, default: () => [] },
+});
 defineEmits(['add', 'close']);
 
 const sortedRegistry = computed(() =>
