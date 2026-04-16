@@ -1,4 +1,4 @@
-- refacto UI
+- amélioration UI
 - nouvelles sources :
   - fluides (un peu comme de la peinture sur de l'eau)
   - bandes horizontales/verticales

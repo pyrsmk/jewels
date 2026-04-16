@@ -5,14 +5,13 @@ export class PixelSortEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      pixelSortEnabled: false,
       pixelSort: 0.20,
       pixelSortSpeed: 1.40,
       pixelSortScale: 2.50,
       pixelSortThreshold: 0.05,
     };
     super({ ...defaults, ...options },
-      ['pixelSortEnabled', 'pixelSort', 'pixelSortSpeed', 'pixelSortScale', 'pixelSortThreshold'],
+      ['pixelSort', 'pixelSortSpeed', 'pixelSortScale', 'pixelSortThreshold'],
       ['pixelSortVal', 'pixelSortSpeedVal', 'pixelSortScaleVal', 'pixelSortThresholdVal']
     );
   }
@@ -20,8 +19,7 @@ export class PixelSortEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_pixelSort,
-      this.options.pixelSortEnabled ? +(this.options.pixelSort ?? 0.20) : 0.0);
+    gl.uniform1f(locs.u_pixelSort, +(this.options.pixelSort ?? 0.20));
     gl.uniform1f(locs.u_pixelSortSpeed, +(this.options.pixelSortSpeed ?? 1.40));
     gl.uniform1f(locs.u_pixelSortScale, +(this.options.pixelSortScale ?? 2.50));
     gl.uniform1f(locs.u_pixelSortThreshold, +(this.options.pixelSortThreshold ?? 0.05));

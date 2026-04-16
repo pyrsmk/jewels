@@ -1,14 +1,6 @@
 <template>
   <ControlGroup title="Lens Flare">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.lensFlare ?? true"
-        @change="instance.options.lensFlare = $event.target.checked"
-      />
-    </label>
-    <label>
       Réponse au grain
       <span class="value">{{ (+(instance.options.lensFlareGrainResponse ?? 0.5)).toFixed(2) }}</span>
     </label>

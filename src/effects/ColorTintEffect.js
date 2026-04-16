@@ -4,8 +4,8 @@ export class ColorTintEffect extends EffectInterface {
   static uiTitle = 'Couleurs';
 
   constructor(options = {}) {
-    const defaults = { colorEnabled: true };
-    super({ ...defaults, ...options }, ['colorEnabled'], []);
+    const defaults = {};
+    super({ ...defaults, ...options }, [], []);
     this.colors = ['#5900ff', '#00d5ff'];
     this.accentCache = new Float32Array(24);
     this.accentCountCache = 0;
@@ -57,7 +57,6 @@ export class ColorTintEffect extends EffectInterface {
 
   getParameters() {
     return {
-      colorEnabled: this.options.colorEnabled,
       colors: this.colors,
     };
   }
@@ -71,27 +70,16 @@ export class ColorTintEffect extends EffectInterface {
       gl.uniform3fv(locs.u_accents, this.accentCache);
     if (locs.u_accentCount !== undefined)
       gl.uniform1i(locs.u_accentCount, this.accentCountCache);
-    if (locs.u_colorEnabled !== undefined)
-      gl.uniform1f(locs.u_colorEnabled, this.options.colorEnabled ? 1.0 : 0.0);
   }
 
   transform({ gl, locs }) {
     if (locs.u_accents !== undefined) gl.uniform3fv(locs.u_accents, this.accentCache);
     if (locs.u_accentCount !== undefined) gl.uniform1i(locs.u_accentCount, this.accentCountCache);
-    if (locs.u_colorEnabled !== undefined)
-      gl.uniform1f(locs.u_colorEnabled, this.options.colorEnabled ? 1.0 : 0.0);
-  }
-
-  getPostShaderUniforms() {
-    return `
-  uniform float u_colorEnabled;
-  uniform vec3 u_accents[8];
-  uniform int u_accentCount;`;
   }
 
   getPostShaderPreCode() {
     return `
-    if (u_colorEnabled > 0.5 && u_accentCount > 0) {
+    if (u_accentCount > 0) {
       vec3 tint = paletteColor(clamp(uv.x, 0.0, 1.0));
       combined = mix(combined, combined * tint, 0.28);
     }`;

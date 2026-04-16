@@ -1,4 +1,10 @@
 export class SharedShaderLibrary {
+  getColorUniforms() {
+    return `
+  uniform vec3 u_accents[8];
+  uniform int u_accentCount;`;
+  }
+
   getSamplingHelpers() {
     return `
   vec3 sampleScene(vec2 uv) {
@@ -109,6 +115,12 @@ export class SharedShaderLibrary {
       this.getBlurHelpers(),
       this.getNoiseHelpers(),
     ].filter(Boolean).join('\n\n');
+  }
+
+  getSharedUniforms() {
+    return [
+      this.getColorUniforms(),
+    ].filter(Boolean).join('\n');
   }
 }
 

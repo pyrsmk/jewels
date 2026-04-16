@@ -1,14 +1,6 @@
 <template>
   <ControlGroup :title="instance.constructor.uiTitle ?? 'Temporal Ghost'">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.temporalGhostEnabled"
-        @change="instance.options.temporalGhostEnabled = $event.target.checked"
-      />
-    </label>
-    <label>
       Intensité
       <span class="value">{{ (+(instance.options.temporalGhostOpacity ?? 0.50)).toFixed(2) }}</span>
     </label>

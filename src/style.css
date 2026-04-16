@@ -14,12 +14,8 @@ html, body {
   overflow: hidden;
 }
 .group {
-  margin: 0 0 12px;
-  padding: 10px;
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 8px;
+  margin: 0 0 4px;
 }
-.group h2 { margin: 0 0 8px; font-size: 12px; font-weight: 700; }
 label {
   display: grid;
   grid-template-columns: 1fr auto;

@@ -185,6 +185,7 @@ export class PipelineRuntime {
       ? `\n    if (${chunks.guardSymbols.map((s) => `!${s}`).join(' && ')}) {\n`
         + `      gl_FragColor = vec4(combined, 1.0);\n      return;\n    }\n`
       : '';
+    const sharedUniforms = sharedShaderLibrary.getSharedUniforms();
     return `
   precision highp float;
   varying vec2 v_uv;
@@ -192,6 +193,7 @@ export class PipelineRuntime {
   uniform sampler2D u_prev;
   uniform vec2 u_resolution;
   uniform float u_time;
+${sharedUniforms}
 ${chunks.uniforms}
 
 ${sharedHelpers}

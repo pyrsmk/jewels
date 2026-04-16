@@ -1,14 +1,6 @@
 <template>
   <ControlGroup :title="instance.constructor.uiTitle ?? 'Pixel Sort'">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.pixelSortEnabled"
-        @change="instance.options.pixelSortEnabled = $event.target.checked"
-      />
-    </label>
-    <label>
       Intensité
       <span class="value">{{ (+(instance.options.pixelSort ?? 0.20)).toFixed(2) }}</span>
     </label>

@@ -5,13 +5,12 @@ export class BlockGlitch2Effect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      bg2Enabled: false,
       bg2: 0.20,
       bg2Speed: 2.00,
       bg2Scale: 1.50,
     };
     super({ ...defaults, ...options },
-      ['bg2Enabled', 'bg2', 'bg2Speed', 'bg2Scale'],
+      ['bg2', 'bg2Speed', 'bg2Scale'],
       ['bg2Val', 'bg2SpeedVal', 'bg2ScaleVal']
     );
   }
@@ -19,7 +18,7 @@ export class BlockGlitch2Effect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_bg2, this.options.bg2Enabled ? +(this.options.bg2 ?? 0.20) : 0.0);
+    gl.uniform1f(locs.u_bg2, +(this.options.bg2 ?? 0.20));
     gl.uniform1f(locs.u_bg2Speed, +(this.options.bg2Speed ?? 2.00));
     gl.uniform1f(locs.u_bg2Scale, 1.0 / Math.max(+(this.options.bg2Scale ?? 1.50), 0.001));
   }

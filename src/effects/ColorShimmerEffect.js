@@ -5,14 +5,13 @@ export class ColorShimmerEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      colorShimmerEnabled: false,
       colorShimmerPalette: 'all',
       colorShimmer: 0.20,
       colorShimmerSpeed: 0.60,
       colorShimmerScale: 1.10,
     };
     super({ ...defaults, ...options },
-      ['colorShimmerEnabled', 'colorShimmerPalette', 'colorShimmer', 'colorShimmerSpeed', 'colorShimmerScale'],
+      ['colorShimmerPalette', 'colorShimmer', 'colorShimmerSpeed', 'colorShimmerScale'],
       ['colorShimmerVal', 'colorShimmerSpeedVal', 'colorShimmerScaleVal']
     );
   }
@@ -26,10 +25,7 @@ export class ColorShimmerEffect extends EffectInterface {
     };
     const paletteIndex = paletteMap[this.options.colorShimmerPalette ?? 'all'] ?? 0.0;
 
-    gl.uniform1f(
-      locs.u_colorShimmer,
-      this.options.colorShimmerEnabled ? +(this.options.colorShimmer ?? 0.20) : 0.0
-    );
+    gl.uniform1f(locs.u_colorShimmer, +(this.options.colorShimmer ?? 0.20));
     gl.uniform1f(locs.u_colorShimmerPalette, paletteIndex);
     gl.uniform1f(locs.u_colorShimmerSpeed, +(this.options.colorShimmerSpeed ?? 0.60));
     gl.uniform1f(locs.u_colorShimmerScale, +(this.options.colorShimmerScale ?? 1.10));

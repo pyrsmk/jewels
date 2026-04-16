@@ -1,14 +1,6 @@
 <template>
   <ControlGroup :title="instance.constructor.uiTitle ?? 'Bruit chromatique'">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.chromaticNoiseEnabled"
-        @change="instance.options.chromaticNoiseEnabled = $event.target.checked"
-      />
-    </label>
-    <label>
       Intensité
       <span class="value">{{ (+(instance.options.chromaticNoise ?? 0.18)).toFixed(2) }}</span>
     </label>

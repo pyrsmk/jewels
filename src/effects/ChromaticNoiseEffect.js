@@ -5,13 +5,12 @@ export class ChromaticNoiseEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      chromaticNoiseEnabled: false,
       chromaticNoise: 0.18,
       chromaticNoiseSpeed: 2.10,
       chromaticNoiseScale: 2.80,
     };
     super({ ...defaults, ...options },
-      ['chromaticNoiseEnabled', 'chromaticNoise', 'chromaticNoiseSpeed', 'chromaticNoiseScale'],
+      ['chromaticNoise', 'chromaticNoiseSpeed', 'chromaticNoiseScale'],
       ['chromaticNoiseVal', 'chromaticNoiseSpeedVal', 'chromaticNoiseScaleVal']
     );
   }
@@ -19,8 +18,7 @@ export class ChromaticNoiseEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_chromaticNoise,
-      this.options.chromaticNoiseEnabled ? +(this.options.chromaticNoise ?? 0.18) : 0.0);
+    gl.uniform1f(locs.u_chromaticNoise, +(this.options.chromaticNoise ?? 0.18));
     gl.uniform1f(locs.u_chromaticNoiseSpeed, +(this.options.chromaticNoiseSpeed ?? 2.10));
     gl.uniform1f(locs.u_chromaticNoiseScale, +(this.options.chromaticNoiseScale ?? 2.80));
   }

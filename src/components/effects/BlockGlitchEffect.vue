@@ -1,13 +1,5 @@
 <template>
   <ControlGroup title="Block Glitch">
-    <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.blockGlitchEnabled"
-        @change="instance.options.blockGlitchEnabled = $event.target.checked"
-      />
-    </label>
     <label>Intensité <span class="value">{{ (+(instance.options.blockGlitch ?? 0.20)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="4" step="0.01"

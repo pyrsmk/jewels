@@ -1,13 +1,5 @@
 <template>
   <ControlGroup title="Glow">
-    <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.glowEnabled ?? true"
-        @change="instance.options.glowEnabled = $event.target.checked"
-      />
-    </label>
     <label>Intensité <span class="value">{{ glowDisplay }}</span></label>
     <input
       type="range" min="0" max="2.5" step="0.01"

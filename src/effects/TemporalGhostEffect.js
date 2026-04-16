@@ -5,7 +5,6 @@ export class TemporalGhostEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      temporalGhostEnabled: false,
       temporalGhostOpacity: 0.50,
       temporalGhost: 0.20,
       temporalGhostRgbShift: 0.80,
@@ -14,7 +13,7 @@ export class TemporalGhostEffect extends EffectInterface {
     };
     super({ ...defaults, ...options },
       [
-        'temporalGhostEnabled', 'temporalGhostOpacity', 'temporalGhost',
+        'temporalGhostOpacity', 'temporalGhost',
         'temporalGhostRgbShift', 'temporalGhostSpeed', 'temporalGhostScale',
       ],
       [
@@ -27,8 +26,7 @@ export class TemporalGhostEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_temporalGhost,
-      this.options.temporalGhostEnabled ? +(this.options.temporalGhost ?? 0.20) : 0.0);
+    gl.uniform1f(locs.u_temporalGhost, +(this.options.temporalGhost ?? 0.20));
     gl.uniform1f(locs.u_temporalGhostOpacity, +(this.options.temporalGhostOpacity ?? 0.50));
     gl.uniform1f(locs.u_temporalGhostRgbShift, +(this.options.temporalGhostRgbShift ?? 0.80));
     gl.uniform1f(locs.u_temporalGhostSpeed, +(this.options.temporalGhostSpeed ?? 1.20));

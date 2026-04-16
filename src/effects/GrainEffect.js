@@ -5,11 +5,10 @@ export class GrainEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      filmGrain: true,
       grainMode: 'celluloid',
       grainAmount: 3.0,
     };
-    super({ ...defaults, ...options }, ['filmGrain', 'grainMode', 'grainAmount'], ['grainAmountVal']);
+    super({ ...defaults, ...options }, ['grainMode', 'grainAmount'], ['grainAmountVal']);
   }
 
   syncValueDisplays() {}
@@ -17,21 +16,19 @@ export class GrainEffect extends EffectInterface {
   transform({ gl, locs }) {
     const modeValue = this.options.grainMode ?? 'celluloid';
     const grainMode = modeValue === 'static' ? 1 : modeValue === 'celluloid' ? 2 : 0;
-    gl.uniform1f(locs.u_filmGrain, !!this.options.filmGrain ? 1.0 : 0.0);
     gl.uniform1f(locs.u_grainMode, grainMode);
     gl.uniform1f(locs.u_grainAmount, +(this.options.grainAmount ?? 3.0));
   }
 
   getPostShaderUniforms() {
     return `
-  uniform float u_filmGrain;
   uniform float u_grainMode;
   uniform float u_grainAmount;`;
   }
 
   getPostShaderGuards() {
     return `
-    bool hasGrain = (u_filmGrain > 0.5 && u_grainAmount > 0.01);`;
+    bool hasGrain = (u_grainAmount > 0.01);`;
   }
 
   getPostShaderGuardSymbol() {

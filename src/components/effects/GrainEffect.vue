@@ -1,13 +1,5 @@
 <template>
   <ControlGroup title="Grain">
-    <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.filmGrain ?? true"
-        @change="instance.options.filmGrain = $event.target.checked"
-      />
-    </label>
     <label>Quantité <span class="value">{{ (+(instance.options.grainAmount ?? 3)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="10" step="0.01"

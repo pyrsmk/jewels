@@ -1,13 +1,5 @@
 <template>
   <ControlGroup :title="instance.constructor.uiTitle ?? 'Block Glitch 3'">
-    <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.bg3Enabled"
-        @change="instance.options.bg3Enabled = $event.target.checked"
-      />
-    </label>
     <label>Intensité <span class="value">{{ (+(instance.options.bg3 ?? 0.22)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="4" step="0.01"

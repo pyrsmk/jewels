@@ -1,14 +1,6 @@
 <template>
   <ControlGroup title="CRT">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.crtEnabled ?? false"
-        @change="instance.options.crtEnabled = $event.target.checked"
-      />
-    </label>
-    <label>
       Intensité
       <span class="value">{{ (+(instance.options.crt ?? 0.60)).toFixed(2) }}</span>
     </label>

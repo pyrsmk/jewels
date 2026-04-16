@@ -5,7 +5,6 @@ export class CRTEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      crtEnabled: false,
       crt: 0.60,
       crtScanlines: 0.40,
       crtScanlinesSize: 2.0,
@@ -14,7 +13,7 @@ export class CRTEffect extends EffectInterface {
       crtPhosphore: 0.20,
     };
     super({ ...defaults, ...options },
-      ['crtEnabled', 'crt', 'crtScanlines', 'crtScanlinesSize', 'crtFlicker', 'crtVignette', 'crtPhosphore'],
+      ['crt', 'crtScanlines', 'crtScanlinesSize', 'crtFlicker', 'crtVignette', 'crtPhosphore'],
       ['crtVal', 'crtScanlinesVal', 'crtScanlinesSizeVal', 'crtFlickerVal', 'crtVignetteVal', 'crtPhosphoreVal']
     );
   }
@@ -22,7 +21,7 @@ export class CRTEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_crt, this.options.crtEnabled ? +(this.options.crt ?? 0.60) : 0.0);
+    gl.uniform1f(locs.u_crt, +(this.options.crt ?? 0.60));
     gl.uniform1f(locs.u_crtScanlines, +(this.options.crtScanlines ?? 0.40));
     gl.uniform1f(locs.u_crtScanlinesSize, +(this.options.crtScanlinesSize ?? 2.0));
     gl.uniform1f(locs.u_crtFlicker, +(this.options.crtFlicker ?? 0.25));

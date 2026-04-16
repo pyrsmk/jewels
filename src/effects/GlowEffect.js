@@ -5,13 +5,12 @@ export class GlowEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      glowEnabled: true,
       glow: 1.30,
       glowGrainResponse: 1.0,
       glowMode: 'post',
     };
     super({ ...defaults, ...options },
-      ['glowEnabled', 'glow', 'glowGrainResponse', 'glowMode'],
+      ['glow', 'glowGrainResponse', 'glowMode'],
       ['glowVal', 'glowGrainResponseVal']
     );
   }
@@ -26,7 +25,7 @@ export class GlowEffect extends EffectInterface {
   transform({ gl, locs }) {
     const mode = this.options.glowMode ?? 'post';
     const glowMode = mode === 'post' ? 1 : mode === 'post2' ? 2 : 0;
-    const glowVal = !!this.options.glowEnabled ? +(this.options.glow ?? 1.3) : 0.0;
+    const glowVal = +(this.options.glow ?? 1.3);
     gl.uniform1f(locs.u_glow, glowVal);
     gl.uniform1f(locs.u_glowMode, glowMode);
     gl.uniform1f(locs.u_glowGrainResponse, +(this.options.glowGrainResponse ?? 1.0));

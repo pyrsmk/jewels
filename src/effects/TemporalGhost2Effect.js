@@ -5,7 +5,6 @@ export class TemporalGhost2Effect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      tg2Enabled: false,
       tg2Opacity: 0.50,
       tg2: 0.20,
       tg2RgbShift: 0.80,
@@ -13,7 +12,7 @@ export class TemporalGhost2Effect extends EffectInterface {
       tg2Scale: 1.50,
     };
     super({ ...defaults, ...options },
-      ['tg2Enabled', 'tg2Opacity', 'tg2', 'tg2RgbShift', 'tg2Speed', 'tg2Scale'],
+      ['tg2Opacity', 'tg2', 'tg2RgbShift', 'tg2Speed', 'tg2Scale'],
       ['tg2OpacityVal', 'tg2Val', 'tg2RgbShiftVal', 'tg2SpeedVal', 'tg2ScaleVal']
     );
   }
@@ -21,7 +20,7 @@ export class TemporalGhost2Effect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_tg2, this.options.tg2Enabled ? +(this.options.tg2 ?? 0.20) : 0.0);
+    gl.uniform1f(locs.u_tg2, +(this.options.tg2 ?? 0.20));
     gl.uniform1f(locs.u_tg2Opacity, +(this.options.tg2Opacity ?? 0.50));
     gl.uniform1f(locs.u_tg2RgbShift, +(this.options.tg2RgbShift ?? 0.80));
     gl.uniform1f(locs.u_tg2Speed, +(this.options.tg2Speed ?? 1.20));

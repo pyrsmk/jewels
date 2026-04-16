@@ -1,14 +1,6 @@
 <template>
   <ControlGroup title="Color Shimmer">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.colorShimmerEnabled"
-        @change="instance.options.colorShimmerEnabled = $event.target.checked"
-      />
-    </label>
-    <label>
       Intensité
       <span class="value">{{ (+(instance.options.colorShimmer ?? 0.20)).toFixed(2) }}</span>
     </label>

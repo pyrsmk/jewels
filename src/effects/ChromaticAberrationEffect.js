@@ -5,13 +5,12 @@ export class ChromaticAberrationEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      chromatic: true,
       chromaticMode: 'edges',
       chromaticWidth: 0.55,
       chromaticOffset: 0.75,
     };
     super({ ...defaults, ...options },
-      ['chromatic', 'chromaticMode', 'chromaticWidth', 'chromaticOffset'],
+      ['chromaticMode', 'chromaticWidth', 'chromaticOffset'],
       ['chromaticWidthVal', 'chromaticOffsetVal']
     );
   }
@@ -23,7 +22,6 @@ export class ChromaticAberrationEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_chromatic, !!this.options.chromatic ? 1.0 : 0.0);
     gl.uniform1f(
       locs.u_chromaticMode,
       (this.options.chromaticMode ?? 'edges') === 'edges' ? 1.0 : 0.0
@@ -34,19 +32,9 @@ export class ChromaticAberrationEffect extends EffectInterface {
 
   getPostShaderUniforms() {
     return `
-  uniform float u_chromatic;
   uniform float u_chromaticMode;
   uniform float u_chromaticWidth;
   uniform float u_chromaticOffset;`;
-  }
-
-  getPostShaderGuards() {
-    return `
-    bool hasChrom = (u_chromatic > 0.5);`;
-  }
-
-  getPostShaderGuardSymbol() {
-    return 'hasChrom';
   }
 
   getPostShaderHelpers() {
@@ -78,8 +66,6 @@ export class ChromaticAberrationEffect extends EffectInterface {
 
   getPostShaderPreCode() {
     return `
-    if (hasChrom) {
-      combined = applyChromaticAberration(uv, px);
-    }`;
+    combined = applyChromaticAberration(uv, px);`;
   }
 }

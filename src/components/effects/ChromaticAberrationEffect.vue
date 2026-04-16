@@ -1,14 +1,6 @@
 <template>
   <ControlGroup title="Aberration chromatique">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.chromatic ?? true"
-        @change="instance.options.chromatic = $event.target.checked"
-      />
-    </label>
-    <label>
       Largeur
       <span class="value">{{ (+(instance.options.chromaticWidth ?? 0.55)).toFixed(2) }}</span>
     </label>

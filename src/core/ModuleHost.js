@@ -119,4 +119,24 @@ export class ModuleHost {
       module.resize(contextFactory({}));
     }
   }
+
+  addSource(instance) {
+    this.sources.push(instance);
+  }
+
+  removeSource(instance) {
+    this.sources = this.sources.filter((s) => s !== instance);
+  }
+
+  addEffect(instance) {
+    this.effects.push(instance);
+  }
+
+  removeEffect(instance) {
+    this.effects = this.effects.filter((e) => e !== instance);
+  }
+
+  reorderEffects(newOrder) {
+    this.effects = newOrder;
+  }
 }

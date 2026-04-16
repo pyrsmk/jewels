@@ -5,13 +5,12 @@ export class DreamyGlowEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      dreamyEnabled: true,
       dreamyGlow: 4,
       dreamyGrainResponse: 1.0,
       dreamyEdgeBoost: 3,
     };
     super({ ...defaults, ...options },
-      ['dreamyEnabled', 'dreamyGlow', 'dreamyGrainResponse', 'dreamyEdgeBoost'],
+      ['dreamyGlow', 'dreamyGrainResponse', 'dreamyEdgeBoost'],
       ['dreamyVal', 'dreamyGrainResponseVal', 'dreamyEdgeBoostVal']
     );
   }
@@ -24,7 +23,7 @@ export class DreamyGlowEffect extends EffectInterface {
   }
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_dreamyGlow, this.options.dreamyEnabled ? +(this.options.dreamyGlow ?? 4) : 0.0);
+    gl.uniform1f(locs.u_dreamyGlow, +(this.options.dreamyGlow ?? 4));
     gl.uniform1f(locs.u_dreamyEdgeBoost, +(this.options.dreamyEdgeBoost ?? 3));
     gl.uniform1f(locs.u_dreamyGrainResponse, +(this.options.dreamyGrainResponse ?? 1.0));
   }

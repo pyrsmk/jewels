@@ -5,13 +5,12 @@ export class BlockGlitch3Effect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      bg3Enabled: false,
       bg3: 0.22,
       bg3Speed: 1.50,
       bg3Scale: 2.20,
     };
     super({ ...defaults, ...options },
-      ['bg3Enabled', 'bg3', 'bg3Speed', 'bg3Scale'],
+      ['bg3', 'bg3Speed', 'bg3Scale'],
       ['bg3Val', 'bg3SpeedVal', 'bg3ScaleVal']
     );
   }
@@ -19,7 +18,7 @@ export class BlockGlitch3Effect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_bg3, this.options.bg3Enabled ? +(this.options.bg3 ?? 0.22) : 0.0);
+    gl.uniform1f(locs.u_bg3, +(this.options.bg3 ?? 0.22));
     gl.uniform1f(locs.u_bg3Speed, +(this.options.bg3Speed ?? 1.50));
     gl.uniform1f(locs.u_bg3Scale, +(this.options.bg3Scale ?? 2.20));
   }

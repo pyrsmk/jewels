@@ -1,14 +1,6 @@
 <template>
   <ControlGroup title="Dreamy Glow">
     <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.dreamyEnabled ?? true"
-        @change="instance.options.dreamyEnabled = $event.target.checked"
-      />
-    </label>
-    <label>
       Intensité
       <span class="value">{{ (+(instance.options.dreamyGlow ?? 4)).toFixed(2) }}</span>
     </label>

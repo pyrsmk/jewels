@@ -1,13 +1,5 @@
 <template>
   <ControlGroup title="Couleurs">
-    <label>
-      Activer
-      <input
-        type="checkbox"
-        :checked="instance.options.colorEnabled ?? true"
-        @change="instance.options.colorEnabled = $event.target.checked; onColorChange()"
-      />
-    </label>
     <div id="colors">
       <div v-for="(color, i) in colors" :key="i" class="row">
         <input

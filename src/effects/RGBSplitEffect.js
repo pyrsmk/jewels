@@ -5,13 +5,12 @@ export class RGBSplitEffect extends EffectInterface {
 
   constructor(options = {}) {
     const defaults = {
-      rgbSplitEnabled: false,
       rgbSplit: 0.22,
       rgbSplitSpeed: 2.20,
       rgbSplitScale: 2.00,
     };
     super({ ...defaults, ...options },
-      ['rgbSplitEnabled', 'rgbSplit', 'rgbSplitSpeed', 'rgbSplitScale'],
+      ['rgbSplit', 'rgbSplitSpeed', 'rgbSplitScale'],
       ['rgbSplitVal', 'rgbSplitSpeedVal', 'rgbSplitScaleVal']
     );
   }
@@ -19,7 +18,7 @@ export class RGBSplitEffect extends EffectInterface {
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_rgbSplit, this.options.rgbSplitEnabled ? +(this.options.rgbSplit ?? 0.22) : 0.0);
+    gl.uniform1f(locs.u_rgbSplit, +(this.options.rgbSplit ?? 0.22));
     gl.uniform1f(locs.u_rgbSplitSpeed, +(this.options.rgbSplitSpeed ?? 2.20));
     gl.uniform1f(locs.u_rgbSplitScale, +(this.options.rgbSplitScale ?? 2.00));
   }

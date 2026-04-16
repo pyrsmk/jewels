@@ -1,4 +1,4 @@
-import { reactive, markRaw } from 'vue';
+import { reactive, ref, markRaw } from 'vue';
 import { ModuleHost } from '../core/ModuleHost.js';
 import { PipelineRuntime } from '../core/PipelineRuntime.js';
 import { PostProcessor } from '../core/PostProcessor.js';
@@ -22,29 +22,16 @@ export async function useEngine(canvas) {
 
   const runtimeConfig = { frameHistoryLimit: 5, frameHistoryScale: 0.5 };
 
-  const [sourceClasses, effectClasses] = await Promise.all([
-    Promise.all(sourceRegistry.map((r) => r.classLoader())),
-    Promise.all(effectRegistry.map((r) => r.classLoader())),
-  ]);
-
-  const sources = sourceClasses.map((Cls) => markRaw(Cls.deserialize({})));
-  const effects = effectClasses.map((Cls) => markRaw(Cls.deserialize({})));
-
-  const moduleHost = new ModuleHost({ sources, effects });
+  const sources = ref([]);
+  const effects = ref([]);
+  const moduleHost = new ModuleHost({ sources: sources.value, effects: effects.value });
 
   const pipelineRuntime = new PipelineRuntime(canvas, gl, state, runtimeConfig, moduleHost);
-
-  const colorTintEffect = moduleHost.findEffectByClassName('ColorTintEffect');
   const settingsController = new SettingsController(moduleHost);
   const postProcessor = new PostProcessor({ moduleHost, pipelineRuntime });
-  const particleSource = moduleHost.getSources()[0];
 
-  function setupAllModules() {
-    moduleHost.setupAllModules((extra = {}) => pipelineRuntime.buildPassContext(extra));
-  }
-
-  function resizeAllModules() {
-    moduleHost.resizeAllModules((extra = {}) => pipelineRuntime.buildPassContext(extra));
+  function contextFactory(extra = {}) {
+    return pipelineRuntime.buildPassContext(extra);
   }
 
   function resize() {
@@ -54,8 +41,7 @@ export async function useEngine(canvas) {
     const h = Math.max(2, Math.floor(rect.height * dpr));
     if (w === state.width && h === state.height && dpr === state.dpr) return;
     pipelineRuntime.resizeTargets(w, h, dpr);
-    resizeAllModules();
-    particleSource.reseedParticles();
+    moduleHost.resizeAllModules(contextFactory);
   }
 
   function executeEffectStages(t) {
@@ -75,30 +61,42 @@ export async function useEngine(canvas) {
     executeEffectStages(t);
   }
 
-  function loadSettings() {
-    settingsController.loadFromUrl();
+  async function addSource(className) {
+    const entry = sourceRegistry.find((r) => r.className === className);
+    if (!entry) throw new Error(`Source inconnue : ${className}`);
+    const Cls = await entry.classLoader();
+    const instance = markRaw(Cls.deserialize({}));
+    moduleHost.addSource(instance);
+    sources.value = [...moduleHost.sources];
+    instance.setup(contextFactory({}));
+    instance.resize(contextFactory({}));
+    instance.reseedParticles?.();
+    return instance;
   }
 
-  function persistSettings() {
-    settingsController.persistToUrl();
+  async function addEffect(className) {
+    const entry = effectRegistry.find((r) => r.className === className);
+    if (!entry) throw new Error(`Effet inconnu : ${className}`);
+    const Cls = await entry.classLoader();
+    const instance = markRaw(Cls.deserialize({}));
+    moduleHost.addEffect(instance);
+    effects.value = [...moduleHost.effects];
+    instance.setup(contextFactory({}));
+    instance.resize(contextFactory({}));
+    return instance;
   }
 
-  function bindPersistence() {
-    const persist = () => {
-      const t = performance.now() * 0.001;
-      moduleHost.getEffects().forEach((e) => e.onSettingsChanged(t));
-      persistSettings();
-    };
-    settingsController.bindPersistence(persist);
+  function removeEffect(instance) {
+    moduleHost.removeEffect(instance);
+    effects.value = [...moduleHost.effects];
   }
 
-  setupAllModules();
+  function reorderEffects(newOrder) {
+    moduleHost.reorderEffects(newOrder);
+    effects.value = [...moduleHost.effects];
+  }
+
   resize();
-  colorTintEffect?.rebuildAccentCache();
-
-  loadSettings();
-  bindPersistence();
-  persistSettings();
 
   const frameLoopController = new FrameLoopController({
     moduleHost,
@@ -110,16 +108,18 @@ export async function useEngine(canvas) {
   return {
     gl,
     state,
+    sources,
+    effects,
     moduleHost,
     pipelineRuntime,
-    colorTintEffect,
-    particleSource,
     frameLoopController,
     settingsController,
     resize,
     sourceRegistry,
     effectRegistry,
-    sources,
-    effects,
+    addSource,
+    addEffect,
+    removeEffect,
+    reorderEffects,
   };
 }
