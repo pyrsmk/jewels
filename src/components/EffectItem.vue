@@ -2,13 +2,15 @@
   <div
     class="effect-item"
     :class="{ 'effect-item--expanded': expanded, 'effect-item--draggable': draggable }"
-    :draggable="draggable"
-    @dragstart="$emit('dragstart', $event)"
-    @dragend="$emit('dragend', $event)"
-    @dragover.prevent="$emit('dragover', $event)"
   >
     <div class="effect-item__header" @click="$emit('toggle')">
-      <span v-if="draggable" class="material-icons effect-item__handle">drag_indicator</span>
+      <span
+        class="material-icons effect-item__handle"
+        :draggable="draggable"
+        @dragstart.stop="draggable && $emit('dragstart', $event)"
+        @dragend.stop="$emit('dragend', $event)"
+        @click.stop="$emit('collapse')"
+      >drag_indicator</span>
       <span class="effect-item__badge">EFFET</span>
       <span class="effect-item__label">{{ label }}</span>
       <span class="material-icons effect-item__chevron">
@@ -16,8 +18,10 @@
       </span>
       <span class="material-icons effect-item__delete" @click.stop="$emit('delete')">delete</span>
     </div>
-    <div v-if="expanded" class="effect-item__body">
-      <slot />
+    <div class="effect-item__body" :class="{ 'effect-item__body--expanded': expanded }">
+      <div class="effect-item__body-inner">
+        <slot />
+      </div>
     </div>
   </div>
 </template>
@@ -29,7 +33,7 @@ defineProps({
   expanded: { type: Boolean, default: false },
   draggable: { type: Boolean, default: false },
 });
-defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'dragover']);
+defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'collapse']);
 </script>
 
 <style scoped>
@@ -39,8 +43,6 @@ defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'dragover']);
   overflow: hidden;
   margin-bottom: 6px;
 }
-.effect-item--draggable { cursor: grab; }
-.effect-item--draggable:active { cursor: grabbing; }
 .effect-item__header {
   display: flex;
   align-items: center;
@@ -51,7 +53,13 @@ defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'dragover']);
   background: rgba(255,255,255,.03);
 }
 .effect-item__header:hover { background: rgba(255,255,255,.06); }
-.effect-item__handle { font-size: 16px; color: #8f9bb3; cursor: grab; }
+.effect-item__handle {
+  font-size: 16px;
+  color: #8f9bb3;
+  cursor: grab;
+  flex-shrink: 0;
+}
+.effect-item__handle:active { cursor: grabbing; }
 .effect-item__badge {
   font-size: 9px;
   font-weight: 700;
@@ -72,5 +80,20 @@ defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'dragover']);
   padding: 2px;
 }
 .effect-item__delete:hover { color: #ff6b6b; }
-.effect-item__body { padding: 10px; }
+.effect-item__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+.effect-item__body--expanded {
+  grid-template-rows: 1fr;
+}
+.effect-item__body-inner {
+  overflow: hidden;
+  padding: 0 10px;
+  transition: padding 0.35s ease;
+}
+.effect-item__body--expanded .effect-item__body-inner {
+  padding: 10px;
+}
 </style>

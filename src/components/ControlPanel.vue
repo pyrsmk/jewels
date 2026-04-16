@@ -11,26 +11,24 @@
     >
       <component :is="entry.component" :instance="entry.instance" />
     </SourceItem>
-    <div
-      class="effects-list"
-      @drop.prevent="onDrop"
-      @dragover.prevent
-    >
-      <EffectItem
-        v-for="(entry, i) in effectEntries"
-        :key="'effect-' + i"
-        :instance="entry.instance"
-        :label="entry.label"
-        :expanded="expandedId === 'effect-' + i"
-        :draggable="expandedId === null"
-        @toggle="toggleExpanded('effect-' + i)"
-        @delete="$emit('delete-effect', entry.instance)"
-        @dragstart="onDragStart(i)"
-        @dragend="onDragEnd"
-        @dragover="onDragOver(i)"
-      >
-        <component :is="entry.component" :instance="entry.instance" />
-      </EffectItem>
+    <div class="effects-list" @dragover.prevent="onDragOverList" @drop.prevent="onDrop" @dragleave="onDragLeaveList">
+      <template v-for="(entry, i) in effectEntries" :key="'effect-' + i">
+        <div v-if="dropLineIndex === i" class="drop-line" />
+        <EffectItem
+          :instance="entry.instance"
+          :label="entry.label"
+          :expanded="expandedId === 'effect-' + i"
+          :draggable="true"
+          @toggle="toggleExpanded('effect-' + i)"
+          @delete="$emit('delete-effect', entry.instance)"
+          @collapse="expandedId = null"
+          @dragstart="onDragStart(i, $event)"
+          @dragend="onDragEnd"
+        >
+          <component :is="entry.component" :instance="entry.instance" />
+        </EffectItem>
+      </template>
+      <div v-if="dropLineIndex === effectEntries.length" class="drop-line" />
     </div>
   </div>
 </template>
@@ -50,7 +48,7 @@ const emit = defineEmits(['settings-change', 'reorder-effects', 'delete-source',
 
 const expandedId = ref(null);
 const dragIndex = ref(null);
-const dragOverIndex = ref(null);
+const dropLineIndex = ref(null);
 
 watch(
   () => [...props.sources.map((s) => s.options), ...props.effects.map((e) => e.options)],
@@ -80,28 +78,58 @@ const effectEntries = computed(() =>
     .filter(Boolean)
 );
 
-function onDragStart(index) {
+function onDragStart(index, event) {
   dragIndex.value = index;
-}
-
-function onDragOver(index) {
-  dragOverIndex.value = index;
+  event.dataTransfer.effectAllowed = 'move';
 }
 
 function onDragEnd() {
   dragIndex.value = null;
-  dragOverIndex.value = null;
+  dropLineIndex.value = null;
+}
+
+function onDragOverList(event) {
+  if (dragIndex.value === null) return;
+  const list = event.currentTarget;
+  const items = [...list.querySelectorAll('.effect-item')];
+  if (items.length === 0) {
+    dropLineIndex.value = 0;
+    return;
+  }
+  let index = items.length;
+  for (let i = 0; i < items.length; i++) {
+    const rect = items[i].getBoundingClientRect();
+    const mid = rect.top + rect.height / 2;
+    if (event.clientY < mid) {
+      index = i;
+      break;
+    }
+  }
+  dropLineIndex.value = index;
+}
+
+function onDragLeaveList(event) {
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    dropLineIndex.value = null;
+  }
 }
 
 function onDrop() {
-  if (dragIndex.value === null || dragOverIndex.value === null) return;
-  if (dragIndex.value === dragOverIndex.value) return;
+  if (dragIndex.value === null || dropLineIndex.value === null) return;
+  const from = dragIndex.value;
+  let to = dropLineIndex.value;
+  if (to === from || to === from + 1) {
+    dragIndex.value = null;
+    dropLineIndex.value = null;
+    return;
+  }
   const newOrder = [...props.effects];
-  const [moved] = newOrder.splice(dragIndex.value, 1);
-  newOrder.splice(dragOverIndex.value, 0, moved);
+  const [moved] = newOrder.splice(from, 1);
+  const insertAt = to > from ? to - 1 : to;
+  newOrder.splice(insertAt, 0, moved);
   emit('reorder-effects', newOrder);
   dragIndex.value = null;
-  dragOverIndex.value = null;
+  dropLineIndex.value = null;
 }
 </script>
 
@@ -112,5 +140,13 @@ function onDrop() {
   padding: 12px;
   background: linear-gradient(180deg, rgba(18, 18, 24, 0.95), rgba(10, 10, 14, 0.95));
 }
-.effects-list { display: flex; flex-direction: column; }
+.effects-list { display: flex; flex-direction: column; gap: 6px; }
+.effects-list :deep(.effect-item) { margin-bottom: 0; }
+.drop-line {
+  height: 1px;
+  background: #fff;
+  border-radius: 1px;
+  margin: 0;
+  flex-shrink: 0;
+}
 </style>

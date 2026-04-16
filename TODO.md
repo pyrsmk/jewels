@@ -1,9 +1,15 @@
-- corriger le drag n drop
+- quand un effet est déjà ajouté, on ne peut pas l'ajouter une seconde fois, donc il faut le griser dans la liste
+- quand on ouvre un effet/source, ça ferme l'autre qui est ouvert
 - corriger le chargement des settings (et vérifier l'enregistrement aussi)
 - remplacer les icônes sur tous les boutons
+
+- lens flare : taille min/max à corriger/renommer
+- aberration chromatique : renommer "particules" en "source", mode en haut, désactiver largeur quand on est en mode source
 - bruit chromatique, mode d'application : source (par défaut), fond, les deux
 - revoir les valeurs par défaut pour chaque effet
+
 - amélioration UI
+
 - nouvelles sources :
   - fluides (un peu comme de la peinture sur de l'eau)
   - bandes horizontales/verticales

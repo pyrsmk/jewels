@@ -8,8 +8,10 @@
       </span>
       <span class="material-icons source-item__delete" @click.stop="$emit('delete')">delete</span>
     </div>
-    <div v-if="expanded" class="source-item__body">
-      <slot />
+    <div class="source-item__body" :class="{ 'source-item__body--expanded': expanded }">
+      <div class="source-item__body-inner">
+        <slot />
+      </div>
     </div>
   </div>
 </template>
@@ -57,6 +59,22 @@ defineEmits(['toggle', 'delete']);
   color: #ddd;
 }
 .source-item__chevron { font-size: 16px; color: #8f9bb3; }
+.source-item__body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+.source-item__body--expanded {
+  grid-template-rows: 1fr;
+}
+.source-item__body-inner {
+  overflow: hidden;
+  padding: 0 10px;
+  transition: padding 0.35s ease;
+}
+.source-item__body--expanded .source-item__body-inner {
+  padding: 10px;
+}
 .source-item__delete {
   font-size: 16px;
   color: #8f9bb3;
@@ -65,5 +83,5 @@ defineEmits(['toggle', 'delete']);
   padding: 2px;
 }
 .source-item__delete:hover { color: #ff6b6b; }
-.source-item__body { padding: 10px; }
+.source-item__body--expanded > * { padding: 10px; }
 </style>
