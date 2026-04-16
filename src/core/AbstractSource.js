@@ -33,6 +33,7 @@ export class AbstractSource extends AbstractModule {
       time,
       gl,
       locs: this.locs,
+      dpr: state.dpr,
     };
     this.renderSource(renderContext);
 

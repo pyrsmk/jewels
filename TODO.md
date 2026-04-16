@@ -1,3 +1,8 @@
+- vérifier le calcul du FPS
+- corriger le chargement des settings (et vérifier l'enregistrement aussi)
+- corriger le drag n drop
+- remplacer les icônes sur tous les boutons
+- revoir les valeurs par défaut pour chaque effet
 - amélioration UI
 - nouvelles sources :
   - fluides (un peu comme de la peinture sur de l'eau)
