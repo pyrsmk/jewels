@@ -9,7 +9,9 @@
         @dragend.stop="$emit('dragend', $event)"
         @mousedown.stop="$emit('collapse')"
       >drag_indicator</span>
-      <span class="objet-item__badge">OBJET</span>
+      <span class="objet-item__badge" :class="instance.constructor.name === 'BackgroundSource' ? 'objet-item__badge--root' : ''">
+        {{ instance.constructor.name === 'BackgroundSource' ? 'RACINE' : 'OBJET' }}
+      </span>
       <span class="objet-item__label">{{ label }}</span>
       <span class="material-symbols-outlined objet-item__chevron">
         {{ expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
@@ -65,6 +67,10 @@ defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'collapse']);
   border-radius: 4px;
   padding: 2px 5px;
   flex-shrink: 0;
+}
+.objet-item__badge--root {
+  color: #ff6b6b;
+  background: rgba(255, 80, 80, 0.18);
 }
 .objet-item__label {
   flex: 1;
