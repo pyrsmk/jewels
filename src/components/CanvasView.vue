@@ -1,23 +1,14 @@
 <template>
   <div ref="wrapRef" class="canvas-wrap">
     <canvas ref="canvasRef"></canvas>
-    <div class="canvas-overlay">
-      <div v-if="!hasSource" class="canvas-add-source">
-        <Button icon="ev_shadow_add" label="Ajouter une source" size="xxl" @click="$emit('openAddSource')" />
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useEngine } from '../composables/useEngine.js';
-import Button from './Button.vue';
 
-const props = defineProps({
-  hasSource: { type: Boolean, default: false },
-});
-const emit = defineEmits(['engineReady', 'fpsUpdate', 'fullscreenChange', 'openAddSource']);
+const emit = defineEmits(['engineReady', 'fpsUpdate', 'fullscreenChange']);
 
 const wrapRef = ref(null);
 const canvasRef = ref(null);
@@ -79,18 +70,4 @@ defineExpose({ toggleFullscreen });
   height: 100%;
 }
 canvas { width: 100%; height: 100%; display: block; }
-.canvas-overlay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.canvas-add-source {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-.canvas-add-source > * { pointer-events: auto; }
 </style>

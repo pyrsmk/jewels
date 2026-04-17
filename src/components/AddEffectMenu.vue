@@ -10,7 +10,6 @@
         :label="entry.label"
         icon="texture"
         size="xl"
-        :disabled="activeClassNames.includes(entry.className)"
         @click="$emit('add', entry.className)"
       />
     </div>
@@ -24,7 +23,6 @@ import Button from './Button.vue';
 
 const props = defineProps({
   effectRegistry: { type: Array, required: true },
-  activeClassNames: { type: Array, default: () => [] },
 });
 defineEmits(['add', 'close']);
 

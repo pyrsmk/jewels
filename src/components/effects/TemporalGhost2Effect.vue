@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup>
+  <div>
     <label>Intensité <span class="value">{{ (+(instance.options.tg2Opacity ?? 1.00)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="1" step="0.01"
@@ -30,11 +30,11 @@
       :value="instance.options.tg2Scale ?? 1.50"
       @input="instance.options.tg2Scale = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

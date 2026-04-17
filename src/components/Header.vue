@@ -2,18 +2,21 @@
   <div class="header">
     <h1 class="title">Jewels <span class="version">v{{ version }}</span></h1>
     <div class="spacer"></div>
-    <div v-if="hasSource" class="fps">{{ fps }} FPS</div>
+    <div v-if="fps > 0" class="fps">{{ fps }} FPS</div>
     <div class="spacer"></div>
+    <Button
+      icon="ev_shadow_add"
+      tooltip="Ajouter une source"
+      @click="$emit('openAddSource')"
+    />
     <Button
       icon="texture_add"
       tooltip="Ajouter un effet"
-      :disabled="!hasSource"
       @click="$emit('openAddEffect')"
     />
     <Button
       :icon="isFullscreen ? 'fullscreen_exit' : 'fullscreen'"
       :tooltip="isFullscreen ? 'Quitter le plein écran' : 'Plein écran'"
-      :disabled="!hasSource"
       @click="$emit('toggleFullscreen')"
     />
   </div>
@@ -25,9 +28,8 @@ import Button from './Button.vue';
 defineProps({
   fps: { type: Number, default: 0 },
   isFullscreen: { type: Boolean, default: false },
-  hasSource: { type: Boolean, default: false },
 });
-defineEmits(['toggleFullscreen', 'openAddEffect']);
+defineEmits(['toggleFullscreen', 'openAddEffect', 'openAddSource']);
 
 const version = __APP_VERSION__;
 </script>

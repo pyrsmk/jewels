@@ -28,29 +28,40 @@ export class PostProcessor {
 
   render(t) {
     const { pipelineRuntime, moduleHost } = this;
-    const effects = moduleHost.getEffects();
+    const groups = moduleHost.getSourceGroups();
     const gl = pipelineRuntime.gl;
     const prevTexture = pipelineRuntime.getPreviousFrameTexture(pipelineRuntime.getSceneTarget().tex);
-    let inputTex = pipelineRuntime.getSceneTarget().tex;
-    let lastOut = null;
 
-    for (const effect of effects) {
-      const effectStack = new EffectStack(effects, effect);
-      const { program, locs } = this._getOrBuildProgram(effect, effectStack);
-      const out = pipelineRuntime.getNextPostTarget();
-      pipelineRuntime.bindEffectPass(program, locs, inputTex, out.fbo, prevTexture, t);
-      effect.transform({ gl, locs, time: t, effectStack });
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      inputTex = out.tex;
-      lastOut = out;
+    let isFirst = true;
+
+    for (const group of groups) {
+      group.source.renderScenePass(pipelineRuntime.buildPassContext({
+        time: t,
+        effects: group.effects,
+      }));
+
+      pipelineRuntime.resetPostChain();
+      let inputTex = pipelineRuntime.getSceneTarget().tex;
+      let lastOut = null;
+
+      for (const effect of group.effects) {
+        const effectStack = new EffectStack(group.effects, effect);
+        const { program, locs } = this._getOrBuildProgram(effect, effectStack);
+        const out = pipelineRuntime.getNextPostTarget();
+        pipelineRuntime.bindEffectPass(program, locs, inputTex, out.fbo, prevTexture, t);
+        effect.transform({ gl, locs, time: t, effectStack });
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        inputTex = out.tex;
+        lastOut = out;
+      }
+
+      const groupResultTex = lastOut ? lastOut.tex : inputTex;
+      pipelineRuntime.compositeOntoAccumulator(groupResultTex, isFirst);
+      isFirst = false;
     }
 
-    if (lastOut) {
-      pipelineRuntime.blitToScreen(lastOut.tex);
-      pipelineRuntime.pushFrameHistory(lastOut.tex);
-    } else {
-      pipelineRuntime.blitToScreen(inputTex);
-      pipelineRuntime.pushFrameHistory(inputTex);
-    }
+    const accumTex = pipelineRuntime.getAccumulator().tex;
+    pipelineRuntime.blitToScreen(accumTex);
+    pipelineRuntime.pushFrameHistory(accumTex);
   }
 }

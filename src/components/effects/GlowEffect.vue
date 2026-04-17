@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Glow">
+  <div>
     <label>Intensité <span class="value">{{ glowDisplay }}</span></label>
     <input
       type="range" min="0" max="2.5" step="0.01"
@@ -24,12 +24,12 @@
       <option value="post">Post-process</option>
       <option value="post2">Post-process v2</option>
     </select>
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import ControlGroup from '../ControlGroup.vue';
+
 
 const props = defineProps({ instance: { type: Object, required: true } });
 

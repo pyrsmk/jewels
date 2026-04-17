@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="RGB Split">
+  <div>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.rgbSplit ?? 1.80)).toFixed(2) }}</span>
@@ -27,11 +27,11 @@
       :value="instance.options.rgbSplitScale ?? 2.00"
       @input="instance.options.rgbSplitScale = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

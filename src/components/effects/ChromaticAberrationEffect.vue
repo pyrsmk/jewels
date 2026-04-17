@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Aberration chromatique">
+  <div>
     <label>Mode</label>
     <select
       :value="instance.options.chromaticMode ?? 'edges'"
@@ -27,11 +27,11 @@
       :value="instance.options.chromaticOffset ?? 0.75"
       @input="instance.options.chromaticOffset = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

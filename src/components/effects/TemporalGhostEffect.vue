@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup>
+  <div>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.temporalGhostOpacity ?? 0.70)).toFixed(2) }}</span>
@@ -37,11 +37,11 @@
       :value="instance.options.temporalGhostScale ?? 1.50"
       @input="instance.options.temporalGhostScale = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

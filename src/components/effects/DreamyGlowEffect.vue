@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Dreamy Glow">
+  <div>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.dreamyGlow ?? 4)).toFixed(2) }}</span>
@@ -27,11 +27,11 @@
       :value="instance.options.dreamyEdgeBoost ?? 3"
       @input="instance.options.dreamyEdgeBoost = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

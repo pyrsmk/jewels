@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Block Glitch">
+  <div>
     <label>Intensité <span class="value">{{ (+(instance.options.blockGlitch ?? 1.39)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="1.39" step="0.01"
@@ -18,12 +18,12 @@
       :value="instance.options.blockGlitchScale ?? 1.50"
       @input="instance.options.blockGlitchScale = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
 import { computed } from 'vue';
-import ControlGroup from '../ControlGroup.vue';
+
 
 const props = defineProps({ instance: { type: Object, required: true } });
 

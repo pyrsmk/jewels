@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup>
+  <div>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.hGlitch ?? 1.00)).toFixed(2) }}</span>
@@ -28,11 +28,11 @@
       @input="instance.options.hGlitchScale = +$event.target.value"
     />
 
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

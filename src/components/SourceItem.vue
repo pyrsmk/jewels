@@ -1,12 +1,24 @@
 <template>
   <div class="source-item" :class="{ 'source-item--expanded': expanded }">
     <div class="source-item__header" @click="$emit('toggle')">
+      <span
+        v-if="isDraggable"
+        class="material-symbols-outlined source-item__handle"
+        :draggable="true"
+        @dragstart.stop="$emit('dragstart', $event)"
+        @dragend.stop="$emit('dragend', $event)"
+        @mousedown.stop="$emit('collapse')"
+      >drag_indicator</span>
       <span class="source-item__badge">SOURCE</span>
       <span class="source-item__label">{{ label }}</span>
       <span class="material-symbols-outlined source-item__chevron">
         {{ expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
       </span>
-      <span class="material-symbols-outlined source-item__delete" @click.stop="$emit('delete')">delete</span>
+      <span
+        v-if="isDeletable"
+        class="material-symbols-outlined source-item__delete"
+        @click.stop="$emit('delete')"
+      >delete</span>
     </div>
     <div class="source-item__body" :class="{ 'source-item__body--expanded': expanded }">
       <div class="source-item__body-inner">
@@ -21,8 +33,10 @@ defineProps({
   instance: { type: Object, required: true },
   label: { type: String, required: true },
   expanded: { type: Boolean, default: false },
+  isDeletable: { type: Boolean, default: true },
+  isDraggable: { type: Boolean, default: false },
 });
-defineEmits(['toggle', 'delete']);
+defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'collapse']);
 </script>
 
 <style scoped>
@@ -58,6 +72,13 @@ defineEmits(['toggle', 'delete']);
   font-weight: 600;
   color: #ddd;
 }
+.source-item__handle {
+  font-size: 16px;
+  color: #8f9bb3;
+  cursor: grab;
+  flex-shrink: 0;
+}
+.source-item__handle:active { cursor: grabbing; }
 .source-item__chevron { font-size: 16px; color: #8f9bb3; }
 .source-item__body {
   display: grid;

@@ -17,14 +17,13 @@ export async function useEngine(canvas) {
 
   const state = reactive({
     width: 0, height: 0, dpr: 1,
-    sceneA: null, sceneB: null, sceneTex: null, frameHistory: [],
+    sceneA: null, sceneB: null, sceneTex: null, accumulator: null, frameHistory: [],
   });
 
   const runtimeConfig = { frameHistoryLimit: 5, frameHistoryScale: 0.5 };
 
-  const sources = ref([]);
-  const effects = ref([]);
-  const moduleHost = new ModuleHost({ sources: sources.value, effects: effects.value });
+  const items = ref([]);
+  const moduleHost = new ModuleHost();
 
   const pipelineRuntime = new PipelineRuntime(canvas, gl, state, runtimeConfig, moduleHost);
   const settingsController = new SettingsController(moduleHost);
@@ -53,12 +52,55 @@ export async function useEngine(canvas) {
   }
 
   function renderFrame(t) {
-    moduleHost.renderSources((extra = {}) => pipelineRuntime.buildPassContext({
-      time: t,
-      effects: moduleHost.getEffects(),
-      ...extra,
-    }));
     executeEffectStages(t);
+  }
+
+  async function addSource(className) {
+    const entry = sourceRegistry.find((r) => r.className === className);
+    if (!entry) throw new Error(`Source inconnue : ${className}`);
+    if (className === 'BackgroundSource' && moduleHost.sources.some((s) => s.constructor.name === 'BackgroundSource')) return;
+    entry.componentLoader?.();
+    const Cls = await entry.classLoader();
+    const instance = markRaw(Cls.deserialize({}));
+    moduleHost.addSource(instance);
+    items.value = [...moduleHost.items];
+    instance.setup(contextFactory({}));
+    instance.resize(contextFactory({}));
+    instance.reseedParticles?.();
+    return instance;
+  }
+
+  async function addEffect(className, position) {
+    const entry = effectRegistry.find((r) => r.className === className);
+    if (!entry) throw new Error(`Effet inconnu : ${className}`);
+    entry.componentLoader?.();
+    const Cls = await entry.classLoader();
+    const instance = markRaw(Cls.deserialize({}));
+    moduleHost.addEffect(instance, position ?? moduleHost.items.length);
+    items.value = [...moduleHost.items];
+    postProcessor.invalidateCache();
+    instance.setup(contextFactory({}));
+    instance.resize(contextFactory({}));
+    return instance;
+  }
+
+  function removeSource(instance) {
+    if (instance.constructor.name === 'BackgroundSource') return;
+    moduleHost.removeSource(instance);
+    items.value = [...moduleHost.items];
+    pipelineRuntime.clearScene();
+  }
+
+  function removeEffect(instance) {
+    moduleHost.removeEffect(instance);
+    items.value = [...moduleHost.items];
+    postProcessor.invalidateCache();
+  }
+
+  function reorderItems(newItems) {
+    moduleHost.reorderItems(newItems);
+    items.value = [...moduleHost.items];
+    postProcessor.invalidateCache();
   }
 
   async function restoreFromUrl() {
@@ -70,73 +112,36 @@ export async function useEngine(canvas) {
       const settings = JSON.parse(decoded);
       if (!settings || typeof settings !== 'object') return;
 
-      for (const reg of sourceRegistry) {
-        if (!settings[reg.className]) continue;
-        await addSource(reg.className);
-      }
-
-      for (const reg of effectRegistry) {
-        if (!settings[reg.className]) continue;
-        await addEffect(reg.className);
+      if (settings.v === 2 && Array.isArray(settings.items)) {
+        for (const itemData of settings.items) {
+          if (itemData.type === 'source' && itemData.className === 'BackgroundSource') continue;
+          if (itemData.type === 'source') {
+            await addSource(itemData.className);
+          } else if (itemData.type === 'effect') {
+            await addEffect(itemData.className);
+          }
+        }
+      } else {
+        for (const reg of sourceRegistry) {
+          if (reg.className === 'BackgroundSource') continue;
+          if (!settings[reg.className]) continue;
+          await addSource(reg.className);
+        }
+        for (const reg of effectRegistry) {
+          if (!settings[reg.className]) continue;
+          await addEffect(reg.className);
+        }
       }
 
       moduleHost.applySettings(settings);
-      sources.value = [...moduleHost.sources];
-      effects.value = [...moduleHost.effects];
+      items.value = [...moduleHost.items];
     } catch (err) {
       console.warn(`Impossible de restaurer les paramètres depuis l'URL :`, err);
     }
   }
 
-  async function addSource(className) {
-    const entry = sourceRegistry.find((r) => r.className === className);
-    if (!entry) throw new Error(`Source inconnue : ${className}`);
-    if (moduleHost.sources.some((s) => s.constructor.name === className)) return;
-    entry.componentLoader?.();
-    const Cls = await entry.classLoader();
-    const instance = markRaw(Cls.deserialize({}));
-    moduleHost.addSource(instance);
-    sources.value = [...moduleHost.sources];
-    instance.setup(contextFactory({}));
-    instance.resize(contextFactory({}));
-    instance.reseedParticles?.();
-    return instance;
-  }
-
-  async function addEffect(className) {
-    const entry = effectRegistry.find((r) => r.className === className);
-    if (!entry) throw new Error(`Effet inconnu : ${className}`);
-    if (moduleHost.effects.some((e) => e.constructor.name === className)) return;
-    entry.componentLoader?.();
-    const Cls = await entry.classLoader();
-    const instance = markRaw(Cls.deserialize({}));
-    moduleHost.addEffect(instance);
-    effects.value = [...moduleHost.effects];
-    postProcessor.invalidateCache();
-    instance.setup(contextFactory({}));
-    instance.resize(contextFactory({}));
-    return instance;
-  }
-
-  function removeSource(instance) {
-    moduleHost.removeSource(instance);
-    sources.value = [...moduleHost.sources];
-    pipelineRuntime.clearScene();
-  }
-
-  function removeEffect(instance) {
-    moduleHost.removeEffect(instance);
-    effects.value = [...moduleHost.effects];
-    postProcessor.invalidateCache();
-  }
-
-  function reorderEffects(newOrder) {
-    moduleHost.reorderEffects(newOrder);
-    effects.value = [...moduleHost.effects];
-    postProcessor.invalidateCache();
-  }
-
   resize();
+  await addSource('BackgroundSource');
   await restoreFromUrl();
 
   const frameLoopController = new FrameLoopController({
@@ -149,8 +154,7 @@ export async function useEngine(canvas) {
   return {
     gl,
     state,
-    sources,
-    effects,
+    items,
     moduleHost,
     pipelineRuntime,
     frameLoopController,
@@ -162,6 +166,6 @@ export async function useEngine(canvas) {
     removeSource,
     addEffect,
     removeEffect,
-    reorderEffects,
+    reorderItems,
   };
 }

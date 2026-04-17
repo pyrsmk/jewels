@@ -1,14 +1,5 @@
 <template>
-  <ControlGroup title="Color Shimmer">
-    <label>Mode</label>
-    <select
-      :value="instance.options.colorTint2Mode ?? 'source'"
-      @change="instance.options.colorTint2Mode = $event.target.value"
-    >
-      <option value="source">Source</option>
-      <option value="background">Fond</option>
-      <option value="both">Les deux</option>
-    </select>
+  <div>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.colorTint2 ?? 3.00)).toFixed(2) }}</span>
@@ -53,11 +44,11 @@
       <option value="ice">Glace</option>
       <option value="midnight">Minuit</option>
     </select>
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

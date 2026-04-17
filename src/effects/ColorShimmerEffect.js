@@ -8,10 +8,9 @@ export class ColorShimmerEffect extends EffectInterface {
       colorTint2: 3.0,
       colorTint2Speed: 0.60,
       colorTint2Scale: 1.10,
-      colorTint2Mode: 'source',
     };
     super({ ...defaults, ...options },
-      ['colorTint2Palette', 'colorTint2', 'colorTint2Speed', 'colorTint2Scale', 'colorTint2Mode'],
+      ['colorTint2Palette', 'colorTint2', 'colorTint2Speed', 'colorTint2Scale'],
       ['colorTint2Val', 'colorTint2SpeedVal', 'colorTint2ScaleVal']
     );
   }
@@ -25,12 +24,10 @@ export class ColorShimmerEffect extends EffectInterface {
     };
     const paletteIndex = paletteMap[this.options.colorTint2Palette ?? 'all'] ?? 0.0;
 
-    const modeMap = { source: 0.0, background: 1.0, both: 2.0 };
     gl.uniform1f(locs.u_colorTint2, +(this.options.colorTint2 ?? 3.0));
     gl.uniform1f(locs.u_colorTint2Palette, paletteIndex);
     gl.uniform1f(locs.u_colorTint2Speed, +(this.options.colorTint2Speed ?? 0.60));
     gl.uniform1f(locs.u_colorTint2Scale, +(this.options.colorTint2Scale ?? 1.10));
-    gl.uniform1f(locs.u_colorTint2Mode, modeMap[this.options.colorTint2Mode ?? 'source'] ?? 0.0);
   }
 
   getPostShaderUniforms() {
@@ -38,8 +35,7 @@ export class ColorShimmerEffect extends EffectInterface {
   uniform float u_colorTint2;
   uniform float u_colorTint2Palette;
   uniform float u_colorTint2Speed;
-  uniform float u_colorTint2Scale;
-  uniform float u_colorTint2Mode;`;
+  uniform float u_colorTint2Scale;`;
   }
 
   getPostShaderGuards() {
@@ -70,16 +66,7 @@ export class ColorShimmerEffect extends EffectInterface {
     if (u_colorTint2Palette < 0.5) {
       vec3 centered = vec3(n1, n2, n3) * 2.0 - 1.0;
       vec3 outCol = centered * vec3(1.25, 0.85, 1.45);
-      float lum = dot(sampleScene(uv), vec3(0.2126, 0.7152, 0.0722));
-      float lumaMask;
-      if (u_colorTint2Mode < 0.5) {
-        lumaMask = smoothstep(0.0, 0.4, lum);
-      } else if (u_colorTint2Mode < 1.5) {
-        lumaMask = smoothstep(0.4, 0.0, lum);
-      } else {
-        lumaMask = 1.0;
-      }
-      return outCol * (0.24 * u_colorTint2) * lumaMask;
+      return outCol * (0.24 * u_colorTint2);
     } else if (u_colorTint2Palette < 1.5) {
       c1 = vec3(1.40, 0.18, 0.08); c2 = vec3(1.34, 0.52, 0.06); c3 = vec3(1.08, 0.84, 0.14);
       amp = 2.60;
@@ -116,16 +103,7 @@ export class ColorShimmerEffect extends EffectInterface {
     float s3 = (n3 - 0.5) * 2.0;
     vec3 paletteSignal = max(c1 * s1 + c2 * s2 + c3 * s3, 0.0);
     float pulse = 0.78 + 0.22 * sin((uv.x + uv.y) * (5.0 + scale * 1.4) + t * 1.6);
-    float lum = dot(sampleScene(uv), vec3(0.2126, 0.7152, 0.0722));
-    float lumaMask;
-    if (u_colorTint2Mode < 0.5) {
-      lumaMask = smoothstep(0.0, 0.4, lum);
-    } else if (u_colorTint2Mode < 1.5) {
-      lumaMask = smoothstep(0.4, 0.0, lum);
-    } else {
-      lumaMask = 1.0;
-    }
-    return paletteSignal * amp * (0.24 * u_colorTint2) * pulse * lumaMask;
+    return paletteSignal * amp * (0.24 * u_colorTint2) * pulse;
   }`;
   }
 

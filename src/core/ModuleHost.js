@@ -1,23 +1,40 @@
 export class ModuleHost {
-  constructor({ sources = [], effects = [] } = {}) {
-    this.sources = sources;
-    this.effects = effects;
+  constructor() {
+    this.items = [];
+  }
+
+  get sources() {
+    return this.items.filter((i) => i.type === 'source').map((i) => i.instance);
+  }
+
+  get effects() {
+    return this.items.filter((i) => i.type === 'effect').map((i) => i.instance);
   }
 
   getAllModules() {
-    return [...this.sources, ...this.effects];
+    return this.items.map((i) => i.instance);
   }
 
   getEffects() {
-    return [...this.effects];
+    return this.effects;
   }
 
   getSources() {
-    return [...this.sources];
+    return this.sources;
   }
 
-  findEffectByClassName(className) {
-    return this.effects.find((effect) => effect.constructor.name === className) || null;
+  getSourceGroups() {
+    const groups = [];
+    let current = null;
+    for (const item of this.items) {
+      if (item.type === 'source') {
+        current = { source: item.instance, effects: [] };
+        groups.push(current);
+      } else if (item.type === 'effect' && current) {
+        current.effects.push(item.instance);
+      }
+    }
+    return groups;
   }
 
   findControl(id) {
@@ -36,17 +53,34 @@ export class ModuleHost {
     return null;
   }
 
-  buildAllUI(groupFinder) {
-    const mappings = [
-      ...this.sources.map((s) => [s,s.constructor.name]),
-      ...this.effects.map((e) => [e,e.constructor.name]),
-    ];
+  captureSettings() {
+    return {
+      v: 2,
+      items: this.items.map((item) => ({
+        type: item.type,
+        className: item.instance.constructor.name,
+        params: item.instance.getParameters(),
+      })),
+    };
+  }
 
-    for (const [module, title] of mappings) {
-      if (!module) continue;
-      const node = groupFinder(title);
-      if (!node) continue;
-      module.buildUI(node);
+  applySettings(settings) {
+    if (!settings || typeof settings !== 'object') return;
+    if (settings.v === 2 && Array.isArray(settings.items)) {
+      const len = Math.min(settings.items.length, this.items.length);
+      for (let i = 0; i < len; i++) {
+        const saved = settings.items[i];
+        const item = this.items[i];
+        if (saved?.className === item?.instance.constructor.name && saved.params) {
+          item.instance.setParameters(saved.params);
+        }
+      }
+      return;
+    }
+    for (const module of this.getAllModules()) {
+      const saved = settings[module.constructor.name];
+      if (!saved || typeof saved !== 'object') continue;
+      module.setParameters(saved);
     }
   }
 
@@ -57,49 +91,9 @@ export class ModuleHost {
     }
   }
 
-  captureSettings() {
-    const settings = {};
-    for (const module of this.getAllModules()) {
-      settings[module.constructor.name] = module.getParameters();
-    }
-    return settings;
-  }
-
-  applySettings(settings) {
-    if (!settings || typeof settings !== 'object') return;
-    for (const module of this.getAllModules()) {
-      const saved = settings[module.constructor.name];
-      if (!saved || typeof saved !== 'object') continue;
-      module.setParameters(saved);
-    }
-  }
-
-  bindPersistenceListeners(handler) {
-    for (const module of this.getAllModules()) {
-      for (const id of module.controlIds || []) {
-        const el = module.getControl(id);
-        if (!el) continue;
-        el.addEventListener('input', handler);
-        el.addEventListener('change', handler);
-      }
-    }
-  }
-
   updateSources(contextFactory) {
     for (const source of this.sources) {
-      source.update?.(contextFactory({}));
-    }
-  }
-
-  renderSources(contextFactory) {
-    for (const source of this.sources) {
-      source.renderScenePass(contextFactory({}));
-    }
-  }
-
-  setupAllModules(contextFactory) {
-    for (const module of this.getAllModules()) {
-      module.setup(contextFactory({}));
+      source.update(contextFactory({}));
     }
   }
 
@@ -109,23 +103,27 @@ export class ModuleHost {
     }
   }
 
-  addSource(instance) {
-    this.sources.push(instance);
+  addSource(instance, position = this.items.length) {
+    this.items.splice(position, 0, { type: 'source', instance });
   }
 
   removeSource(instance) {
-    this.sources = this.sources.filter((s) => s !== instance);
+    const idx = this.items.findIndex((i) => i.instance === instance);
+    if (idx === -1) return;
+    let end = idx + 1;
+    while (end < this.items.length && this.items[end].type === 'effect') end++;
+    this.items.splice(idx, end - idx);
   }
 
-  addEffect(instance) {
-    this.effects.push(instance);
+  addEffect(instance, position = this.items.length) {
+    this.items.splice(position, 0, { type: 'effect', instance });
   }
 
   removeEffect(instance) {
-    this.effects = this.effects.filter((e) => e !== instance);
+    this.items = this.items.filter((i) => i.instance !== instance);
   }
 
-  reorderEffects(newOrder) {
-    this.effects = newOrder;
+  reorderItems(newItems) {
+    this.items = newItems;
   }
 }

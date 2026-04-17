@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Lens Flare">
+  <div>
     <label>
       Réponse au grain
       <span class="value">{{ (+(instance.options.lensFlareGrainResponse ?? 0.5)).toFixed(2) }}</span>
@@ -178,11 +178,11 @@
       :value="instance.options.ghostDecay ?? 0.50"
       @input="instance.options.ghostDecay = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

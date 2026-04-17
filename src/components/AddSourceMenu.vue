@@ -3,17 +3,15 @@
     <template #title>
       <span class="modal-title">Ajouter une source</span>
     </template>
-    <p v-if="hasSource" class="add-source-menu__info">
-      Une source est déjà active.
-    </p>
-    <div v-else class="source-grid">
+    <div class="source-grid">
       <Button
         v-for="entry in sourceRegistry"
         :key="entry.className"
         :label="entry.label"
         icon="ev_shadow"
         size="xl"
-        @click="$emit('add', entry.className)"
+        :disabled="entry.className === 'BackgroundSource'"
+        @click="entry.className !== 'BackgroundSource' && $emit('add', entry.className)"
       />
     </div>
   </OverlayModal>
@@ -25,7 +23,7 @@ import Button from './Button.vue';
 
 defineProps({
   sourceRegistry: { type: Array, required: true },
-  hasSource: { type: Boolean, default: false },
+  activeSourceNames: { type: Array, default: () => [] },
 });
 defineEmits(['add', 'close']);
 </script>
@@ -36,7 +34,6 @@ defineEmits(['add', 'close']);
   font-weight: 700;
   color: #ddd;
 }
-.add-source-menu__info { margin: 0; color: #8f9bb3; font-size: 12px; }
 .source-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

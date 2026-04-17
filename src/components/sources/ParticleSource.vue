@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Particules">
+  <div>
     <label>Forme</label>
     <select
       :value="instance.options.particleShape"
@@ -67,12 +67,12 @@
       :display-fn="v => Math.round(v * 100) + ' %'"
       @update:model-value="instance.options.particleJitter = $event"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
 import { watch } from 'vue';
-import ControlGroup from '../ControlGroup.vue';
+
 import SliderControl from '../SliderControl.vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });

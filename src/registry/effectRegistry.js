@@ -136,4 +136,14 @@ export const effectRegistry = [
       () => import('../components/effects/ChromaticNoiseEffect.vue')
     ),
   },
+  {
+    className: 'ColorGradingEffect',
+    label: 'Colorimétrie',
+    classLoader: () => import('../effects/ColorGradingEffect.js')
+      .then((m) => m.ColorGradingEffect),
+    componentLoader: () => import('../components/effects/ColorGradingEffect.vue'),
+    component: defineAsyncComponent(
+      () => import('../components/effects/ColorGradingEffect.vue')
+    ),
+  },
 ];

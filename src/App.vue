@@ -3,35 +3,33 @@
     <Header
       :fps="fps"
       :is-fullscreen="isFullscreen"
-      :has-source="hasSource"
       @toggle-fullscreen="canvasViewRef?.toggleFullscreen()"
       @open-add-effect="showAddEffect = true"
+      @open-add-source="showAddSource = true"
     />
     <ControlPanel
       v-if="engine"
-      :sources="sources"
-      :effects="effects"
+      ref="controlPanelRef"
+      :items="items"
       :source-registry="engine.sourceRegistry"
       :effect-registry="engine.effectRegistry"
       @settings-change="onSettingsChange"
-      @reorder-effects="onReorderEffects"
+      @reorder-items="onReorderItems"
       @delete-source="onDeleteSource"
       @delete-effect="onDeleteEffect"
     />
   </div>
   <CanvasView
     ref="canvasViewRef"
-    :has-source="hasSource"
     @engine-ready="onEngineReady"
     @fps-update="fps = $event"
     @fullscreen-change="isFullscreen = $event"
-    @open-add-source="showAddSource = true"
   />
   <Transition name="overlay">
     <AddSourceMenu
       v-if="showAddSource"
       :source-registry="engine?.sourceRegistry ?? []"
-      :has-source="hasSource"
+      :active-source-names="items.filter(i => i.type === 'source').map(i => i.instance.constructor.name)"
       @add="onAddSource"
       @close="showAddSource = false"
     />
@@ -40,7 +38,6 @@
     <AddEffectMenu
       v-if="showAddEffect"
       :effect-registry="engine?.effectRegistry ?? []"
-      :active-class-names="effects.map(e => e.constructor.name)"
       @add="onAddEffect"
       @close="showAddEffect = false"
     />
@@ -56,15 +53,14 @@ import AddSourceMenu from './components/AddSourceMenu.vue';
 import AddEffectMenu from './components/AddEffectMenu.vue';
 
 const canvasViewRef = ref(null);
+const controlPanelRef = ref(null);
 const fps = ref(0);
 const isFullscreen = ref(false);
 const engine = shallowRef(null);
 const showAddSource = ref(false);
 const showAddEffect = ref(false);
 
-const sources = computed(() => engine.value?.sources.value ?? []);
-const effects = computed(() => engine.value?.effects.value ?? []);
-const hasSource = computed(() => sources.value.length > 0);
+const items = computed(() => engine.value?.items.value ?? []);
 
 function onEngineReady(eng) {
   engine.value = eng;
@@ -72,18 +68,21 @@ function onEngineReady(eng) {
 
 async function onAddSource(className) {
   if (!engine.value) return;
-  await engine.value.addSource(className);
+  const instance = await engine.value.addSource(className);
   showAddSource.value = false;
+  if (instance) controlPanelRef.value?.expandItem(instance);
 }
 
 async function onAddEffect(className) {
   if (!engine.value) return;
-  await engine.value.addEffect(className);
+  const insertIndex = controlPanelRef.value?.getEffectInsertIndex() ?? items.value.length;
+  const instance = await engine.value.addEffect(className, insertIndex);
   showAddEffect.value = false;
+  if (instance) controlPanelRef.value?.expandItem(instance);
 }
 
-function onReorderEffects(newOrder) {
-  engine.value?.reorderEffects(newOrder);
+function onReorderItems(newOrder) {
+  engine.value?.reorderItems(newOrder);
 }
 
 function onDeleteEffect(instance) {
@@ -91,9 +90,7 @@ function onDeleteEffect(instance) {
 }
 
 function onDeleteSource(instance) {
-  if (!engine.value) return;
-  engine.value.removeSource(instance);
-  [...engine.value.effects.value].forEach((e) => engine.value.removeEffect(e));
+  engine.value?.removeSource(instance);
 }
 
 function onSettingsChange() {

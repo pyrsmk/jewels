@@ -31,7 +31,7 @@ export class ParticleSource extends AbstractSource {
     this.bufferInitialized = false;
     this.flowFrameCounter = 0;
     this.flowOffset = [0, 0];
-    this.flowField = { cols: 72, rows: 72, vectors: new Float32Array(72 * 72 * 2) };
+    this.flowField = { cols: 48, rows: 48, vectors: new Float32Array(48 * 48 * 2) };
     this.vortexSeeds = [];
     this.imperfectionSeeds = [];
   }
@@ -401,11 +401,9 @@ void main() {
     const nA = this.fieldNoise(x, y, t);
     const nB = this.fieldNoise(x + flowRadius, y, t);
     const nC = this.fieldNoise(x - flowRadius, y, t);
-    const nD = this.fieldNoise(x, y + flowRadius, t);
-    const nE = this.fieldNoise(x, y - flowRadius, t);
     const noise = [
-      (nA[0] + nB[0] + nC[0] + nD[0] + nE[0]) / 5,
-      (nA[1] + nB[1] + nC[1] + nD[1] + nE[1]) / 5,
+      (nA[0] + nB[0] + nC[0]) / 3,
+      (nA[1] + nB[1] + nC[1]) / 3,
     ];
     const useImperfections = this.useSurfaceImperfections();
     if (
@@ -424,11 +422,9 @@ void main() {
       const vA = this.fieldVortex(x, y);
       const vB = this.fieldVortex(x + flowRadius, y);
       const vC = this.fieldVortex(x - flowRadius, y);
-      const vD = this.fieldVortex(x, y + flowRadius);
-      const vE = this.fieldVortex(x, y - flowRadius);
       const vortex = [
-        (vA[0] + vB[0] + vC[0] + vD[0] + vE[0]) / 5,
-        (vA[1] + vB[1] + vC[1] + vD[1] + vE[1]) / 5,
+        (vA[0] + vB[0] + vC[0]) / 3,
+        (vA[1] + vB[1] + vC[1]) / 3,
       ];
       const imperf = useImperfections ? this.imperfectionField(x, y) : 0.0;
       vx += noise[0] * 0.0045 + vortex[0] * 0.9 + imperf;
@@ -566,7 +562,7 @@ void main() {
     const t = time ?? 0;
     const speed = this.getParticleSpeedFromSlider();
     this.flowFrameCounter++;
-    if ((this.flowFrameCounter & 1) === 0) this.rebuildFlowField(t);
+    if (this.flowFrameCounter % 3 === 0) this.rebuildFlowField(t);
     if (this.useSurfaceImperfections()) this.updateImperfectionSeeds(dt);
     for (let i = 0; i < this.particles.length; i++) {
       const p = this.particles[i];
@@ -578,7 +574,7 @@ void main() {
       const jitter = this.options.particleJitter ?? 0.3;
       if (jitter > 0) {
         p.jitterAge++;
-        if (p.jitterAge >= 4) {
+        if (p.jitterAge >= 6) {
           p.jitterAge = 0;
           const jn = this.fieldNoise(p.x + p.noiseOffsetX, p.y + p.noiseOffsetY, t * 0.4);
           p.jitterVx = jn[0];

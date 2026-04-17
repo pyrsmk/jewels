@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup>
+  <div>
     <label>Intensité <span class="value">{{ (+(instance.options.bg2 ?? 1.60)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="1.60" step="0.01"
@@ -18,11 +18,11 @@
       :value="instance.options.bg2Scale ?? 0.75"
       @input="instance.options.bg2Scale = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 const props = defineProps({ instance: { type: Object, required: true } });
 

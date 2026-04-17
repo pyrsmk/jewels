@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="CRT">
+  <div>
     <label>
       Intensité
       <span class="value">{{ (+(instance.options.crt ?? 1.00)).toFixed(2) }}</span>
@@ -54,11 +54,11 @@
       :value="instance.options.crtPhosphore ?? 0.30"
       @input="instance.options.crtPhosphore = +$event.target.value"
     />
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

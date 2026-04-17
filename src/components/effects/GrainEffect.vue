@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Grain">
+  <div>
     <label>Quantité <span class="value">{{ (+(instance.options.grainAmount ?? 6)).toFixed(2) }}</span></label>
     <input
       type="range" min="0" max="10" step="0.01"
@@ -15,11 +15,11 @@
       <option value="scan">Scan</option>
       <option value="celluloid">Celluloïd</option>
     </select>
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
-import ControlGroup from '../ControlGroup.vue';
+
 
 defineProps({ instance: { type: Object, required: true } });
 </script>

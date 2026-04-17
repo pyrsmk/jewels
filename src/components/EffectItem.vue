@@ -9,7 +9,7 @@
         :draggable="draggable"
         @dragstart.stop="draggable && $emit('dragstart', $event)"
         @dragend.stop="$emit('dragend', $event)"
-        @click.stop="$emit('collapse')"
+        @mousedown.stop="$emit('collapse')"
       >drag_indicator</span>
       <span class="effect-item__badge">EFFET</span>
       <span class="effect-item__label">{{ label }}</span>

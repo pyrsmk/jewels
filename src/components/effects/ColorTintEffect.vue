@@ -1,5 +1,5 @@
 <template>
-  <ControlGroup title="Couleurs">
+  <div>
     <div id="colors">
       <div v-for="(color, i) in colors" :key="i" class="row">
         <input
@@ -12,12 +12,12 @@
       </div>
     </div>
     <button type="button" @click="addColor">Ajouter une couleur</button>
-  </ControlGroup>
+  </div>
 </template>
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import ControlGroup from '../ControlGroup.vue';
+
 
 const props = defineProps({ instance: { type: Object, required: true } });
 

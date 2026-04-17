@@ -20,6 +20,7 @@ const blitFS = `
   }
 `;
 
+
 export class PipelineRuntime {
   constructor(canvas, gl, state, config, moduleHost) {
     this.canvas = canvas;
@@ -39,6 +40,7 @@ export class PipelineRuntime {
       a_pos: gl.getAttribLocation(this.blitProgram, 'a_pos'),
       u_tex: gl.getUniformLocation(this.blitProgram, 'u_tex'),
     };
+
   }
 
   buildPassContext(extra = {}) {
@@ -81,6 +83,10 @@ export class PipelineRuntime {
     return this.state.sceneTex;
   }
 
+  getAccumulator() {
+    return this.state.accumulator;
+  }
+
   getPreviousFrameTexture(fallbackTexture = null) {
     return this.state.frameHistory[0]?.texture || fallbackTexture;
   }
@@ -95,12 +101,10 @@ export class PipelineRuntime {
     return this.postPingIndex === 0 ? this.state.sceneA : this.state.sceneB;
   }
 
-  blitToScreen(texture) {
+  blitTo(texture, fbo) {
     const { gl, blitLocs, quadBuffer, state } = this;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
     gl.viewport(0, 0, state.width, state.height);
-    gl.clearColor(0, 0, 0, 1);
-    gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(this.blitProgram);
     gl.bindBuffer(gl.ARRAY_BUFFER, quadBuffer);
     gl.enableVertexAttribArray(blitLocs.a_pos);
@@ -109,6 +113,31 @@ export class PipelineRuntime {
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.uniform1i(blitLocs.u_tex, 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  blitToScreen(texture) {
+    this.blitTo(texture, null);
+  }
+
+  compositeOntoAccumulator(overlayTex, isFirst) {
+    const { gl, state } = this;
+    if (isFirst) {
+      this.blitTo(overlayTex, state.accumulator.fbo);
+    } else {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, state.accumulator.fbo);
+      gl.viewport(0, 0, state.width, state.height);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE);
+      gl.useProgram(this.blitProgram);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+      gl.enableVertexAttribArray(this.blitLocs.a_pos);
+      gl.vertexAttribPointer(this.blitLocs.a_pos, 2, gl.FLOAT, false, 0, 0);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, overlayTex);
+      gl.uniform1i(this.blitLocs.u_tex, 0);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      gl.disable(gl.BLEND);
+    }
   }
 
   resizeTargets(width, height, dpr) {
@@ -122,9 +151,11 @@ export class PipelineRuntime {
     state.sceneTex = createTexFbo(gl, width, height);
     state.sceneA = createTexFbo(gl, width, height);
     state.sceneB = createTexFbo(gl, width, height);
+    state.accumulator = createTexFbo(gl, width, height);
     clearFbo(gl, state.sceneA.fbo);
     clearFbo(gl, state.sceneB.fbo);
     clearFbo(gl, state.sceneTex.fbo);
+    clearFbo(gl, state.accumulator.fbo);
     this.clearFrameHistory();
     this.postPingIndex = 0;
   }
