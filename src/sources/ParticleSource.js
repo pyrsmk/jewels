@@ -7,7 +7,6 @@ export class ParticleSource extends AbstractSource {
 
   constructor(options = {}) {
     const defaults = {
-      particleShape: 'pearls',
       flowDirection: 'free',
       surfaceImperfections: false,
       particleCount: 0.316,
@@ -18,7 +17,7 @@ export class ParticleSource extends AbstractSource {
     };
     super(
       { ...defaults, ...options },
-      ['particleShape', 'flowDirection', 'surfaceImperfections', 'particleCount', 'speed', 'size',
+      ['flowDirection', 'surfaceImperfections', 'particleCount', 'speed', 'size',
         'particleJitter', 'edgeFade'],
       ['particleCountVal', 'speedVal', 'sizeVal'],
     );
@@ -83,102 +82,21 @@ varying vec2 v_sceneUv;
 uniform vec3 u_accents[8];
 uniform int u_accentCount;
 uniform float u_colorEnabled;
-uniform float u_particleShape;
-uniform float u_time;
 ${sharedShaderLibrary.getColorHelpers()}
-${sharedShaderLibrary.getNoiseHelpers()}
-mat2 rot(float a) {
-  float s = sin(a);
-  float c = cos(a);
-  return mat2(c, -s, s, c);
-}
-float particleFlowAngle(vec2 uv) {
-  vec2 q = uv * 6.0 + vec2(1.7, -2.3);
-  float n1 = noise21(q);
-  float n2 = noise21(q + vec2(4.2, 7.1));
-  return (n1 * 2.0 - 1.0) * 1.8 + (n2 * 2.0 - 1.0) * 0.35;
-}
 void main() {
   vec2 p = gl_PointCoord * 2.0 - 1.0;
-  float r = length(p);
   vec3 base = vec3(0.02, 0.035, 0.09) * mix(0.75, 1.25, v_depth);
   if (u_colorEnabled > 0.5 && u_accentCount > 0) {
     vec3 pal = paletteColor(clamp(v_sceneUv.x, 0.0, 1.0));
     base = pal * mix(0.42, 0.82, v_depth);
   }
-  float shape = floor(u_particleShape + 0.5);
-  float mask = 0.0;
-  float halo = 0.0;
-  float sparkle = 0.0;
-  float sizeNorm = 1.0;
-  float randRot = (hash21(floor(v_sceneUv * 512.0)) - 0.5) * 0.4;
-  if (shape < 0.5) {
-    // Pearls
-    sizeNorm = 1.00;
-    vec2 ps = p / sizeNorm;
-    float rs = length(ps);
-    if (rs > 1.0) discard;
-    float core = smoothstep(0.65, 0.0, rs);
-    float ring = smoothstep(0.98, 0.72, rs) * smoothstep(0.35, 0.55, rs);
-    halo = smoothstep(1.0, 0.15, rs);
-    mask = max(core * 0.55, ring * 0.95);
-    sparkle = ring * 0.9;
-  }
-  else if (shape < 1.5) {
-    // Pixel
-    sizeNorm = 1.16;
-    vec2 q = p / sizeNorm;
-    float d = max(abs(q.x), abs(q.y)) - 0.78;
-    if (d > 0.0) discard;
-    mask = 0.92;
-    halo = 0.02;
-  }
-  else if (shape < 2.5) {
-    // Flow
-    sizeNorm = 1.22;
-    float a = particleFlowAngle(v_sceneUv) + randRot;
-    vec2 q = rot(a) * (p / sizeNorm);
-    float line = exp(-pow(abs(q.y) / 0.16, 2.0)) * exp(-pow(abs(q.x) / 1.02, 2.0));
-    mask = line;
-    halo = exp(-pow(abs(q.y) / 0.34, 2.0)) * exp(-pow(abs(q.x) / 1.22, 2.0)) * 0.18;
-    if (mask + halo < 0.01) discard;
-  }
-  else if (shape < 3.5) {
-    // Carré soft
-    sizeNorm = 1.08;
-    vec2 q = p / sizeNorm;
-    float box = max(abs(q.x), abs(q.y));
-    float soft = smoothstep(0.95, 0.2, box);
-    float inner = smoothstep(0.6, 0.0, box);
-    if (soft <= 0.001) discard;
-    mask = soft * (0.6 + inner * 0.4);
-    halo = smoothstep(1.1, 0.35, box) * 0.15;
-  }
-  else if (shape < 4.5) {
-    // Core
-    sizeNorm = 1.05;
-    vec2 qs = p / sizeNorm;
-    float rs = length(qs);
-    if (rs > 1.0) discard;
-    float c1 = smoothstep(1.0, 0.0, rs);
-    float c2 = smoothstep(0.8, 0.0, rs);
-    mask = c1 * 0.62 + c2 * 0.46;
-    halo = smoothstep(1.0, 0.35, rs) * 0.18;
-  }
-  else {
-    // Glitter
-    float seed = hash21(floor(v_sceneUv * 1024.0));
-    float flickerPhase = fract(seed * 13.7 + u_time * (0.8 + seed * 1.4));
-    float flicker = smoothstep(0.0, 0.15, flickerPhase) * smoothstep(0.45, 0.20, flickerPhase);
-    vec2 q = rot((seed - 0.5) * 0.52) * p;
-    float sq = max(abs(q.x), abs(q.y));
-    if (sq > 0.90) discard;
-    float face = smoothstep(0.90, 0.68, sq);
-    float bright = smoothstep(0.90, 0.0, sq);
-    mask = face * (0.55 + flicker * 0.45);
-    sparkle = bright * (0.5 + flicker * 0.8);
-    halo = smoothstep(1.0, 0.82, sq) * 0.12;
-  }
+  float rs = length(p);
+  if (rs > 1.0) discard;
+  float core = smoothstep(0.65, 0.0, rs);
+  float ring = smoothstep(0.98, 0.72, rs) * smoothstep(0.35, 0.55, rs);
+  float halo = smoothstep(1.0, 0.15, rs);
+  float mask = max(core * 0.55, ring * 0.95);
+  float sparkle = ring * 0.9;
   vec3 col = base * (0.82 + mask * 0.92);
   col += vec3(1.0) * sparkle;
   col += vec3(1.0) * halo * 0.32;
@@ -612,13 +530,6 @@ void main() {
     gl.uniform2f(locs.u_camera, 0.0, 0.0);
     gl.uniform1f(locs.u_size, +(this.options.size ?? 9));
     gl.uniform1f(locs.u_dpr, dpr ?? 1);
-    const shapeValue = this.options.particleShape ?? 'pearls';
-    const particleShape = shapeValue === 'pixel' ? 1
-      : shapeValue === 'flowline' ? 2
-      : shapeValue === 'softsquare' ? 3
-      : shapeValue === 'core' ? 4
-      : shapeValue === 'glitter' ? 5 : 0;
-    gl.uniform1f(locs.u_particleShape, particleShape);
     gl.uniform1f(locs.u_time, time);
   }
 }

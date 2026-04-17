@@ -1,6 +1,5 @@
 - nouvelles sources :
   - vidéo
-  - fluides (un peu comme de la peinture sur de l'eau)
   - bandes horizontales/verticales
   - https://vincentgarreau.com/particles.js/
   - figures géométriques ?

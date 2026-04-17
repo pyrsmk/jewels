@@ -1,17 +1,5 @@
 <template>
   <div>
-    <label>Forme</label>
-    <select
-      :value="instance.options.particleShape"
-      @change="instance.options.particleShape = $event.target.value"
-    >
-      <option value="pearls">Perles</option>
-      <option value="pixel">Pixels</option>
-      <option value="flowline">Flows</option>
-      <option value="softsquare">Carré soft</option>
-      <option value="core">Core</option>
-      <option value="glitter">Glitter</option>
-    </select>
     <label>Mouvement</label>
     <select
       :value="instance.options.flowDirection"
