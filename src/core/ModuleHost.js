@@ -67,13 +67,14 @@ export class ModuleHost {
   applySettings(settings) {
     if (!settings || typeof settings !== 'object') return;
     if (settings.v === 2 && Array.isArray(settings.items)) {
-      const len = Math.min(settings.items.length, this.items.length);
-      for (let i = 0; i < len; i++) {
-        const saved = settings.items[i];
-        const item = this.items[i];
-        if (saved?.className === item?.instance.constructor.name && saved.params) {
-          item.instance.setParameters(saved.params);
-        }
+      const counters = {};
+      for (const saved of settings.items) {
+        if (!saved?.className || !saved.params) continue;
+        const cls = saved.className;
+        const idx = counters[cls] ?? 0;
+        counters[cls] = idx + 1;
+        const match = this.items.filter((i) => i.instance.constructor.name === cls)[idx];
+        if (match) match.instance.setParameters(saved.params);
       }
       return;
     }

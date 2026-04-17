@@ -3,21 +3,20 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class ColorTintEffect extends EffectInterface {
 
   constructor(options = {}) {
-    const defaults = {};
+    const defaults = { colors: ['#5900ff', '#00d5ff'] };
     super({ ...defaults, ...options }, [], []);
-    this.colors = ['#5900ff', '#00d5ff'];
     this.accentCache = new Float32Array(24);
     this.accentCountCache = 0;
     this.rebuildAccentCache();
   }
 
   setColors(colors) {
-    this.colors = colors;
+    this.options.colors = colors;
     this.rebuildAccentCache();
   }
 
   getColors() {
-    return this.colors;
+    return this.options.colors;
   }
 
   rebuildAccentCache() {
@@ -26,7 +25,7 @@ export class ColorTintEffect extends EffectInterface {
       return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
     };
 
-    const colors = this.colors.slice(0, 8);
+    const colors = (this.options.colors ?? ['#5900ff', '#00d5ff']).slice(0, 8);
     this.accentCountCache = colors.length;
 
     for (let i = 0; i < 8; i++) {
@@ -46,18 +45,13 @@ export class ColorTintEffect extends EffectInterface {
 
   setParameters(saved) {
     super.setParameters(saved);
-    if (!Array.isArray(saved.colors) || !saved.colors.length) return;
-    const valid = saved.colors
-      .filter((c) => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c))
-      .slice(0, 8);
-    if (!valid.length) return;
-    this.setColors(valid);
-  }
-
-  getParameters() {
-    return {
-      colors: this.colors,
-    };
+    if (Array.isArray(this.options.colors)) {
+      const valid = this.options.colors
+        .filter((c) => typeof c === 'string' && /^#[0-9a-fA-F]{6}$/.test(c))
+        .slice(0, 8);
+      this.options.colors = valid.length ? valid : ['#5900ff', '#00d5ff'];
+    }
+    this.rebuildAccentCache();
   }
 
   onSettingsChanged(t) {

@@ -20,10 +20,10 @@ import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-const colors = ref([...(props.instance.colors ?? ['#5900ff', '#00d5ff'])]);
+const colors = ref([...(props.instance.options.colors ?? ['#5900ff', '#00d5ff'])]);
 
 onMounted(() => {
-  colors.value = [...(props.instance.colors ?? ['#5900ff', '#00d5ff'])];
+  colors.value = [...(props.instance.options.colors ?? ['#5900ff', '#00d5ff'])];
 });
 
 function updateColor(i, val) {
@@ -42,7 +42,7 @@ function addColor() {
 }
 
 watch(
-  () => props.instance.colors,
+  () => props.instance.options.colors,
   (newColors) => {
     if (JSON.stringify(newColors) !== JSON.stringify(colors.value)) {
       colors.value = [...newColors];

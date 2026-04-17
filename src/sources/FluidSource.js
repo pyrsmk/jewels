@@ -105,13 +105,13 @@ void main() {
 export class FluidSource extends AbstractSource {
 
   constructor(options = {}) {
-    const defaults = { speed: 0.4 };
-    super({ ...defaults, ...options }, ['speed'], []);
-    this.colors     = options.colors ?? ['#06091a', '#0d3b6e', '#a8d8ea'];
-    this.directions = options.directions ?? this._evenDirections(this.colors.length);
-    this.seeds      = options.seeds ?? this.colors.map(() => Math.random() * 100);
-    this._accTime   = 0;
-    this._lastTime  = null;
+    const colors = options.colors ?? ['#06091a', '#0d3b6e', '#a8d8ea'];
+    const n = colors.length;
+    const directions = options.directions ?? Array.from({ length: n }, (_, i) => Math.round((i * 360) / n));
+    const seeds = options.seeds ?? colors.map(() => Math.random() * 100);
+    super({ speed: 0.4, ...options, colors, directions, seeds }, [], []);
+    this._accTime  = 0;
+    this._lastTime = null;
     this.gl      = null;
     this.program = null;
     this.buffer  = null;
@@ -123,29 +123,20 @@ export class FluidSource extends AbstractSource {
   }
 
   setFluids(colors) {
-    this.colors = [...colors];
-    if (this.directions.length !== colors.length) {
-      this.directions = this._evenDirections(colors.length);
+    const n = colors.length;
+    this.options.colors = [...colors];
+    if (this.options.directions.length !== n) {
+      this.options.directions = this._evenDirections(n);
     }
-    while (this.seeds.length < colors.length) this.seeds.push(Math.random() * 100);
-    this.seeds.length = colors.length;
-  }
-
-  getParameters() {
-    return {
-      ...this.options,
-      colors:     [...this.colors],
-      directions: [...this.directions],
-      seeds:      [...this.seeds],
-    };
+    while (this.options.seeds.length < n) this.options.seeds.push(Math.random() * 100);
+    this.options.seeds.length = n;
   }
 
   setParameters(params) {
     super.setParameters(params);
-    if (params.colors)     this.colors     = [...params.colors];
-    if (params.directions) this.directions = [...params.directions];
-    if (params.seeds)      this.seeds      = [...params.seeds];
-    while (this.seeds.length < this.colors.length) this.seeds.push(Math.random() * 100);
+    while (this.options.seeds.length < this.options.colors.length) {
+      this.options.seeds.push(Math.random() * 100);
+    }
   }
 
   setupGPU(runtime) {
@@ -191,16 +182,16 @@ export class FluidSource extends AbstractSource {
     gl.uniform2f(this.locs.u_resolution, state.width, state.height);
     gl.uniform1f(this.locs.u_accTime,    this._accTime);
 
-    const count      = Math.min(this.colors.length, 8);
+    const count      = Math.min(this.options.colors.length, 8);
     const colorsFlat = new Float32Array(24);
     const seedsArr   = new Float32Array(8);
 
     for (let i = 0; i < count; i++) {
-      const hex = this.colors[i] ?? '#ffffff';
+      const hex = this.options.colors[i] ?? '#ffffff';
       colorsFlat[i * 3 + 0] = parseInt(hex.slice(1, 3), 16) / 255;
       colorsFlat[i * 3 + 1] = parseInt(hex.slice(3, 5), 16) / 255;
       colorsFlat[i * 3 + 2] = parseInt(hex.slice(5, 7), 16) / 255;
-      seedsArr[i] = this.seeds[i] ?? i * 13.7;
+      seedsArr[i] = this.options.seeds[i] ?? i * 13.7;
     }
 
     gl.uniform1f(this.locs.u_fluidCount,   count);

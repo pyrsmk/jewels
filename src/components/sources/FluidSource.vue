@@ -29,10 +29,10 @@ import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-const colors = ref([...props.instance.colors]);
+const colors = ref([...props.instance.options.colors]);
 
 onMounted(() => {
-  colors.value = [...props.instance.colors];
+  colors.value = [...props.instance.options.colors];
 });
 
 function commit() {
@@ -55,7 +55,7 @@ function removeFluid(i) {
 }
 
 watch(
-  () => props.instance.colors,
+  () => props.instance.options.colors,
   (newColors) => {
     if (JSON.stringify(newColors) !== JSON.stringify(colors.value)) {
       colors.value = [...newColors];
