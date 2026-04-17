@@ -1,7 +1,7 @@
 <template>
   <OverlayModal @close="$emit('close')">
     <template #title>
-      <span class="modal-title">Ajouter une source</span>
+      <span class="modal-title">Ajouter un objet</span>
     </template>
     <div class="source-grid">
       <Button

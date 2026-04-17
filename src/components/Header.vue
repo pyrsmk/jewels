@@ -1,13 +1,13 @@
 <template>
   <div class="header">
-    <h1 class="title">Jewels <span class="version">v{{ version }}</span></h1>
+    <h1 class="title">Jewels <span class="version">{{ version }}</span></h1>
     <div class="spacer"></div>
     <div v-if="fps > 0" class="fps">{{ fps }} FPS</div>
     <div class="spacer"></div>
     <Button
       icon="ev_shadow_add"
-      tooltip="Ajouter une source"
-      @click="$emit('openAddSource')"
+      tooltip="Ajouter un objet"
+      @click="$emit('openAddObjet')"
     />
     <Button
       icon="texture_add"
@@ -29,7 +29,7 @@ defineProps({
   fps: { type: Number, default: 0 },
   isFullscreen: { type: Boolean, default: false },
 });
-defineEmits(['toggleFullscreen', 'openAddEffect', 'openAddSource']);
+defineEmits(['toggleFullscreen', 'openAddEffect', 'openAddObjet']);
 
 const version = __APP_VERSION__;
 </script>
@@ -47,14 +47,14 @@ const version = __APP_VERSION__;
   font-size: 15px;
   white-space: nowrap;
 }
-.version { font-size: 11px; color: #8f9bb3; font-weight: normal; }
+.version { font-size: 10px; color: #8f9bb3; font-weight: normal; }
 .spacer { flex: 1; }
 .fps {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #b07fff;
-  background: rgba(160, 100, 255, 0.18);
+  color: #6a8fff;
+  background: rgba(80, 120, 255, 0.18);
   border-radius: 4px;
   padding: 2px 7px;
   white-space: nowrap;

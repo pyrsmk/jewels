@@ -55,14 +55,14 @@ export async function useEngine(canvas) {
     executeEffectStages(t);
   }
 
-  async function addSource(className) {
+  async function addObjet(className) {
     const entry = sourceRegistry.find((r) => r.className === className);
-    if (!entry) throw new Error(`Source inconnue : ${className}`);
+    if (!entry) throw new Error(`Objet inconnu : ${className}`);
     if (className === 'BackgroundSource' && moduleHost.sources.some((s) => s.constructor.name === 'BackgroundSource')) return;
     entry.componentLoader?.();
     const Cls = await entry.classLoader();
     const instance = markRaw(Cls.deserialize({}));
-    moduleHost.addSource(instance);
+    moduleHost.addObjet(instance);
     items.value = [...moduleHost.items];
     instance.setup(contextFactory({}));
     instance.resize(contextFactory({}));
@@ -84,9 +84,9 @@ export async function useEngine(canvas) {
     return instance;
   }
 
-  function removeSource(instance) {
+  function removeObjet(instance) {
     if (instance.constructor.name === 'BackgroundSource') return;
-    moduleHost.removeSource(instance);
+    moduleHost.removeObjet(instance);
     items.value = [...moduleHost.items];
     pipelineRuntime.clearScene();
   }
@@ -114,9 +114,10 @@ export async function useEngine(canvas) {
 
       if (settings.v === 2 && Array.isArray(settings.items)) {
         for (const itemData of settings.items) {
-          if (itemData.type === 'source' && itemData.className === 'BackgroundSource') continue;
-          if (itemData.type === 'source') {
-            await addSource(itemData.className);
+          const isObjet = itemData.type === 'objet' || itemData.type === 'source';
+          if (isObjet && itemData.className === 'BackgroundSource') continue;
+          if (isObjet) {
+            await addObjet(itemData.className);
           } else if (itemData.type === 'effect') {
             await addEffect(itemData.className);
           }
@@ -125,7 +126,7 @@ export async function useEngine(canvas) {
         for (const reg of sourceRegistry) {
           if (reg.className === 'BackgroundSource') continue;
           if (!settings[reg.className]) continue;
-          await addSource(reg.className);
+          await addObjet(reg.className);
         }
         for (const reg of effectRegistry) {
           if (!settings[reg.className]) continue;
@@ -141,7 +142,7 @@ export async function useEngine(canvas) {
   }
 
   resize();
-  await addSource('BackgroundSource');
+  await addObjet('BackgroundSource');
   await restoreFromUrl();
 
   const frameLoopController = new FrameLoopController({
@@ -162,8 +163,8 @@ export async function useEngine(canvas) {
     resize,
     sourceRegistry,
     effectRegistry,
-    addSource,
-    removeSource,
+    addObjet,
+    removeObjet,
     addEffect,
     removeEffect,
     reorderItems,

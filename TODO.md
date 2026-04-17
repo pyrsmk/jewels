@@ -1,5 +1,3 @@
-- source => objet
-- fps => bleu et objet => violet
 - nouvelles sources :
   - vidéo
   - fluides (un peu comme de la peinture sur de l'eau)
