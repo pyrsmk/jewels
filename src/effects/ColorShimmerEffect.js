@@ -111,7 +111,7 @@ export class ColorShimmerEffect extends EffectInterface {
     return `
     if (hasColorTint2) {
       vec3 shimmer = colorShimmer(uv, u_time);
-      combined = clamp(combined + shimmer + combined * shimmer * 0.35, 0.0, 1.0);
+      combined = clamp(combined + (shimmer + combined * shimmer * 0.35) * srcAlpha, 0.0, 1.0);
     }`;
   }
 }

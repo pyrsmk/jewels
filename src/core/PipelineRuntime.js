@@ -171,7 +171,7 @@ export class PipelineRuntime {
     const post = effect.getPostShaderPostCode(context) || '';
     const sym = effect.getPostShaderGuardSymbol(context);
     const earlyExit = sym
-      ? `\n    if (!${sym}) { gl_FragColor = vec4(combined, 1.0); return; }\n`
+      ? `\n    if (!${sym}) { gl_FragColor = vec4(combined, srcAlpha); return; }\n`
       : '';
     const fs = `
   precision highp float;
@@ -190,13 +190,14 @@ ${helpers}
   void main() {
     vec2 uv = v_uv;
     vec2 px = 1.0 / u_resolution;
+    float srcAlpha = texture2D(u_scene, uv).a;
 ${guards}
     vec3 combined = sampleScene(uv);
 ${earlyExit}
     float grainResponseMask = 1.0;
 ${pre}
 ${post}
-    gl_FragColor = vec4(combined, 1.0);
+    gl_FragColor = vec4(combined, srcAlpha);
   }
   `;
     return createProgram(this.gl, quadVS, fs);

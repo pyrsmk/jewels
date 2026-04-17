@@ -1,6 +1,3 @@
-- lueur => virer les deux autres modes
-- teinte 3 => on applique sur l'objet courant, pas l'ensemble (idem pour 2)
-- teinte 1 => vérifier que c'est censé appliquer sur l'objet courant (donc le fond par exemple)
 - source => objet
 - fps => bleu et objet => violet
 - nouvelles sources :

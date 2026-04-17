@@ -64,7 +64,7 @@ export class ChromaticNoiseEffect extends EffectInterface {
   getPostShaderPostCode() {
     return `
     if (hasChromaticNoise) {
-      combined += chromaticNoise(uv, gl_FragCoord.xy, u_time);
+      combined += chromaticNoise(uv, gl_FragCoord.xy, u_time) * srcAlpha;
     }`;
   }
 }
