@@ -21,4 +21,14 @@ export const sourceRegistry = [
       () => import('../components/sources/ParticleSource.vue')
     ),
   },
+  {
+    className: 'FluidSource',
+    label: 'Fluides',
+    isDeletable: true,
+    classLoader: () => import('../sources/FluidSource.js').then((m) => m.FluidSource),
+    componentLoader: () => import('../components/sources/FluidSource.vue'),
+    component: defineAsyncComponent(
+      () => import('../components/sources/FluidSource.vue')
+    ),
+  },
 ];

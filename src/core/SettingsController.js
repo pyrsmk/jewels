@@ -16,14 +16,17 @@ export class SettingsController {
   }
 
   persistToUrl() {
-    try {
-      const url = new URL(window.location.href);
-      const json = JSON.stringify(this.capture());
-      url.searchParams.set('settings', this.encode(json));
-      window.history.replaceState({}, '', url.toString());
-    } catch (err) {
-      console.warn(`Impossible de sauvegarder les paramètres dans l'URL :`, err);
-    }
+    clearTimeout(this._persistTimer);
+    this._persistTimer = setTimeout(() => {
+      try {
+        const url = new URL(window.location.href);
+        const json = JSON.stringify(this.capture());
+        url.searchParams.set('settings', this.encode(json));
+        window.history.replaceState({}, '', url.toString());
+      } catch (err) {
+        console.warn(`Impossible de sauvegarder les paramètres dans l'URL :`, err);
+      }
+    }, 500);
   }
 
   loadFromUrl() {

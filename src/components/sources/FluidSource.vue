@@ -8,10 +8,19 @@
           @input="updateColor(i, $event.target.value)"
           @change="updateColor(i, $event.target.value)"
         />
-        <button v-if="colors.length > 1" type="button" class="remove-btn" @click="removeColor(i)">×</button>
+        <button v-if="colors.length > 1" type="button" class="remove-btn" @click="removeFluid(i)">×</button>
       </div>
-      <button v-if="colors.length < 8" type="button" class="add-btn" @click="addColor">+</button>
+      <button v-if="colors.length < 8" type="button" class="add-btn" @click="addFluid">+</button>
     </div>
+    <label>
+      Vitesse
+      <span class="value">{{ (+(instance.options.speed ?? 0.4)).toFixed(2) }}</span>
+    </label>
+    <input
+      type="range" min="0.2" max="1" step="0.01"
+      :value="instance.options.speed ?? 0.4"
+      @input="instance.options.speed = +$event.target.value"
+    />
   </div>
 </template>
 
@@ -20,25 +29,29 @@ import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-const colors = ref([...(props.instance.colors ?? ['#5900ff', '#00d5ff'])]);
+const colors = ref([...props.instance.colors]);
 
 onMounted(() => {
-  colors.value = [...(props.instance.colors ?? ['#5900ff', '#00d5ff'])];
+  colors.value = [...props.instance.colors];
 });
 
+function commit() {
+  props.instance.setFluids([...colors.value]);
+}
+
 function updateColor(i, val) {
-  colors.value[i] = val;
-  props.instance.setColors([...colors.value]);
+  colors.value.splice(i, 1, val);
+  commit();
 }
 
-function removeColor(i) {
-  colors.value.splice(i, 1);
-  props.instance.setColors([...colors.value]);
+function addFluid() {
+  colors.value = [...colors.value, '#ffffff'];
+  commit();
 }
 
-function addColor() {
-  colors.value.push('#ffffff');
-  props.instance.setColors([...colors.value]);
+function removeFluid(i) {
+  colors.value = colors.value.filter((_, j) => j !== i);
+  commit();
 }
 
 watch(
@@ -48,7 +61,7 @@ watch(
       colors.value = [...newColors];
     }
   },
-  { deep: true }
+  { deep: true },
 );
 </script>
 
@@ -58,7 +71,7 @@ watch(
   gap: 6px;
   align-items: center;
   flex-wrap: wrap;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 .color-chip {
   position: relative;
