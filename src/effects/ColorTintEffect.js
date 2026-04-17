@@ -80,8 +80,10 @@ export class ColorTintEffect extends EffectInterface {
     return `
     if (u_accentCount > 0) {
       vec3 tint = paletteColor(clamp(uv.x, 0.0, 1.0));
+      float lum = dot(combined, vec3(0.2126, 0.7152, 0.0722));
+      float tintMask = max(srcAlpha, clamp(lum, 0.0, 1.0));
       vec3 screened = combined + tint * 0.7 - combined * tint * 0.7;
-      combined = mix(combined, screened, step(0.001, srcAlpha));
+      combined = mix(combined, screened, tintMask);
     }`;
   }
 }

@@ -57,7 +57,8 @@ export class GlowEffect extends EffectInterface {
       vec3 glowNear = blurBrightCross9(uv, 2.0);
       vec3 glowWide = blurBrightCross9(uv, 5.0);
       vec3 glow = glowNear * 0.75 + glowWide * 0.55;
-      combined += glow * u_glow * 0.95;${hasGrainAfter ? grainMaskCode : ''}
+      combined += glow * u_glow * 0.95;
+      srcAlpha = max(srcAlpha, dot(glow * u_glow * 0.95, vec3(0.2126, 0.7152, 0.0722)));${hasGrainAfter ? grainMaskCode : ''}
     }`;
   }
 }

@@ -299,7 +299,7 @@ export class LensFlareEffect extends EffectInterface {
     float lenCoreY = max(lengthFrac * 0.5 * axisScale, 0.001);
     float lenSoftX = lenCoreX;
     float lenSoftY = lenCoreY;
-    vec3 tint = vec3(1.0, 0.98, 0.94);
+    vec3 tint = vec3(1.0, 1.0, 1.0);
     vec3 c = vec3(0.0);
     if (u_lensMode > 1.5) {
       float r = length(d);
