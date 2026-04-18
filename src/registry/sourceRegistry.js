@@ -31,4 +31,14 @@ export const sourceRegistry = [
       () => import('../components/sources/FluidSource.vue')
     ),
   },
+  {
+    className: 'VideoSource',
+    label: 'Vidéo',
+    isDeletable: true,
+    classLoader: () => import('../sources/VideoSource.js').then((m) => m.VideoSource),
+    componentLoader: () => import('../components/sources/VideoSource.vue'),
+    component: defineAsyncComponent(
+      () => import('../components/sources/VideoSource.vue')
+    ),
+  },
 ];

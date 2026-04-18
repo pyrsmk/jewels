@@ -1,5 +1,5 @@
 <template>
-  <div class="controls">
+  <div class="controls" ref="controlsEl">
     <div
       class="items-list"
       @dragover.prevent="onDragOver"
@@ -9,15 +9,15 @@
       <template v-for="(item, i) in panelItems" :key="item.instance">
         <div v-if="dropLineIndex === i" class="drop-line" />
         <SourceItem
-          v-if="item.type === 'objet'"
+          v-if="item.type === 'source'"
           :instance="item.instance"
           :label="item.label"
           :is-deletable="item.isDeletable"
           :is-draggable="item.isDeletable"
           :expanded="expandedInstance === item.instance"
           @toggle="toggleExpanded(item.instance)"
-          @delete="$emit('delete-objet', item.instance)"
-          @dragstart="onDragStart(i, 'objet', $event)"
+          @delete="$emit('delete-source', item.instance)"
+          @dragstart="onDragStart(i, 'source', $event)"
           @dragend="onDragEnd"
           @collapse="expandedInstance = null"
         >
@@ -44,7 +44,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import SourceItem from './SourceItem.vue';
 import EffectItem from './EffectItem.vue';
 
@@ -53,8 +53,9 @@ const props = defineProps({
   sourceRegistry: { type: Array, default: () => [] },
   effectRegistry: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['settings-change', 'reorder-items', 'delete-objet', 'delete-effect']);
+const emit = defineEmits(['settings-change', 'reorder-items', 'delete-source', 'delete-effect']);
 
+const controlsEl = ref(null);
 const expandedInstance = ref(null);
 const dragIndex = ref(null);
 const dragType = ref(null);
@@ -65,6 +66,15 @@ watch(
   () => emit('settings-change'),
   { deep: true },
 );
+
+function onDocumentMousedown(event) {
+  if (expandedInstance.value && controlsEl.value && !controlsEl.value.contains(event.target)) {
+    expandedInstance.value = null;
+  }
+}
+
+onMounted(() => document.addEventListener('mousedown', onDocumentMousedown));
+onUnmounted(() => document.removeEventListener('mousedown', onDocumentMousedown));
 
 function toggleExpanded(instance) {
   expandedInstance.value = expandedInstance.value === instance ? null : instance;
@@ -79,7 +89,7 @@ function getEffectInsertIndex() {
   const idx = props.items.findIndex((i) => i.instance === expandedInstance.value);
   if (idx < 0) return props.items.length;
   for (let i = idx + 1; i < props.items.length; i++) {
-    if (props.items[i].type === 'objet') return i;
+    if (props.items[i].type === 'source') return i;
   }
   return props.items.length;
 }
@@ -89,7 +99,7 @@ defineExpose({ expandItem, getEffectInsertIndex });
 const panelItems = computed(() =>
   props.items
     .map((item) => {
-      if (item.type === 'objet') {
+      if (item.type === 'source') {
         const reg = props.sourceRegistry.find((r) => r.className === item.instance.constructor.name);
         return reg ? { ...item, label: reg.label, component: reg.component, isDeletable: reg.isDeletable ?? true } : null;
       } else {
@@ -112,7 +122,7 @@ function onDragEnd() {
   dropLineIndex.value = null;
 }
 
-function getObjetGroupEnd(idx) {
+function getSourceGroupEnd(idx) {
   let end = idx + 1;
   while (end < panelItems.value.length && panelItems.value[end].type === 'effect') end++;
   return end;
@@ -121,14 +131,14 @@ function getObjetGroupEnd(idx) {
 function onDragOver(event) {
   if (dragIndex.value === null) return;
   const list = event.currentTarget;
-  const allItems = [...list.querySelectorAll('.effect-item, .objet-item')];
+  const allItems = [...list.querySelectorAll('.effect-item, .source-item')];
 
-  if (dragType.value === 'objet') {
-    const groupEnd = getObjetGroupEnd(dragIndex.value);
+  if (dragType.value === 'source') {
+    const groupEnd = getSourceGroupEnd(dragIndex.value);
     const noOp = new Set([dragIndex.value, groupEnd]);
     const validPositions = panelItems.value
       .map((item, i) => ({ item, i }))
-      .filter(({ item, i }) => item.type === 'objet' && item.isDeletable !== false && !noOp.has(i))
+      .filter(({ item, i }) => item.type === 'source' && item.isDeletable !== false && !noOp.has(i))
       .map(({ i }) => i);
     if (!noOp.has(panelItems.value.length)) validPositions.push(panelItems.value.length);
     if (validPositions.length === 0) return;
@@ -161,9 +171,9 @@ function onDragLeave(event) {
 function onDrop() {
   if (dragIndex.value === null || dropLineIndex.value === null) return;
 
-  if (dragType.value === 'objet') {
+  if (dragType.value === 'source') {
     const groupStart = dragIndex.value;
-    const groupEnd = getObjetGroupEnd(groupStart);
+    const groupEnd = getSourceGroupEnd(groupStart);
     const groupSize = groupEnd - groupStart;
     const to = dropLineIndex.value;
     const newOrder = [...props.items];
@@ -198,7 +208,7 @@ function onDrop() {
 }
 .items-list { display: flex; flex-direction: column; gap: 6px; }
 .items-list :deep(.effect-item),
-.items-list :deep(.objet-item) { margin-bottom: 0; }
+.items-list :deep(.source-item) { margin-bottom: 0; }
 .drop-line {
   height: 1px;
   background: #fff;

@@ -4,7 +4,7 @@ export class ModuleHost {
   }
 
   get sources() {
-    return this.items.filter((i) => i.type === 'objet').map((i) => i.instance);
+    return this.items.filter((i) => i.type === 'source').map((i) => i.instance);
   }
 
   get effects() {
@@ -27,7 +27,7 @@ export class ModuleHost {
     const groups = [];
     let current = null;
     for (const item of this.items) {
-      if (item.type === 'objet') {
+      if (item.type === 'source') {
         current = { source: item.instance, effects: [] };
         groups.push(current);
       } else if (item.type === 'effect' && current) {
@@ -104,11 +104,11 @@ export class ModuleHost {
     }
   }
 
-  addObjet(instance, position = this.items.length) {
-    this.items.splice(position, 0, { type: 'objet', instance });
+  addSource(instance, position = this.items.length) {
+    this.items.splice(position, 0, { type: 'source', instance });
   }
 
-  removeObjet(instance) {
+  removeSource(instance) {
     const idx = this.items.findIndex((i) => i.instance === instance);
     if (idx === -1) return;
     let end = idx + 1;

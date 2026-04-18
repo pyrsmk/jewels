@@ -6,7 +6,7 @@
       @change="instance.options.chromaticMode = $event.target.value"
     >
       <option value="edges">Bords</option>
-      <option value="source">Objet</option>
+      <option value="source">Source</option>
     </select>
     <label :class="{ disabled: instance.options.chromaticMode === 'source' }">
       Largeur

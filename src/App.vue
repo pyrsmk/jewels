@@ -5,7 +5,7 @@
       :is-fullscreen="isFullscreen"
       @toggle-fullscreen="canvasViewRef?.toggleFullscreen()"
       @open-add-effect="showAddEffect = true"
-      @open-add-objet="showAddObjet = true"
+      @open-add-source="showAddSource = true"
     />
     <ControlPanel
       v-if="engine"
@@ -15,7 +15,7 @@
       :effect-registry="engine.effectRegistry"
       @settings-change="onSettingsChange"
       @reorder-items="onReorderItems"
-      @delete-objet="onDeleteObjet"
+      @delete-source="onDeleteSource"
       @delete-effect="onDeleteEffect"
     />
   </div>
@@ -27,11 +27,11 @@
   />
   <Transition name="overlay">
     <AddSourceMenu
-      v-if="showAddObjet"
+      v-if="showAddSource"
       :source-registry="engine?.sourceRegistry ?? []"
-      :active-source-names="items.filter(i => i.type === 'objet').map(i => i.instance.constructor.name)"
-      @add="onAddObjet"
-      @close="showAddObjet = false"
+      :active-source-names="items.filter(i => i.type === 'source').map(i => i.instance.constructor.name)"
+      @add="onAddSource"
+      @close="showAddSource = false"
     />
   </Transition>
   <Transition name="overlay">
@@ -57,7 +57,7 @@ const controlPanelRef = ref(null);
 const fps = ref(0);
 const isFullscreen = ref(false);
 const engine = shallowRef(null);
-const showAddObjet = ref(false);
+const showAddSource = ref(false);
 const showAddEffect = ref(false);
 
 const items = computed(() => engine.value?.items.value ?? []);
@@ -66,10 +66,10 @@ function onEngineReady(eng) {
   engine.value = eng;
 }
 
-async function onAddObjet(className) {
+async function onAddSource(className) {
   if (!engine.value) return;
-  const instance = await engine.value.addObjet(className);
-  showAddObjet.value = false;
+  const instance = await engine.value.addSource(className);
+  showAddSource.value = false;
   if (instance) controlPanelRef.value?.expandItem(instance);
 }
 
@@ -89,8 +89,8 @@ function onDeleteEffect(instance) {
   engine.value?.removeEffect(instance);
 }
 
-function onDeleteObjet(instance) {
-  engine.value?.removeObjet(instance);
+function onDeleteSource(instance) {
+  engine.value?.removeSource(instance);
 }
 
 function onSettingsChange() {

@@ -6,8 +6,8 @@
     <div class="spacer"></div>
     <Button
       icon="ev_shadow_add"
-      tooltip="Ajouter un objet"
-      @click="$emit('openAddObjet')"
+      tooltip="Ajouter un source"
+      @click="$emit('openAddSource')"
     />
     <Button
       icon="texture_add"
@@ -29,7 +29,7 @@ defineProps({
   fps: { type: Number, default: 0 },
   isFullscreen: { type: Boolean, default: false },
 });
-defineEmits(['toggleFullscreen', 'openAddEffect', 'openAddObjet']);
+defineEmits(['toggleFullscreen', 'openAddEffect', 'openAddSource']);
 
 const version = __APP_VERSION__;
 </script>

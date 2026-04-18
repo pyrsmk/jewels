@@ -1,9 +1,11 @@
+- vidéo : icône movie
+- grain : on garde que celluloïd
 - nouvelles sources :
-  - vidéo
   - bandes horizontales/verticales
   - https://vincentgarreau.com/particles.js/
   - figures géométriques ?
 - effets
+  - dithering random
   - pixellisation
   - pixel desert
   - trails
