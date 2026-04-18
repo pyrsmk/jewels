@@ -29,9 +29,9 @@ function onFileChange(e) {
 
 <style scoped>
 .file-label {
-  position: relative;
   display: flex;
   align-items: center;
+  gap: 8px;
   cursor: pointer;
   font-size: 12px;
   color: #ccc;
@@ -42,9 +42,8 @@ function onFileChange(e) {
   overflow: hidden;
 }
 .file-label .icon {
-  position: absolute;
-  left: 10px;
   font-size: 16px;
+  flex-shrink: 0;
   opacity: 0.7;
 }
 .file-label .text {
