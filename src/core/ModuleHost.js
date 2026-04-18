@@ -30,7 +30,7 @@ export class ModuleHost {
       if (item.type === 'source') {
         current = { source: item.instance, effects: [] };
         groups.push(current);
-      } else if (item.type === 'effect' && current) {
+      } else if (item.type === 'effect' && current && item.enabled !== false) {
         current.effects.push(item.instance);
       }
     }
@@ -117,7 +117,7 @@ export class ModuleHost {
   }
 
   addEffect(instance, position = this.items.length) {
-    this.items.splice(position, 0, { type: 'effect', instance });
+    this.items.splice(position, 0, { type: 'effect', instance, enabled: true });
   }
 
   removeEffect(instance) {

@@ -97,6 +97,14 @@ export async function useEngine(canvas) {
     postProcessor.invalidateCache();
   }
 
+  function toggleEffectEnabled(instance) {
+    const item = moduleHost.items.find((i) => i.instance === instance);
+    if (!item) return;
+    item.enabled = item.enabled === false ? true : false;
+    items.value = [...moduleHost.items];
+    postProcessor.invalidateCache();
+  }
+
   function reorderItems(newItems) {
     moduleHost.reorderItems(newItems);
     items.value = [...moduleHost.items];
@@ -168,5 +176,6 @@ export async function useEngine(canvas) {
     addEffect,
     removeEffect,
     reorderItems,
+    toggleEffectEnabled,
   };
 }

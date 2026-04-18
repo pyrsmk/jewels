@@ -28,9 +28,11 @@
           :instance="item.instance"
           :label="item.label"
           :expanded="expandedInstance === item.instance"
+          :enabled="item.enabled !== false"
           :draggable="true"
           @toggle="toggleExpanded(item.instance)"
           @delete="$emit('delete-effect', item.instance)"
+          @toggle-enabled="$emit('toggle-effect-enabled', item.instance)"
           @collapse="expandedInstance = null"
           @dragstart="onDragStart(i, 'effect', $event)"
           @dragend="onDragEnd"
@@ -53,7 +55,7 @@ const props = defineProps({
   sourceRegistry: { type: Array, default: () => [] },
   effectRegistry: { type: Array, default: () => [] },
 });
-const emit = defineEmits(['settings-change', 'reorder-items', 'delete-source', 'delete-effect']);
+const emit = defineEmits(['settings-change', 'reorder-items', 'delete-source', 'delete-effect', 'toggle-effect-enabled']);
 
 const controlsEl = ref(null);
 const expandedInstance = ref(null);

@@ -17,6 +17,7 @@
       @reorder-items="onReorderItems"
       @delete-source="onDeleteSource"
       @delete-effect="onDeleteEffect"
+      @toggle-effect-enabled="onToggleEffectEnabled"
     />
   </div>
   <CanvasView
@@ -87,6 +88,10 @@ function onReorderItems(newOrder) {
 
 function onDeleteEffect(instance) {
   engine.value?.removeEffect(instance);
+}
+
+function onToggleEffectEnabled(instance) {
+  engine.value?.toggleEffectEnabled(instance);
 }
 
 function onDeleteSource(instance) {

@@ -16,6 +16,11 @@
       <span class="material-symbols-outlined effect-item__chevron">
         {{ expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
       </span>
+      <span
+        class="material-symbols-outlined effect-item__visibility"
+        :class="{ 'effect-item__visibility--off': !enabled }"
+        @click.stop="$emit('toggle-enabled')"
+      >{{ enabled ? 'visibility' : 'visibility_off' }}</span>
       <span class="material-symbols-outlined effect-item__delete" @click.stop="$emit('delete')">delete</span>
     </div>
     <div class="effect-item__body" :class="{ 'effect-item__body--expanded': expanded }">
@@ -31,9 +36,10 @@ defineProps({
   instance: { type: Object, required: true },
   label: { type: String, required: true },
   expanded: { type: Boolean, default: false },
+  enabled: { type: Boolean, default: true },
   draggable: { type: Boolean, default: false },
 });
-defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'collapse']);
+defineEmits(['toggle', 'delete', 'toggle-enabled', 'dragstart', 'dragend', 'collapse']);
 </script>
 
 <style scoped>
@@ -72,6 +78,16 @@ defineEmits(['toggle', 'delete', 'dragstart', 'dragend', 'collapse']);
 }
 .effect-item__label { flex: 1; font-size: 12px; font-weight: 600; color: #ddd; }
 .effect-item__chevron { font-size: 16px; color: #8f9bb3; }
+.effect-item__visibility {
+  font-size: 16px;
+  color: #8f9bb3;
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px;
+}
+.effect-item__visibility:hover { color: #ddd; }
+.effect-item__visibility--off { color: #555; }
+.effect-item__visibility--off:hover { color: #8f9bb3; }
 .effect-item__delete {
   font-size: 16px;
   color: #8f9bb3;
