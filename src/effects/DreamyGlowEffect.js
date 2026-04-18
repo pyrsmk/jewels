@@ -80,7 +80,9 @@ export class DreamyGlowEffect extends EffectInterface {
       float edgeMetric = max(rect.x, rect.y);
       float edgeMask = smoothstep(0.92, 0.995, edgeMetric);
       float edgeBoost = 1.0 + edgeMask * u_dreamyEdgeBoost;
-      combined += dreamy * (0.35 + u_dreamyGlow * 0.85) * edgeBoost;${hasGrainAfter ? grainMaskCode : ''}
+      vec3 dreamyContrib = dreamy * (0.35 + u_dreamyGlow * 0.85) * edgeBoost;
+      combined += dreamyContrib;
+      srcAlpha = max(srcAlpha, dot(dreamyContrib, vec3(0.2126, 0.7152, 0.0722)));${hasGrainAfter ? grainMaskCode : ''}
     }`;
   }
 }

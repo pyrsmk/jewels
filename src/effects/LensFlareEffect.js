@@ -388,7 +388,9 @@ ${grainHelperCode}`;
 
     return `
     if (hasFlare) {
-      combined += lensFlare(uv);
+      vec3 flare = lensFlare(uv);
+      combined += flare;
+      srcAlpha = max(srcAlpha, dot(flare, vec3(0.2126, 0.7152, 0.0722)));
     }${grainMaskCode}`;
   }
 }
