@@ -9,8 +9,8 @@
         @dragend.stop="$emit('dragend', $event)"
         @mousedown.stop="$emit('collapse')"
       >drag_indicator</span>
-      <span class="source-item__badge" :class="instance.constructor.name === 'BackgroundSource' ? 'source-item__badge--root' : ''">
-        {{ instance.constructor.name === 'BackgroundSource' ? 'RACINE' : 'SOURCE' }}
+      <span class="source-item__badge" :class="className === 'BackgroundSource' ? 'source-item__badge--root' : ''">
+        {{ className === 'BackgroundSource' ? 'RACINE' : 'SOURCE' }}
       </span>
       <span class="source-item__label">{{ label }}</span>
       <span
@@ -39,6 +39,7 @@
 defineProps({
   instance: { type: Object, required: true },
   label: { type: String, required: true },
+  className: { type: String, required: true },
   expanded: { type: Boolean, default: false },
   isDeletable: { type: Boolean, default: true },
   isDraggable: { type: Boolean, default: false },

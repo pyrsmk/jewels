@@ -12,6 +12,7 @@
           v-if="item.type === 'source'"
           :instance="item.instance"
           :label="item.label"
+          :class-name="item.className"
           :is-deletable="item.isDeletable"
           :is-draggable="item.isDeletable"
           :expanded="expandedInstance === item.instance"
