@@ -58,11 +58,11 @@ export async function useEngine(canvas) {
   async function addSource(className) {
     const entry = sourceRegistry.find((r) => r.className === className);
     if (!entry) throw new Error(`Source inconnu : ${className}`);
-    if (className === 'BackgroundSource' && moduleHost.sources.some((s) => s.constructor.name === 'BackgroundSource')) return;
+    if (className === 'BackgroundSource' && moduleHost.items.some((i) => i.type === 'source' && i.className === 'BackgroundSource')) return;
     entry.componentLoader?.();
     const Cls = await entry.classLoader();
     const instance = markRaw(Cls.deserialize({}));
-    moduleHost.addSource(instance);
+    moduleHost.addSource(instance, undefined, className);
     items.value = [...moduleHost.items];
     instance.setup(contextFactory({}));
     instance.resize(contextFactory({}));
@@ -76,7 +76,7 @@ export async function useEngine(canvas) {
     entry.componentLoader?.();
     const Cls = await entry.classLoader();
     const instance = markRaw(Cls.deserialize({}));
-    moduleHost.addEffect(instance, position ?? moduleHost.items.length);
+    moduleHost.addEffect(instance, position ?? moduleHost.items.length, className);
     items.value = [...moduleHost.items];
     postProcessor.invalidateCache();
     instance.setup(contextFactory({}));

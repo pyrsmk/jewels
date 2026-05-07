@@ -58,7 +58,7 @@ export class ModuleHost {
       v: 2,
       items: this.items.map((item) => ({
         type: item.type,
-        className: item.instance.constructor.name,
+        className: item.className,
         params: item.instance.getParameters(),
       })),
     };
@@ -73,15 +73,15 @@ export class ModuleHost {
         const cls = saved.className;
         const idx = counters[cls] ?? 0;
         counters[cls] = idx + 1;
-        const match = this.items.filter((i) => i.instance.constructor.name === cls)[idx];
+        const match = this.items.filter((i) => i.className === cls)[idx];
         if (match) match.instance.setParameters(saved.params);
       }
       return;
     }
-    for (const module of this.getAllModules()) {
-      const saved = settings[module.constructor.name];
+    for (const item of this.items) {
+      const saved = settings[item.className];
       if (!saved || typeof saved !== 'object') continue;
-      module.setParameters(saved);
+      item.instance.setParameters(saved);
     }
   }
 
@@ -104,8 +104,8 @@ export class ModuleHost {
     }
   }
 
-  addSource(instance, position = this.items.length) {
-    this.items.splice(position, 0, { type: 'source', instance });
+  addSource(instance, position = this.items.length, className) {
+    this.items.splice(position, 0, { type: 'source', instance, className: className ?? instance.constructor.name });
   }
 
   removeSource(instance) {
@@ -116,8 +116,8 @@ export class ModuleHost {
     this.items.splice(idx, end - idx);
   }
 
-  addEffect(instance, position = this.items.length) {
-    this.items.splice(position, 0, { type: 'effect', instance, enabled: true });
+  addEffect(instance, position = this.items.length, className) {
+    this.items.splice(position, 0, { type: 'effect', instance, enabled: true, className: className ?? instance.constructor.name });
   }
 
   removeEffect(instance) {

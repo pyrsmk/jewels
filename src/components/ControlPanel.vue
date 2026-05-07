@@ -102,10 +102,10 @@ const panelItems = computed(() =>
   props.items
     .map((item) => {
       if (item.type === 'source') {
-        const reg = props.sourceRegistry.find((r) => r.className === item.instance.constructor.name);
+        const reg = props.sourceRegistry.find((r) => r.className === item.className);
         return reg ? { ...item, label: reg.label, component: reg.component, isDeletable: reg.isDeletable ?? true } : null;
       } else {
-        const reg = props.effectRegistry.find((r) => r.className === item.instance.constructor.name);
+        const reg = props.effectRegistry.find((r) => r.className === item.className);
         return reg ? { ...item, label: reg.label, component: reg.component } : null;
       }
     })
