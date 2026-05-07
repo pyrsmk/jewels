@@ -1,3 +1,4 @@
+- modes de fusion ?
 - nouvelles sources :
   - bandes horizontales/verticales
   - https://vincentgarreau.com/particles.js/

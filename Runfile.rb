@@ -1,3 +1,5 @@
+version 3
+
 task :dev do
   run "yarn vite dev"
 end
