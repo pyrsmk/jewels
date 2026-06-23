@@ -1,24 +1,26 @@
 import { AbstractSource } from '../core/AbstractSource.js';
 import { createProgram } from '../utils/webgl.js';
 
-const vs = `
+const vs = `#version 300 es
 precision highp float;
-attribute vec2 a_pos;
-varying vec2 v_uv;
+in vec2 a_pos;
+out vec2 v_uv;
 void main() {
   v_uv = a_pos * 0.5 + 0.5;
   gl_Position = vec4(a_pos, 0.0, 1.0);
 }
 `;
 
-const fs = `
+const fs = `#version 300 es
 precision highp float;
-varying vec2 v_uv;
+in vec2 v_uv;
 uniform vec2  u_resolution;
 uniform float u_accTime;
 uniform float u_fluidCount;
 uniform vec3  u_fluidColors[8];
 uniform float u_fluidSeeds[8];
+
+out vec4 fragColor;
 
 float hash(vec2 p) {
   p = fract(p * vec2(0.1031, 0.1030));
@@ -98,7 +100,7 @@ void main() {
   vec3 color = nearColor * bright;
   color = mix(color, vec3(1.0), pow(bd, 5.0) * 0.35);
 
-  gl_FragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
+  fragColor = vec4(clamp(color, 0.0, 1.0), 1.0);
 }
 `;
 

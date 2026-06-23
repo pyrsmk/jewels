@@ -50,7 +50,7 @@ export class BlockGlitch3Effect extends EffectInterface {
       (noise21(grid + vec2(phase, 3.0)) - 0.5) * 0.05,
       (noise21(grid + vec2(phase, 9.0)) - 0.5) * 0.02
     ) * u_bg3;
-    vec3 prev = texture2D(u_prev, clamp(uv + motion, 0.0, 1.0)).rgb;
+    vec3 prev = texture(u_prev, clamp(uv + motion, 0.0, 1.0)).rgb;
     return mix(color, prev, gate * clamp(u_bg3, 0.0, 1.0));
   }`;
   }

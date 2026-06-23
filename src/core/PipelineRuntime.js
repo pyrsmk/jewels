@@ -1,22 +1,23 @@
 import { createProgram, createTexFbo, clearFbo } from '../utils/webgl.js';
 import { sharedShaderLibrary } from './SharedShaderLibrary.js';
 
-const quadVS = `
+const quadVS = `#version 300 es
   precision highp float;
-  attribute vec2 a_pos;
-  varying vec2 v_uv;
+  in vec2 a_pos;
+  out vec2 v_uv;
   void main() {
     v_uv = a_pos * 0.5 + 0.5;
     gl_Position = vec4(a_pos, 0.0, 1.0);
   }
 `;
 
-const blitFS = `
+const blitFS = `#version 300 es
   precision highp float;
-  varying vec2 v_uv;
+  in vec2 v_uv;
   uniform sampler2D u_tex;
+  out vec4 fragColor;
   void main() {
-    gl_FragColor = texture2D(u_tex, v_uv);
+    fragColor = texture(u_tex, v_uv);
   }
 `;
 
@@ -171,17 +172,19 @@ export class PipelineRuntime {
     const post = effect.getPostShaderPostCode(context) || '';
     const sym = effect.getPostShaderGuardSymbol(context);
     const earlyExit = sym
-      ? `\n    if (!${sym}) { gl_FragColor = vec4(combined, srcAlpha); return; }\n`
+      ? `\n    if (!${sym}) { fragColor = vec4(combined, srcAlpha); return; }\n`
       : '';
-    const fs = `
+    const fs = `#version 300 es
   precision highp float;
-  varying vec2 v_uv;
+  in vec2 v_uv;
   uniform sampler2D u_scene;
   uniform sampler2D u_prev;
   uniform vec2 u_resolution;
   uniform float u_time;
 ${sharedUniforms}
 ${uniforms}
+
+  out vec4 fragColor;
 
 ${sharedHelpers}
 
@@ -190,14 +193,14 @@ ${helpers}
   void main() {
     vec2 uv = v_uv;
     vec2 px = 1.0 / u_resolution;
-    float srcAlpha = texture2D(u_scene, uv).a;
+    float srcAlpha = texture(u_scene, uv).a;
 ${guards}
     vec3 combined = sampleScene(uv);
 ${earlyExit}
     float grainResponseMask = 1.0;
 ${pre}
 ${post}
-    gl_FragColor = vec4(combined, srcAlpha);
+    fragColor = vec4(combined, srcAlpha);
   }
   `;
     return createProgram(this.gl, quadVS, fs);

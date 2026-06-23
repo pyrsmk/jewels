@@ -1,22 +1,23 @@
 import { AbstractSource } from '../core/AbstractSource.js';
 import { createProgram } from '../utils/webgl.js';
 
-const vs = `
+const vs = `#version 300 es
 precision highp float;
-attribute vec2 a_pos;
-varying vec2 v_uv;
+in vec2 a_pos;
+out vec2 v_uv;
 void main() {
   v_uv = a_pos * 0.5 + 0.5;
   gl_Position = vec4(a_pos, 0.0, 1.0);
 }
 `;
 
-const fs = `
+const fs = `#version 300 es
 precision highp float;
-varying vec2 v_uv;
+in vec2 v_uv;
 uniform sampler2D u_video;
 uniform float u_videoAspect;
 uniform float u_canvasAspect;
+out vec4 fragColor;
 void main() {
   vec2 uv = v_uv;
   if (u_canvasAspect > u_videoAspect) {
@@ -24,7 +25,7 @@ void main() {
   } else {
     uv.x = 0.5 + (uv.x - 0.5) * (u_canvasAspect / u_videoAspect);
   }
-  gl_FragColor = vec4(texture2D(u_video, uv).rgb, 1.0);
+  fragColor = vec4(texture(u_video, uv).rgb, 1.0);
 }
 `;
 

@@ -57,11 +57,11 @@ export class TemporalGhost2Effect extends EffectInterface {
       noise21(uv * (11.0 + u_tg2Scale * 2.0) + vec2(t * 1.7, 9.3)) - 0.5,
       noise21(uv.yx * (10.0 + u_tg2Scale * 2.5) + vec2(-t * 1.3, 5.1)) - 0.5
     ) * (0.012 * u_tg2RgbShift);
-    vec3 ghostBase = texture2D(u_prev, clamp(uv + jitterA, 0.0, 1.0)).rgb;
+    vec3 ghostBase = texture(u_prev, clamp(uv + jitterA, 0.0, 1.0)).rgb;
     vec3 ghostRgb;
-    ghostRgb.r = texture2D(u_prev, clamp(uv + jitterA + rgbShift, 0.0, 1.0)).r;
+    ghostRgb.r = texture(u_prev, clamp(uv + jitterA + rgbShift, 0.0, 1.0)).r;
     ghostRgb.g = ghostBase.g;
-    ghostRgb.b = texture2D(u_prev, clamp(uv + jitterA - rgbShift, 0.0, 1.0)).b;
+    ghostRgb.b = texture(u_prev, clamp(uv + jitterA - rgbShift, 0.0, 1.0)).b;
     float chromaMask = smoothstep(0.0, 0.2, u_tg2RgbShift);
     vec3 ghost = mix(ghostBase, ghostRgb, chromaMask);
     vec3 effected = clamp(color + ghost * (0.55 * u_tg2), 0.0, 1.0);

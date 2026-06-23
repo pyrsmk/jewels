@@ -8,12 +8,15 @@ import { effectRegistry } from '../registry/effectRegistry.js';
 import { sourceRegistry } from '../registry/sourceRegistry.js';
 
 export async function useEngine(canvas) {
-  const gl = canvas.getContext('webgl', {
+  const gl = canvas.getContext('webgl2', {
     antialias: true,
     premultipliedAlpha: false,
     preserveDrawingBuffer: false,
   });
-  if (!gl) throw new Error('WebGL non supporté');
+  if (!gl) throw new Error('WebGL 2 non supporté');
+  if (!gl.getExtension('EXT_color_buffer_float')) {
+    console.warn('EXT_color_buffer_float non disponible, fallback RGBA8');
+  }
 
   const state = reactive({
     width: 0, height: 0, dpr: 1,

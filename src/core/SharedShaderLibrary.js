@@ -8,7 +8,7 @@ export class SharedShaderLibrary {
   getSamplingHelpers() {
     return `
   vec3 sampleScene(vec2 uv) {
-    return texture2D(u_scene, clamp(uv, 0.0, 1.0)).rgb;
+    return texture(u_scene, clamp(uv, 0.0, 1.0)).rgb;
   }`;
   }
 
@@ -19,16 +19,8 @@ export class SharedShaderLibrary {
     if (u_accentCount == 1) return u_accents[0];
     float scaled = clamp(t, 0.0, 0.9999) * float(u_accentCount - 1);
     int i0 = int(floor(scaled));
-    int i1 = i0 + 1;
-    if (i1 >= u_accentCount) i1 = u_accentCount - 1;
-    float f = fract(scaled);
-    vec3 c0 = vec3(0.0);
-    vec3 c1 = vec3(0.0);
-    for (int i = 0; i < 8; i++) {
-      if (i == i0) c0 = u_accents[i];
-      if (i == i1) c1 = u_accents[i];
-    }
-    return mix(c0, c1, f);
+    int i1 = min(i0 + 1, u_accentCount - 1);
+    return mix(u_accents[i0], u_accents[i1], fract(scaled));
   }`;
   }
 

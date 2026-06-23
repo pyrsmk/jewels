@@ -58,11 +58,11 @@ export class TemporalGhostEffect extends EffectInterface {
     vec2 drift = vec2(sin(phase) * pxGhost.x, cos(phase * 0.73) * pxGhost.y);
     float rgbShift = u_temporalGhostRgbShift * 2.0;
     vec2 rgb = drift * rgbShift;
-    vec3 prevCol = texture2D(u_prev, clamp(uv - drift, 0.0, 1.0)).rgb;
+    vec3 prevCol = texture(u_prev, clamp(uv - drift, 0.0, 1.0)).rgb;
     vec3 prevShifted = vec3(
-      texture2D(u_prev, clamp(uv - drift + rgb, 0.0, 1.0)).r,
-      texture2D(u_prev, clamp(uv - drift, 0.0, 1.0)).g,
-      texture2D(u_prev, clamp(uv - drift - rgb, 0.0, 1.0)).b
+      texture(u_prev, clamp(uv - drift + rgb, 0.0, 1.0)).r,
+      texture(u_prev, clamp(uv - drift, 0.0, 1.0)).g,
+      texture(u_prev, clamp(uv - drift - rgb, 0.0, 1.0)).b
     );
     vec3 ghost = mix(prevCol, prevShifted, clamp(u_temporalGhostRgbShift, 0.0, 1.0));
     return mix(color, ghost, clamp(u_temporalGhostOpacity * u_temporalGhost, 0.0, 1.0));

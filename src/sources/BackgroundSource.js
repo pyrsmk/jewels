@@ -23,15 +23,16 @@ export class BackgroundSource extends AbstractSource {
     const gl = runtime.gl;
     this.gl = gl;
 
-    const vs = `
+    const vs = `#version 300 es
       precision highp float;
-      attribute vec2 a_pos;
+      in vec2 a_pos;
       void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
     `;
-    const fs = `
+    const fs = `#version 300 es
       precision highp float;
       uniform vec3 u_bgColor;
-      void main() { gl_FragColor = vec4(u_bgColor, 1.0); }
+      out vec4 fragColor;
+      void main() { fragColor = vec4(u_bgColor, 1.0); }
     `;
     this.program = createProgram(gl, vs, fs);
     this.locs = this._resolveAllLocs(gl, this.program);

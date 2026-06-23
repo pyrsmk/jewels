@@ -50,15 +50,15 @@ export class ParticleSource extends AbstractSource {
   }
 
   getVertexShaderSource() {
-    return `
+    return `#version 300 es
 precision highp float;
-attribute vec4 a_data;
+in vec4 a_data;
 uniform vec2 u_camera;
 uniform float u_size;
 uniform float u_dpr;
-varying float v_depth;
-varying float v_alpha;
-varying vec2 v_sceneUv;
+out float v_depth;
+out float v_alpha;
+out vec2 v_sceneUv;
 void main() {
   vec2 pos = a_data.xy + u_camera;
   gl_Position = vec4(pos, 0.0, 1.0);
@@ -74,14 +74,15 @@ void main() {
   }
 
   getFragmentShaderSource() {
-    return `
+    return `#version 300 es
 precision highp float;
-varying float v_depth;
-varying float v_alpha;
-varying vec2 v_sceneUv;
+in float v_depth;
+in float v_alpha;
+in vec2 v_sceneUv;
 uniform vec3 u_accents[8];
 uniform int u_accentCount;
 uniform float u_colorEnabled;
+out vec4 fragColor;
 ${sharedShaderLibrary.getColorHelpers()}
 void main() {
   vec2 p = gl_PointCoord * 2.0 - 1.0;
@@ -102,7 +103,7 @@ void main() {
   col += vec3(1.0) * halo * 0.32;
   float alpha = clamp(mask + halo * 0.6, 0.0, 1.0) * v_alpha;
   if (alpha <= 0.001) discard;
-  gl_FragColor = vec4(col, alpha);
+  fragColor = vec4(col, alpha);
 }
 `;
   }
