@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class TemporalGhostEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       temporalGhostOpacity: 0.70,

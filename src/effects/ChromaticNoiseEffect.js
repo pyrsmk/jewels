@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ChromaticNoiseEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       chromaticNoise: 4.00,

@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ColorShimmerEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       colorTint2Palette: 'all',

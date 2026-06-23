@@ -1,7 +1,6 @@
 import { EffectInterface } from "../core/EffectInterface.js";
 
 export class ColorGradingEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       cgBrightness: 0.0,

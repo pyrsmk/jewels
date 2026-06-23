@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ChromaticAberrationEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       chromaticMode: 'edges',

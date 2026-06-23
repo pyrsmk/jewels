@@ -32,6 +32,16 @@ export const sourceRegistry = [
     ),
   },
   {
+    className: 'GameOfLifeSource',
+    label: 'Automates cellulaires',
+    isDeletable: true,
+    classLoader: () => import('../sources/GameOfLifeSource.js').then((m) => m.GameOfLifeSource),
+    componentLoader: () => import('../components/sources/GameOfLifeSource.vue'),
+    component: defineAsyncComponent(
+      () => import('../components/sources/GameOfLifeSource.vue')
+    ),
+  },
+  {
     className: 'VideoSource',
     label: 'Vidéo',
     isDeletable: true,

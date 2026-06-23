@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class PixelSortEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       hGlitch: 1.0,

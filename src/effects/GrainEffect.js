@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class GrainEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = { grainAmount: 6.0 };
     super({ ...defaults, ...options }, ['grainAmount'], ['grainAmountVal']);

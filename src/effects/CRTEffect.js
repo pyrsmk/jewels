@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class CRTEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       crt: 1.0,

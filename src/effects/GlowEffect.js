@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class GlowEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       glow: 1.0,

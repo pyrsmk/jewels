@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class BlockGlitchEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = {
       blockGlitch: 1.39,

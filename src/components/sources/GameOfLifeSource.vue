@@ -1,0 +1,127 @@
+<template>
+  <div>
+    <label>Algorithme</label>
+    <select
+      :value="instance.options.algorithm"
+      @change="onAlgorithmChange($event.target.value)"
+    >
+      <optgroup label="Life-like">
+        <option value="conway">Conway (B3/S23)</option>
+        <option value="highlife">HighLife (B36/S23)</option>
+        <option value="seeds">Seeds (B2/S)</option>
+        <option value="daynight">Day & Night (B3678/S34678)</option>
+        <option value="diamoeba">Diamoeba (B35678/S5678)</option>
+        <option value="replicator">Replicator (B1357/S1357)</option>
+        <option value="lifenodeath">Life sans mort (B3/S012345678)</option>
+      </optgroup>
+      <optgroup label="Spécial">
+        <option value="brain">Brian's Brain</option>
+      </optgroup>
+      <optgroup label="MNCA">
+        <option value="mnca-worms">Vers</option>
+        <option value="mnca-mitosis">Mitose</option>
+        <option value="mnca-gems">Gemmes</option>
+      </optgroup>
+    </select>
+
+    <label>Bordure</label>
+    <select
+      :value="instance.options.boundaryMode"
+      @change="instance.options.boundaryMode = $event.target.value"
+    >
+      <option value="continuous">Création continue</option>
+      <option value="toroidal">Wrapping toroïdal</option>
+    </select>
+
+    <label>Palette</label>
+    <select
+      :value="instance.options.palette"
+      @change="instance.options.palette = $event.target.value"
+    >
+      <option value="warm">Chaleureuses</option>
+      <option value="cool">Froides</option>
+      <option value="fluo">Fluo</option>
+      <option value="cyberpunk">Cyberpunk</option>
+      <option value="aurora">Aurora</option>
+      <option value="fire">Feu</option>
+      <option value="sunset">Coucher de soleil</option>
+      <option value="toxic">Toxique</option>
+      <option value="ice">Glace</option>
+      <option value="midnight">Minuit</option>
+    </select>
+
+    <SliderControl
+      label="Résolution"
+      :model-value="instance.options.gridResolution ?? 256"
+      :min="32" :max="1024" :step="1"
+      :display-fn="v => Math.round(v) + ' px'"
+      @update:model-value="onGridResolutionChange($event)"
+    />
+
+    <SliderControl
+      label="Vitesse"
+      :model-value="instance.options.speed ?? 0.35"
+      :min="0" :max="1" :step="0.005"
+      :display-fn="formatSpeed"
+      @update:model-value="instance.options.speed = $event"
+    />
+
+    <SliderControl
+      label="Densité initiale"
+      :model-value="instance.options.initialDensity ?? 0.3"
+      :min="0.01" :max="0.9" :step="0.01"
+      :display-fn="v => Math.round(v * 100) + ' %'"
+      @update:model-value="instance.options.initialDensity = $event"
+    />
+
+    <SliderControl
+      v-if="instance.options.boundaryMode === 'continuous'"
+      label="Taux de création"
+      :model-value="instance.options.spawnRate ?? 0.002"
+      :min="0" :max="0.02" :step="0.0001"
+      :display-fn="v => (v * 100).toFixed(2) + ' %'"
+      @update:model-value="instance.options.spawnRate = $event"
+    />
+
+    <button class="reseed-btn" @click="instance.reseed()">
+      Reseed
+    </button>
+  </div>
+</template>
+
+<script setup>
+import SliderControl from '../SliderControl.vue';
+
+const props = defineProps({ instance: { type: Object, required: true } });
+
+function onAlgorithmChange(value) {
+  props.instance.options.algorithm = value;
+  props.instance.onAlgorithmChange();
+}
+
+function onGridResolutionChange(value) {
+  props.instance.options.gridResolution = value;
+  props.instance.onGridResolutionChange();
+}
+
+function formatSpeed(t) {
+  let sps;
+  if (t <= 0.6) {
+    sps = 0.5 * Math.pow(120, t / 0.6);
+  } else {
+    sps = 60 * Math.pow(20, (t - 0.6) / 0.4);
+  }
+  if (sps < 1) return (1 / sps).toFixed(1) + ' s/step';
+  if (sps < 60) return sps.toFixed(1) + ' step/s';
+  return Math.round(sps / 60) + ' step/frame';
+}
+</script>
+
+<style scoped>
+.reseed-btn {
+  margin-top: 6px;
+  width: 100%;
+  padding: 5px 0;
+  cursor: pointer;
+}
+</style>

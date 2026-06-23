@@ -1,7 +1,6 @@
 import { EffectInterface } from '../core/EffectInterface.js';
 
 export class ColorTintEffect extends EffectInterface {
-
   constructor(options = {}) {
     const defaults = { colors: ['#5900ff', '#00d5ff'] };
     super({ ...defaults, ...options }, [], []);
