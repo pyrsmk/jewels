@@ -1,3 +1,7 @@
+- CRT => corriger le phosphore qui doit avoir un fondu sur les précédents pixels
+- Teinte 2 s'applique sur toutes les sources alors qu'il ne faut pas que ça s'applique sur le Fond; avec Teinte 1 ça plante
+
+- renommer les palettes
 - réponse au grain dans Halo ne fonctionne pas
 - ghosts ne fonctionne pas après certains filtres (mets en place les filtres habituels)
 - si on met Teinte 2 par dessus Teinte 3 ça ne fait que renforcer Teinte 3 (et idem dans l'autre sens, ça ne fait que renforcer la pemière Teinte)

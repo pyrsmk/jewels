@@ -6,6 +6,7 @@
     :max="max"
     :step="step"
     :value="modelValue"
+    :disabled="disabled"
     @input="$emit('update:modelValue', +$event.target.value)"
   />
 </template>
@@ -18,6 +19,7 @@ defineProps({
   max: { type: Number, required: true },
   step: { type: Number, default: 0.01 },
   displayFn: { type: Function, default: null },
+  disabled: { type: Boolean, default: false },
 });
 
 defineEmits(['update:modelValue']);

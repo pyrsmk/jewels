@@ -17,20 +17,15 @@
       <optgroup label="Spécial">
         <option value="brain">Brian's Brain</option>
       </optgroup>
-      <optgroup label="MNCA">
-        <option value="mnca-worms">Vers</option>
-        <option value="mnca-mitosis">Mitose</option>
-        <option value="mnca-gems">Gemmes</option>
-      </optgroup>
     </select>
 
-    <label>Bordure</label>
+    <label>Initialisation</label>
     <select
-      :value="instance.options.boundaryMode"
-      @change="instance.options.boundaryMode = $event.target.value"
+      :value="instance.options.initMode ?? 'single'"
+      @change="instance.setParameters({ initMode: $event.target.value })"
     >
-      <option value="continuous">Création continue</option>
-      <option value="toroidal">Wrapping toroïdal</option>
+      <option value="single">Single seed</option>
+      <option value="multi">Multi seeds</option>
     </select>
 
     <label>Palette</label>
@@ -52,7 +47,7 @@
 
     <SliderControl
       label="Résolution"
-      :model-value="instance.options.gridResolution ?? 256"
+      :model-value="instance.options.gridResolution ?? 512"
       :min="32" :max="1024" :step="1"
       :display-fn="v => Math.round(v) + ' px'"
       @update:model-value="onGridResolutionChange($event)"
@@ -60,7 +55,7 @@
 
     <SliderControl
       label="Vitesse"
-      :model-value="instance.options.speed ?? 0.35"
+      :model-value="instance.options.speed ?? 0.485"
       :min="0" :max="1" :step="0.005"
       :display-fn="formatSpeed"
       @update:model-value="instance.options.speed = $event"
@@ -71,15 +66,15 @@
       :model-value="instance.options.initialDensity ?? 0.3"
       :min="0.01" :max="0.9" :step="0.01"
       :display-fn="v => Math.round(v * 100) + ' %'"
+      :disabled="(instance.options.initMode ?? 'single') === 'single'"
       @update:model-value="instance.options.initialDensity = $event"
     />
 
     <SliderControl
-      v-if="instance.options.boundaryMode === 'continuous'"
-      label="Taux de création"
-      :model-value="instance.options.spawnRate ?? 0.002"
-      :min="0" :max="0.02" :step="0.0001"
-      :display-fn="v => (v * 100).toFixed(2) + ' %'"
+      label="Ensemancement"
+      :model-value="instance.options.spawnRate ?? 10"
+      :min="0" :max="100" :step="0.01"
+      :display-fn="v => v.toFixed(2) + ' px/Mpx²/step'"
       @update:model-value="instance.options.spawnRate = $event"
     />
 
@@ -95,13 +90,11 @@ import SliderControl from '../SliderControl.vue';
 const props = defineProps({ instance: { type: Object, required: true } });
 
 function onAlgorithmChange(value) {
-  props.instance.options.algorithm = value;
-  props.instance.onAlgorithmChange();
+  props.instance.setParameters({ algorithm: value });
 }
 
 function onGridResolutionChange(value) {
-  props.instance.options.gridResolution = value;
-  props.instance.onGridResolutionChange();
+  props.instance.setParameters({ gridResolution: value });
 }
 
 function formatSpeed(t) {

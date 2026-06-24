@@ -15,33 +15,6 @@ const PRESETS = {
 
   // Brian's Brain
   brain: { type: 'brain' },
-
-  // MNCA
-  'mnca-worms': {
-    type: 'mnca',
-    rings: [
-      { inner: 0, outer: 3, center: 0.48, width: 0.15 },
-      { inner: 7, outer: 14, center: 0.15, width: 0.14 },
-    ],
-    dt: 0.15,
-  },
-  'mnca-mitosis': {
-    type: 'mnca',
-    rings: [
-      { inner: 0, outer: 3, center: 0.50, width: 0.18 },
-      { inner: 5, outer: 9, center: 0.30, width: 0.14 },
-      { inner: 10, outer: 15, center: 0.18, width: 0.12 },
-    ],
-    dt: 0.12,
-  },
-  'mnca-gems': {
-    type: 'mnca',
-    rings: [
-      { inner: 0, outer: 3, center: 0.45, width: 0.14 },
-      { inner: 5, outer: 10, center: 0.22, width: 0.12 },
-    ],
-    dt: 0.12,
-  },
 };
 
 // ===== Palettes: [dark, mid, bright] triplets =====
@@ -72,9 +45,14 @@ void main() {
 
 const HASH_GLSL = `
 float hash(vec2 p) {
-  p = fract(p * vec2(0.1031, 0.1030));
-  p += dot(p, p.yx + 33.33);
-  return fract((p.x + p.y) * p.x);
+  uvec2 v = floatBitsToUint(p);
+  uint h = v.x * 1597334677u ^ v.y * 3812015801u;
+  h ^= h >> 16u;
+  h *= 2246822519u;
+  h ^= h >> 13u;
+  h *= 3266489917u;
+  h ^= h >> 16u;
+  return float(h) / 4294967295.0;
 }`;
 
 const simLifeLikeFS = `#version 300 es
@@ -83,7 +61,6 @@ uniform sampler2D u_state;
 uniform ivec2 u_gridSize;
 uniform int u_birthMask;
 uniform int u_surviveMask;
-uniform bool u_wrap;
 uniform float u_spawnRate;
 uniform float u_seed;
 out vec4 fragColor;
@@ -96,12 +73,7 @@ void main() {
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
       if (dx == 0 && dy == 0) continue;
-      ivec2 nc = coord + ivec2(dx, dy);
-      if (u_wrap) {
-        nc = ivec2(mod(vec2(nc), vec2(u_gridSize)));
-      } else if (nc.x < 0 || nc.x >= u_gridSize.x || nc.y < 0 || nc.y >= u_gridSize.y) {
-        continue;
-      }
+      ivec2 nc = (coord + ivec2(dx, dy) + u_gridSize) % u_gridSize;
       if (texelFetch(u_state, nc, 0).r > 0.5) neighbors++;
     }
   }
@@ -111,18 +83,17 @@ void main() {
   } else {
     newState = ((u_birthMask >> neighbors) & 1) == 1 ? 1.0 : 0.0;
   }
-  if (!u_wrap && newState < 0.5) {
+  if (newState < 0.5) {
     float r = hash(vec2(coord) + vec2(u_seed, u_seed * 1.37));
     if (r < u_spawnRate) newState = 1.0;
   }
-  fragColor = vec4(newState, 0.0, 0.0, 1.0);
+  fragColor = vec4(newState);
 }`;
 
 const simBrainFS = `#version 300 es
 precision highp float;
 uniform sampler2D u_state;
 uniform ivec2 u_gridSize;
-uniform bool u_wrap;
 uniform float u_spawnRate;
 uniform float u_seed;
 out vec4 fragColor;
@@ -142,100 +113,17 @@ void main() {
     for (int dy = -1; dy <= 1; dy++) {
       for (int dx = -1; dx <= 1; dx++) {
         if (dx == 0 && dy == 0) continue;
-        ivec2 nc = coord + ivec2(dx, dy);
-        if (u_wrap) {
-          nc = ivec2(mod(vec2(nc), vec2(u_gridSize)));
-        } else if (nc.x < 0 || nc.x >= u_gridSize.x || nc.y < 0 || nc.y >= u_gridSize.y) {
-          continue;
-        }
+        ivec2 nc = (coord + ivec2(dx, dy) + u_gridSize) % u_gridSize;
         if (texelFetch(u_state, nc, 0).r > 0.75) neighbors++;
       }
     }
     if (neighbors == 2) newState = 1.0;
   }
-  if (!u_wrap && newState < 0.01) {
+  if (newState < 0.01) {
     float r = hash(vec2(coord) + vec2(u_seed, u_seed * 1.37));
     if (r < u_spawnRate) newState = 1.0;
   }
-  fragColor = vec4(newState, 0.0, 0.0, 1.0);
-}`;
-
-const simMncaFS = `#version 300 es
-precision highp float;
-uniform sampler2D u_state;
-uniform ivec2 u_gridSize;
-uniform bool u_wrap;
-uniform float u_spawnRate;
-uniform float u_seed;
-#define MAX_RINGS 4
-#define MAX_RADIUS 15
-uniform int u_ringCount;
-uniform int u_ringInner[MAX_RINGS];
-uniform int u_ringOuter[MAX_RINGS];
-uniform float u_ringCenter[MAX_RINGS];
-uniform float u_ringWidth[MAX_RINGS];
-uniform float u_dt;
-out vec4 fragColor;
-${HASH_GLSL}
-
-float sampleState(ivec2 coord) {
-  if (u_wrap) {
-    coord = ivec2(mod(vec2(coord), vec2(u_gridSize)));
-  } else {
-    coord = clamp(coord, ivec2(0), u_gridSize - 1);
-  }
-  return texelFetch(u_state, coord, 0).r;
-}
-
-void main() {
-  ivec2 coord = ivec2(gl_FragCoord.xy);
-  float state = texelFetch(u_state, coord, 0).r;
-  float growth = 0.0;
-  for (int r = 0; r < MAX_RINGS; r++) {
-    if (r >= u_ringCount) break;
-    int iR = u_ringInner[r];
-    int oR = u_ringOuter[r];
-    int iR2 = iR * iR;
-    int oR2 = oR * oR;
-    float sum = 0.0;
-    int count = 0;
-    for (int dy = -MAX_RADIUS; dy <= MAX_RADIUS; dy++) {
-      for (int dx = -MAX_RADIUS; dx <= MAX_RADIUS; dx++) {
-        int d2 = dx * dx + dy * dy;
-        if (d2 < iR2 || d2 > oR2) continue;
-        sum += sampleState(coord + ivec2(dx, dy));
-        count++;
-      }
-    }
-    float avg = count > 0 ? sum / float(count) : 0.0;
-    float c = u_ringCenter[r];
-    float w = u_ringWidth[r];
-    float g = 2.0 * exp(-(avg - c) * (avg - c) / (2.0 * w * w)) - 1.0;
-    growth += g;
-  }
-  float newState = clamp(state + growth * u_dt, 0.0, 1.0);
-  if (!u_wrap && newState < 0.01) {
-    float r = hash(vec2(coord) + vec2(u_seed, u_seed * 1.37));
-    if (r < u_spawnRate) newState = clamp(newState + 0.5, 0.0, 1.0);
-  }
-  fragColor = vec4(newState, 0.0, 0.0, 1.0);
-}`;
-
-const blurFS = `#version 300 es
-precision highp float;
-uniform sampler2D u_state;
-uniform ivec2 u_gridSize;
-uniform vec2 u_dir;
-out vec4 fragColor;
-void main() {
-  ivec2 coord = ivec2(gl_FragCoord.xy);
-  float sum = 0.0;
-  for (int i = -2; i <= 2; i++) {
-    ivec2 nc = coord + ivec2(u_dir * float(i));
-    nc = clamp(nc, ivec2(0), u_gridSize - 1);
-    sum += texelFetch(u_state, nc, 0).r;
-  }
-  fragColor = vec4(sum / 5.0, 0.0, 0.0, 1.0);
+  fragColor = vec4(newState);
 }`;
 
 const renderFS = `#version 300 es
@@ -265,16 +153,16 @@ export class GameOfLifeSource extends AbstractSource {
   constructor(options = {}) {
     const defaults = {
       algorithm: 'conway',
-      boundaryMode: 'continuous',
-      gridResolution: 256,
-      speed: 0.35,
-      spawnRate: 0.002,
+      gridResolution: 512,
+      speed: 0.485,
+      spawnRate: 10,
       initialDensity: 0.3,
+      initMode: 'multi',
       palette: 'fire',
     };
     super(
       { ...defaults, ...options },
-      ['algorithm', 'boundaryMode', 'gridResolution', 'speed', 'spawnRate', 'initialDensity', 'palette'],
+      ['algorithm', 'gridResolution', 'speed', 'spawnRate', 'initialDensity', 'initMode', 'palette'],
       [],
     );
     this.gl = null;
@@ -287,16 +175,12 @@ export class GameOfLifeSource extends AbstractSource {
     this._screenH = 0;
     this._stepSeed = 0;
     this._stepAccumulator = 0;
-    this._currentAlgoType = null;
 
     this._simLifeLike = null;
     this._simBrain = null;
-    this._simMnca = null;
-    this._blurProg = null;
     this._renderProg = null;
     this._quadBuffer = null;
-    this._simLocs = {};
-    this._renderLocs = {};
+    this._renderContext = { time: 0, gl: null, dpr: 1, locs: null };
   }
 
   // ----- GPU lifecycle -----
@@ -311,11 +195,9 @@ export class GameOfLifeSource extends AbstractSource {
     gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadData, gl.STATIC_DRAW);
 
-    // Compile all simulation programs upfront
+    // Compile simulation programs
     this._simLifeLike = this._buildProgram(simLifeLikeFS);
     this._simBrain = this._buildProgram(simBrainFS);
-    this._simMnca = this._buildProgram(simMncaFS);
-    this._blurProg = this._buildProgram(blurFS);
     this._renderProg = this._buildProgram(renderFS);
 
     // Store screen size for aspect-aware grid
@@ -341,28 +223,19 @@ export class GameOfLifeSource extends AbstractSource {
     if (!gl) return;
     if (this._texA) { gl.deleteTexture(this._texA.tex); gl.deleteFramebuffer(this._texA.fbo); }
     if (this._texB) { gl.deleteTexture(this._texB.tex); gl.deleteFramebuffer(this._texB.fbo); }
-    if (this._simLifeLike) gl.deleteProgram(this._simLifeLike.program);
-    if (this._simBrain) gl.deleteProgram(this._simBrain.program);
-    if (this._simMnca) gl.deleteProgram(this._simMnca.program);
-    if (this._blurProg) gl.deleteProgram(this._blurProg.program);
-    if (this._renderProg) gl.deleteProgram(this._renderProg.program);
+    if (this._simLifeLike) { gl.deleteVertexArray(this._simLifeLike.vao); gl.deleteProgram(this._simLifeLike.program); }
+    if (this._simBrain) { gl.deleteVertexArray(this._simBrain.vao); gl.deleteProgram(this._simBrain.program); }
+    if (this._renderProg) { gl.deleteVertexArray(this._renderProg.vao); gl.deleteProgram(this._renderProg.program); }
     if (this._quadBuffer) gl.deleteBuffer(this._quadBuffer);
   }
 
   // ----- Simulation -----
 
-  // Maps slider (0..1) to steps per second.
-  // 0.0 → 0.5 steps/sec (1 step every 2s)
-  // 0.35 → ~5 steps/sec (default)
-  // 0.6 → ~60 steps/sec (1 step/frame)
-  // 1.0 → 20 steps/frame × 60 fps = 1200 steps/sec
   _getStepsPerSecond() {
     const t = +(this.options.speed ?? 0.35);
     if (t <= 0.6) {
-      // 0..0.6 → 0.5..60 steps/sec (exponential)
       return 0.5 * Math.pow(120, t / 0.6);
     }
-    // 0.6..1.0 → 60..1200 steps/sec (multi-step per frame)
     return 60 * Math.pow(20, (t - 0.6) / 0.4);
   }
 
@@ -376,7 +249,6 @@ export class GameOfLifeSource extends AbstractSource {
 
     this._stepAccumulator += dt;
 
-    // Cap to avoid spiral of death
     const maxSteps = 20;
     let steps = 0;
     while (this._stepAccumulator >= stepInterval && steps < maxSteps) {
@@ -393,8 +265,7 @@ export class GameOfLifeSource extends AbstractSource {
     const gl = this.gl;
     const preset = PRESETS[this.options.algorithm] ?? PRESETS.conway;
     const type = preset.type;
-    const isWrap = this.options.boundaryMode === 'toroidal';
-    const spawnRate = isWrap ? 0.0 : +(this.options.spawnRate ?? 0.002);
+    const spawnRate = +(this.options.spawnRate ?? 10) / 1000000;
 
     this._stepSeed += 1.0;
 
@@ -402,55 +273,28 @@ export class GameOfLifeSource extends AbstractSource {
     const write = this._pingPong === 0 ? this._texB : this._texA;
     this._pingPong = 1 - this._pingPong;
 
-    let prog;
-    if (type === 'brain') prog = this._simBrain;
-    else if (type === 'mnca') prog = this._simMnca;
-    else prog = this._simLifeLike;
+    const prog = type === 'brain' ? this._simBrain : this._simLifeLike;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, write.fbo);
     gl.viewport(0, 0, this._gridW, this._gridH);
     gl.useProgram(prog.program);
+    gl.bindVertexArray(prog.vao);
 
-    // Bind quad
-    gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
-    gl.enableVertexAttribArray(prog.locs.a_pos);
-    gl.vertexAttribPointer(prog.locs.a_pos, 2, gl.FLOAT, false, 0, 0);
-
-    // Common uniforms
+    // Uniforms
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, read.tex);
     gl.uniform1i(prog.locs.u_state, 0);
     gl.uniform2i(prog.locs.u_gridSize, this._gridW, this._gridH);
-    gl.uniform1i(prog.locs.u_wrap, isWrap ? 1 : 0);
     gl.uniform1f(prog.locs.u_spawnRate, spawnRate);
     gl.uniform1f(prog.locs.u_seed, this._stepSeed);
 
-    // Algorithm-specific uniforms
     if (type === 'lifelike') {
       gl.uniform1i(prog.locs.u_birthMask, preset.birth);
       gl.uniform1i(prog.locs.u_surviveMask, preset.survive);
-    } else if (type === 'mnca') {
-      const rings = preset.rings;
-      const count = Math.min(rings.length, 4);
-      gl.uniform1i(prog.locs.u_ringCount, count);
-      const inner = new Int32Array(4);
-      const outer = new Int32Array(4);
-      const center = new Float32Array(4);
-      const width = new Float32Array(4);
-      for (let i = 0; i < count; i++) {
-        inner[i] = rings[i].inner;
-        outer[i] = rings[i].outer;
-        center[i] = rings[i].center;
-        width[i] = rings[i].width;
-      }
-      gl.uniform1iv(prog.locs.u_ringInner, inner);
-      gl.uniform1iv(prog.locs.u_ringOuter, outer);
-      gl.uniform1fv(prog.locs.u_ringCenter, center);
-      gl.uniform1fv(prog.locs.u_ringWidth, width);
-      gl.uniform1f(prog.locs.u_dt, preset.dt ?? 0.05);
     }
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.bindVertexArray(null);
   }
 
   // ----- Rendering -----
@@ -473,9 +317,7 @@ export class GameOfLifeSource extends AbstractSource {
 
     const prog = this._renderProg;
     gl.useProgram(prog.program);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
-    gl.enableVertexAttribArray(prog.locs.a_pos);
-    gl.vertexAttribPointer(prog.locs.a_pos, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(prog.vao);
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, stateTex.tex);
@@ -487,12 +329,17 @@ export class GameOfLifeSource extends AbstractSource {
     gl.uniform3fv(prog.locs.u_palMid, pal[1]);
     gl.uniform3fv(prog.locs.u_palBright, pal[2]);
 
-    const renderContext = { ...context, time, gl, dpr: state.dpr };
+    const rc = this._renderContext;
+    rc.time = time;
+    rc.gl = gl;
+    rc.dpr = state.dpr;
+    rc.locs = prog.locs;
     for (const effect of context.effects ?? []) {
-      effect.applyScenePass(renderContext);
+      effect.applyScenePass(rc);
     }
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.bindVertexArray(null);
   }
 
   // ----- Grid management -----
@@ -518,75 +365,45 @@ export class GameOfLifeSource extends AbstractSource {
     if (!gl) return;
     const w = this._gridW;
     const h = this._gridH;
-    const preset = PRESETS[this.options.algorithm] ?? PRESETS.conway;
-    const density = +(this.options.initialDensity ?? 0.3);
-    const data = new Float32Array(w * h * 4);
+    const data = new Float32Array(w * h);
 
-    if (preset.type === 'mnca') {
-      for (let i = 0; i < w * h; i++) {
-        data[i * 4] = Math.random();
+    if (this.options.initMode === 'single') {
+      const cx = Math.floor(w / 2);
+      const cy = Math.floor(h / 2);
+      const radius = 3;
+      for (let dy = -radius; dy <= radius; dy++) {
+        for (let dx = -radius; dx <= radius; dx++) {
+          const x = cx + dx;
+          const y = cy + dy;
+          if (x >= 0 && x < w && y >= 0 && y < h && Math.random() < 0.5) {
+            data[y * w + x] = 1.0;
+          }
+        }
       }
     } else {
+      const density = +(this.options.initialDensity ?? 0.3);
       for (let i = 0; i < w * h; i++) {
-        data[i * 4] = Math.random() < density ? 1.0 : 0.0;
+        data[i] = Math.random() < density ? 1.0 : 0.0;
       }
     }
 
     gl.bindTexture(gl.TEXTURE_2D, this._texA.tex);
-    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RGBA, gl.FLOAT, data);
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RED, gl.FLOAT, data);
     this._pingPong = 0;
     this._stepSeed = Math.random() * 1000;
-
-    if (preset.type === 'mnca') {
-      this._blurGrid(preset);
-    }
-  }
-
-  _blurGrid(preset) {
-    const gl = this.gl;
-    const prog = this._blurProg;
-    if (!gl || !prog) return;
-
-    // Number of blur passes scales with the outer radius of the first ring
-    // to create structures at the right spatial scale
-    const outerR = preset.rings[0]?.outer ?? 3;
-    const passes = Math.max(2, outerR);
-
-    gl.useProgram(prog.program);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
-    gl.enableVertexAttribArray(prog.locs.a_pos);
-    gl.vertexAttribPointer(prog.locs.a_pos, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2i(prog.locs.u_gridSize, this._gridW, this._gridH);
-    gl.uniform1i(prog.locs.u_state, 0);
-    gl.activeTexture(gl.TEXTURE0);
-
-    for (let i = 0; i < passes; i++) {
-      // Horizontal pass: A → B
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this._texB.fbo);
-      gl.viewport(0, 0, this._gridW, this._gridH);
-      gl.bindTexture(gl.TEXTURE_2D, this._texA.tex);
-      gl.uniform2f(prog.locs.u_dir, 1.0, 0.0);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-      // Vertical pass: B → A
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this._texA.fbo);
-      gl.viewport(0, 0, this._gridW, this._gridH);
-      gl.bindTexture(gl.TEXTURE_2D, this._texB.tex);
-      gl.uniform2f(prog.locs.u_dir, 0.0, 1.0);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
   }
 
   reseed() {
     this._initGrid();
   }
 
-  onAlgorithmChange() {
-    this._rebuildGrid();
-  }
-
-  onGridResolutionChange() {
-    this._rebuildGrid();
+  setParameters(params) {
+    const needsRebuild =
+      params.gridResolution !== undefined && params.gridResolution !== this.options.gridResolution ||
+      params.initialDensity !== undefined && params.initialDensity !== this.options.initialDensity ||
+      params.initMode !== undefined && params.initMode !== this.options.initMode;
+    super.setParameters(params);
+    if (needsRebuild && this.gl) this._rebuildGrid();
   }
 
   // ----- Helpers -----
@@ -595,14 +412,22 @@ export class GameOfLifeSource extends AbstractSource {
     const gl = this.gl;
     const program = createProgram(gl, quadVS, fragmentSource);
     const locs = this._resolveAllLocs(gl, program);
-    return { program, locs };
+
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this._quadBuffer);
+    gl.enableVertexAttribArray(locs.a_pos);
+    gl.vertexAttribPointer(locs.a_pos, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+
+    return { program, locs, vao };
   }
 
   _createSimTexture(w, h) {
     const gl = this.gl;
     const tex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, tex);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA16F, w, h, 0, gl.RGBA, gl.HALF_FLOAT, null);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R16F, w, h, 0, gl.RED, gl.HALF_FLOAT, null);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
