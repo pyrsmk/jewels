@@ -89,6 +89,15 @@
       @update:model-value="instance.options.dt = $event"
     />
 
+    <label class="toggle-label">
+      <input
+        type="checkbox"
+        :checked="instance.options.seedLoop"
+        @change="instance.options.seedLoop = $event.target.checked"
+      />
+      Mode Croissance / Décroissance
+    </label>
+
     <button class="reseed-btn" @click="instance.reseed()">
       Reseed
     </button>
@@ -127,6 +136,14 @@ function formatSpeed(t) {
   margin-top: 6px;
   width: 100%;
   padding: 5px 0;
+  cursor: pointer;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
   cursor: pointer;
 }
 </style>

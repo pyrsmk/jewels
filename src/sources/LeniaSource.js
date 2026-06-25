@@ -74,6 +74,7 @@ uniform int u_kernelRadius;
 uniform float u_mu;
 uniform float u_sigma;
 uniform float u_dt;
+uniform float u_decay;
 out vec4 fragColor;
 
 float growth(float u) {
@@ -97,7 +98,7 @@ void main() {
     }
   }
 
-  float newState = clamp(state + u_dt * growth(U), 0.0, 1.0);
+  float newState = clamp(state + u_dt * growth(U) - u_decay, 0.0, 1.0);
 
   fragColor = vec4(newState);
 }`;
@@ -145,10 +146,11 @@ export class LeniaSource extends AbstractSource {
       dt: 0.1,
       palette: 'cool',
       seed: null,
+      seedLoop: false,
     };
     super(
       { ...defaults, ...options },
-      ['preset', 'initMode', 'gridResolution', 'speed', 'kernelRadius', 'mu', 'sigma', 'dt', 'palette'],
+      ['preset', 'initMode', 'gridResolution', 'speed', 'kernelRadius', 'mu', 'sigma', 'dt', 'palette', 'seedLoop'],
       [],
     );
     this.gl = null;
@@ -167,6 +169,13 @@ export class LeniaSource extends AbstractSource {
     this._kernelTex = null;
     this._kernelRadius = -1;
     this._renderContext = { time: 0, gl: null, dpr: 1, locs: null };
+
+    // Seed loop state
+    this._simStepCount = 0;
+    this._prevSnapshot = null;
+    this._stableCount = 0;
+    this._decaying = false;
+    this._currentDecay = 0;
   }
 
   // ----- GPU lifecycle -----
@@ -212,6 +221,12 @@ export class LeniaSource extends AbstractSource {
 
   // ----- Simulation -----
 
+  static STABILITY_CHECK_INTERVAL = 15;
+  static STABILITY_THRESHOLD = 0.02;
+  static DEAD_THRESHOLD = 0.001;
+  static DECAY_RATE = 0.005;
+  static DECAY_MAX = 0.15;
+
   _getStepsPerSecond() {
     return leniaStepsPerSecond(+(this.options.speed ?? 0.35));
   }
@@ -226,14 +241,120 @@ export class LeniaSource extends AbstractSource {
 
     this._stepAccumulator += dt;
 
+    // Debug seed loop
+    if (!this._lastDebugLog || Date.now() - this._lastDebugLog > 1000) {
+      this._lastDebugLog = Date.now();
+      console.log(`[Lenia] seedLoop=${this.options.seedLoop}, decaying=${this._decaying}, decay=${this._currentDecay.toFixed(5)}, stepCount=${this._simStepCount}`);
+    }
+
+    // During decay, ramp up the decay value
+    if (this._decaying) {
+      this._currentDecay = Math.min(
+        this._currentDecay + dt * LeniaSource.DECAY_RATE,
+        LeniaSource.DECAY_MAX,
+      );
+    }
+
     const maxSteps = 10;
     let steps = 0;
     while (this._stepAccumulator >= stepInterval && steps < maxSteps) {
       this._simStep();
       this._stepAccumulator -= stepInterval;
       steps++;
+
+      if (this.options.seedLoop && !this._decaying) {
+        this._simStepCount++;
+        if (this._simStepCount >= LeniaSource.STABILITY_CHECK_INTERVAL) {
+          this._simStepCount = 0;
+          if (this._checkStability()) {
+            this._decaying = true;
+            this._currentDecay = 0;
+          }
+        }
+      }
     }
     if (steps >= maxSteps) this._stepAccumulator = 0;
+
+    // During decay, check if energy is depleted to trigger reseed
+    if (this._decaying && this._checkDead()) {
+      this._resetSeedLoopState();
+      this.reseed();
+    }
+  }
+
+  _checkStability() {
+    const gl = this.gl;
+    const w = this._gridW;
+    const h = this._gridH;
+    const pixelCount = w * h;
+
+    const stateTex = this._pingPong === 0 ? this._texA : this._texB;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, stateTex.fbo);
+
+    const current = new Float32Array(pixelCount * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.FLOAT, current);
+
+    // Compute energy (mean state value)
+    let energy = 0;
+    for (let i = 0; i < pixelCount; i++) {
+      energy += current[i * 4];
+    }
+    energy /= pixelCount;
+
+    // Dead pattern
+    if (energy < LeniaSource.DEAD_THRESHOLD) {
+      this._prevSnapshot = current;
+      console.log(`[Lenia stability] DEAD — energy=${energy.toFixed(6)}`);
+      return true;
+    }
+
+    // Compare with previous snapshot
+    if (this._prevSnapshot) {
+      let diff = 0;
+      for (let i = 0; i < pixelCount; i++) {
+        diff += Math.abs(current[i * 4] - this._prevSnapshot[i * 4]);
+      }
+      diff /= pixelCount;
+
+      if (diff < LeniaSource.STABILITY_THRESHOLD) {
+        this._stableCount++;
+      } else {
+        this._stableCount = Math.max(0, this._stableCount - 1);
+      }
+      console.log(`[Lenia stability] diff=${diff.toFixed(6)}, energy=${energy.toFixed(6)}, stable=${this._stableCount}`);
+    } else {
+      console.log(`[Lenia stability] first snapshot — energy=${energy.toFixed(6)}`);
+    }
+
+    this._prevSnapshot = current;
+    return this._stableCount >= 2;
+  }
+
+  _checkDead() {
+    const gl = this.gl;
+    const w = this._gridW;
+    const h = this._gridH;
+    const pixelCount = w * h;
+
+    const stateTex = this._pingPong === 0 ? this._texA : this._texB;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, stateTex.fbo);
+
+    const data = new Float32Array(pixelCount * 4);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.FLOAT, data);
+
+    let energy = 0;
+    for (let i = 0; i < pixelCount; i++) {
+      energy += data[i * 4];
+    }
+    return energy / pixelCount < LeniaSource.DEAD_THRESHOLD;
+  }
+
+  _resetSeedLoopState() {
+    this._simStepCount = 0;
+    this._prevSnapshot = null;
+    this._stableCount = 0;
+    this._decaying = false;
+    this._currentDecay = 0;
   }
 
   _simStep() {
@@ -266,6 +387,7 @@ export class LeniaSource extends AbstractSource {
     gl.uniform1f(prog.locs.u_mu, +(this.options.mu ?? 0.15));
     gl.uniform1f(prog.locs.u_sigma, +(this.options.sigma ?? 0.015));
     gl.uniform1f(prog.locs.u_dt, +(this.options.dt ?? 0.1));
+    gl.uniform1f(prog.locs.u_decay, this._decaying ? this._currentDecay : 0.0);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     gl.bindVertexArray(null);
@@ -358,6 +480,7 @@ export class LeniaSource extends AbstractSource {
     const gridH = res;
     const gridW = Math.max(32, Math.round(res * aspect));
 
+    this._resetSeedLoopState();
     this._destroySimTextures();
     this._gridW = gridW;
     this._gridH = gridH;
@@ -528,6 +651,7 @@ export class LeniaSource extends AbstractSource {
   }
 
   reseed() {
+    this._resetSeedLoopState();
     this.options.seed = null;
     this._initGrid();
   }
