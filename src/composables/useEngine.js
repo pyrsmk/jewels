@@ -59,13 +59,13 @@ export async function useEngine(canvas) {
     executeEffectStages(t);
   }
 
-  async function addSource(className) {
+  async function addSource(className, params = {}) {
     const entry = sourceRegistry.find((r) => r.className === className);
     if (!entry) throw new Error(`Source inconnu : ${className}`);
     if (className === 'BackgroundSource' && moduleHost.items.some((i) => i.type === 'source' && i.className === 'BackgroundSource')) return;
     entry.componentLoader?.();
     const Cls = await entry.classLoader();
-    const instance = markRaw(Cls.deserialize({}));
+    const instance = markRaw(Cls.deserialize(params));
     moduleHost.addSource(instance, undefined, className);
     items.value = [...moduleHost.items];
     instance.setup(contextFactory({}));
@@ -130,7 +130,7 @@ export async function useEngine(canvas) {
           const isSource = itemData.type === 'source' || itemData.type === 'source';
           if (isSource && itemData.className === 'BackgroundSource') continue;
           if (isSource) {
-            await addSource(itemData.className);
+            await addSource(itemData.className, itemData.params || {});
           } else if (itemData.type === 'effect') {
             await addEffect(itemData.className);
           }
@@ -138,8 +138,9 @@ export async function useEngine(canvas) {
       } else {
         for (const reg of sourceRegistry) {
           if (reg.className === 'BackgroundSource') continue;
-          if (!settings[reg.className]) continue;
-          await addSource(reg.className);
+          const saved = settings[reg.className];
+          if (!saved) continue;
+          await addSource(reg.className, typeof saved === 'object' ? saved : {});
         }
         for (const reg of effectRegistry) {
           if (!settings[reg.className]) continue;
