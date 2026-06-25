@@ -3,7 +3,6 @@ http://localhost:5173/?settings=eyJ2IjoyLCJpdGVtcyI6W3sidHlwZSI6InNvdXJjZSIsImNs
 - stabiliser Lenia :
   - ajouter des créatures de temps à autre
   - ce serait bien d'avoir de la décroissance dans les autres patterns ou alors de l'interpolation vers un autre seed
-- sauvegarder le seed en URL à l'init et au reseed
 - trouver d'autres algos
   - Fredkin
   - Evoloops

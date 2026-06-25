@@ -495,7 +495,7 @@ export class LeniaSource extends AbstractSource {
     const pattern = ORBIUM_PATTERN;
     const pH = pattern.length;
     const pW = pattern[0].length;
-    const count = 2 + Math.floor(rng() * 3);
+    const count = 4 + Math.floor(rng() * 5);
     const margin = Math.max(pW, pH) + 4;
 
     for (let b = 0; b < count; b++) {
