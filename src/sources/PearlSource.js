@@ -3,30 +3,30 @@ import { sharedShaderLibrary } from '../core/SharedShaderLibrary.js';
 import { createProgram } from '../utils/webgl.js';
 import { rand, clamp, smooth, fbm } from '../utils/math.js';
 
-export class ParticleSource extends AbstractSource {
+export class PearlSource extends AbstractSource {
 
   constructor(options = {}) {
     const defaults = {
       flowDirection: 'free',
       surfaceImperfections: false,
-      particleCount: 0.316,
+      pearlCount: 0.316,
       speed: 0.047,
       size: 9,
-      particleJitter: 0.3,
+      pearlJitter: 0.3,
       edgeFade: true,
     };
     super(
       { ...defaults, ...options },
-      ['flowDirection', 'surfaceImperfections', 'particleCount', 'speed', 'size',
-        'particleJitter', 'edgeFade'],
-      ['particleCountVal', 'speedVal', 'sizeVal'],
+      ['flowDirection', 'surfaceImperfections', 'pearlCount', 'speed', 'size',
+        'pearlJitter', 'edgeFade'],
+      ['pearlCountVal', 'speedVal', 'sizeVal'],
     );
     this.gl = null;
     this.program = null;
     this.buffer = null;
     this.locs = null;
-    this.particles = [];
-    this.particleData = new Float32Array(0);
+    this.pearls = [];
+    this.pearlData = new Float32Array(0);
     this.bufferInitialized = false;
     this.flowFrameCounter = 0;
     this.flowOffset = [0, 0];
@@ -108,8 +108,8 @@ void main() {
 `;
   }
 
-  getParticleCountFromSlider() {
-    const t = +(this.options.particleCount ?? 0.316);
+  getPearlCountFromSlider() {
+    const t = +(this.options.pearlCount ?? 0.316);
     if (t < 0.20) {
       const local = smooth(t / 0.20);
       return Math.round(100 + (1000 - 100) * local);
@@ -122,20 +122,20 @@ void main() {
     return Math.round(50000 + (100000 - 50000) * local);
   }
 
-  getParticleSpeedFromSlider() {
+  getPearlSpeedFromSlider() {
     const t = +(this.options.speed ?? 0.047);
     if (t < 0.5) return 0.4 * (t / 0.5);
     return 0.4 + (3.0 - 0.4) * ((t - 0.5) / 0.5);
   }
 
-  getParticleSpeedDisplayPxPerSec() {
+  getPearlSpeedDisplayPxPerSec() {
     const referencePxScale = 540.0;
     const flowDisplayRef = 0.0065;
-    return this.getParticleSpeedFromSlider() * flowDisplayRef * 60.0 * referencePxScale;
+    return this.getPearlSpeedFromSlider() * flowDisplayRef * 60.0 * referencePxScale;
   }
 
   getDrawCount() {
-    return this.particles.length;
+    return this.pearls.length;
   }
 
   getFlowDirection() {
@@ -216,7 +216,7 @@ void main() {
     }
   }
 
-  spawnParticleForRespawn(p, zOverride, scatterInit) {
+  spawnPearlForRespawn(p, zOverride, scatterInit) {
     const z = zOverride !== undefined ? zOverride : Math.random();
     const margin = 1.15;
     const dir = this.getFlowDirection();
@@ -425,7 +425,7 @@ void main() {
     return fadeIn * exitFade;
   }
 
-  particleBrightness(p, speed) {
+  pearlBrightness(p, speed) {
     const motion = Math.min(1.0, Math.hypot(p.vx, p.vy) / Math.max(speed, 0.0001));
     const depth = 0.45 + p.z * 0.75;
     return clamp((0.35 + motion * 0.65) * p.fade * depth, 0, 1);
@@ -433,10 +433,10 @@ void main() {
 
   syncValueDisplays() {}
 
-  reseedParticles() {
-    const count = this.getParticleCountFromSlider();
-    this.particles = new Array(count);
-    this.particleData = new Float32Array(count * 4);
+  reseedPearls() {
+    const count = this.getPearlCountFromSlider();
+    this.pearls = new Array(count);
+    this.pearlData = new Float32Array(count * 4);
     this.bufferInitialized = false;
     this.initFlowSeeds();
     this.flowOffset = [rand(0, 100), rand(0, 100)];
@@ -451,46 +451,46 @@ void main() {
         jitterVx: 0, jitterVy: 0,
         jitterAge: Math.floor(Math.random() * 4),
       };
-      this.spawnParticleForRespawn(p, Math.random(), true);
-      this.particles[i] = p;
+      this.spawnPearlForRespawn(p, Math.random(), true);
+      this.pearls[i] = p;
     }
-    this.uploadParticles();
+    this.uploadPearls();
   }
 
-  uploadParticles() {
+  uploadPearls() {
     const gl = this.gl;
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
+    for (let i = 0; i < this.pearls.length; i++) {
+      const p = this.pearls[i];
       const j = i * 4;
-      this.particleData[j] = p.x;
-      this.particleData[j + 1] = p.y;
-      this.particleData[j + 2] = p.z;
-      this.particleData[j + 3] = p.fade;
+      this.pearlData[j] = p.x;
+      this.pearlData[j + 1] = p.y;
+      this.pearlData[j + 2] = p.z;
+      this.pearlData[j + 3] = p.fade;
     }
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     if (!this.bufferInitialized) {
-      gl.bufferData(gl.ARRAY_BUFFER, this.particleData, gl.DYNAMIC_DRAW);
+      gl.bufferData(gl.ARRAY_BUFFER, this.pearlData, gl.DYNAMIC_DRAW);
       this.bufferInitialized = true;
     } else {
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.particleData);
+      gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.pearlData);
     }
   }
 
   update({ deltaTime, time } = {}) {
     const dt = deltaTime ?? 0;
     const t = time ?? 0;
-    const speed = this.getParticleSpeedFromSlider();
+    const speed = this.getPearlSpeedFromSlider();
     this.flowFrameCounter++;
     if (this.flowFrameCounter % 3 === 0) this.rebuildFlowField(t);
     if (this.useSurfaceImperfections()) this.updateImperfectionSeeds(dt);
-    for (let i = 0; i < this.particles.length; i++) {
-      const p = this.particles[i];
+    for (let i = 0; i < this.pearls.length; i++) {
+      const p = this.pearls[i];
       const depthFactor = 0.55 + p.z * 1.35;
       p.life += dt;
       const flow = this.sampleFlowField(p.x, p.y);
       let targetVx = flow[0] * speed * depthFactor;
       let targetVy = flow[1] * speed * depthFactor;
-      const jitter = this.options.particleJitter ?? 0.3;
+      const jitter = this.options.pearlJitter ?? 0.3;
       if (jitter > 0) {
         p.jitterAge++;
         if (p.jitterAge >= 6) {
@@ -519,12 +519,12 @@ void main() {
       p.x += p.vx * dt * 60.0;
       p.y += p.vy * dt * 60.0;
       if (this.shouldRespawn(p)) {
-        this.spawnParticleForRespawn(p);
+        this.spawnPearlForRespawn(p);
       }
       p.fade = this.computeRespawnFade(p);
-      p.bright = this.particleBrightness(p, speed);
+      p.bright = this.pearlBrightness(p, speed);
     }
-    this.uploadParticles();
+    this.uploadPearls();
   }
 
   renderSource({ gl, locs, time, dpr }) {

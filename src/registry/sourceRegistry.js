@@ -12,13 +12,13 @@ export const sourceRegistry = [
     ),
   },
   {
-    className: 'ParticleSource',
-    label: 'Particules',
+    className: 'PearlSource',
+    label: 'Perles',
     isDeletable: true,
-    classLoader: () => import('../sources/ParticleSource.js').then((m) => m.ParticleSource),
-    componentLoader: () => import('../components/sources/ParticleSource.vue'),
+    classLoader: () => import('../sources/PearlSource.js').then((m) => m.PearlSource),
+    componentLoader: () => import('../components/sources/PearlSource.vue'),
     component: defineAsyncComponent(
-      () => import('../components/sources/ParticleSource.vue')
+      () => import('../components/sources/PearlSource.vue')
     ),
   },
   {

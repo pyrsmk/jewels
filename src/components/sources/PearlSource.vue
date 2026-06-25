@@ -29,10 +29,10 @@
     </label>
     <SliderControl
       label="Nombre"
-      :model-value="instance.options.particleCount ?? 0.316"
+      :model-value="instance.options.pearlCount ?? 0.316"
       :min="0" :max="1" :step="0.001"
-      :display-fn="formatParticleCount"
-      @update:model-value="instance.options.particleCount = $event"
+      :display-fn="formatPearlCount"
+      @update:model-value="instance.options.pearlCount = $event"
     />
     <SliderControl
       label="Vitesse"
@@ -50,10 +50,10 @@
     />
     <SliderControl
       label="Chaos"
-      :model-value="instance.options.particleJitter ?? 0.3"
+      :model-value="instance.options.pearlJitter ?? 0.3"
       :min="0" :max="1" :step="0.01"
       :display-fn="v => Math.round(v * 100) + ' %'"
-      @update:model-value="instance.options.particleJitter = $event"
+      @update:model-value="instance.options.pearlJitter = $event"
     />
   </div>
 </template>
@@ -65,13 +65,13 @@ import SliderControl from '../SliderControl.vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-watch(() => props.instance.options.particleCount, () => {
-  props.instance.reseedParticles();
+watch(() => props.instance.options.pearlCount, () => {
+  props.instance.reseedPearls();
 });
 
 const smooth_ = (x) => x * x * (3 - 2 * x);
 
-function formatParticleCount(t) {
+function formatPearlCount(t) {
   let count;
   if (t < 0.20) count = Math.round(100 + (1000 - 100) * smooth_(t / 0.20));
   else if (t < 0.85) count = Math.round(1000 + (50000 - 1000) * smooth_((t - 0.20) / 0.65));

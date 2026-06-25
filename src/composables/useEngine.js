@@ -70,7 +70,7 @@ export async function useEngine(canvas) {
     items.value = [...moduleHost.items];
     instance.setup(contextFactory({}));
     instance.resize(contextFactory({}));
-    instance.reseedParticles?.();
+    instance.reseedPearls?.();
     return instance;
   }
 
