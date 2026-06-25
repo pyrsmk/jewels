@@ -15,10 +15,10 @@ import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-const bgColor = ref(props.instance.bgColor ?? '#000000');
+const bgColor = ref(props.instance.options.bgColor ?? '#000000');
 
 onMounted(() => {
-  bgColor.value = props.instance.bgColor ?? '#000000';
+  bgColor.value = props.instance.options.bgColor ?? '#000000';
 });
 
 function updateColor(val) {
@@ -26,7 +26,7 @@ function updateColor(val) {
   props.instance.setBgColor(val);
 }
 
-watch(() => props.instance.bgColor, (val) => {
+watch(() => props.instance.options.bgColor, (val) => {
   if (val !== bgColor.value) {
     bgColor.value = val ?? '#000000';
   }

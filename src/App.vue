@@ -4,8 +4,6 @@
       :fps="fps"
       :is-fullscreen="isFullscreen"
       @toggle-fullscreen="canvasViewRef?.toggleFullscreen()"
-      @open-add-effect="showAddEffect = true"
-      @open-add-source="showAddSource = true"
     />
     <ControlPanel
       v-if="engine"
@@ -18,6 +16,12 @@
       @delete-source="onDeleteSource"
       @delete-effect="onDeleteEffect"
       @toggle-effect-enabled="onToggleEffectEnabled"
+    />
+    <Toolbar
+      :automation-count="automationCount"
+      @open-add-source="showAddSource = true"
+      @open-add-effect="showAddEffect = true"
+      @open-automations="showAutomations = true"
     />
   </div>
   <CanvasView
@@ -43,15 +47,28 @@
       @close="showAddEffect = false"
     />
   </Transition>
+  <Transition name="overlay">
+    <AutomationModal
+      v-if="showAutomations"
+      :automation-host="engine?.automationHost"
+      :items="items"
+      :source-registry="engine?.sourceRegistry ?? []"
+      :effect-registry="engine?.effectRegistry ?? []"
+      @close="showAutomations = false"
+      @settings-change="onSettingsChange"
+    />
+  </Transition>
 </template>
 
 <script setup>
 import { ref, shallowRef, computed } from 'vue';
 import Header from './components/Header.vue';
+import Toolbar from './components/Toolbar.vue';
 import CanvasView from './components/CanvasView.vue';
 import ControlPanel from './components/ControlPanel.vue';
 import AddSourceMenu from './components/AddSourceMenu.vue';
 import AddEffectMenu from './components/AddEffectMenu.vue';
+import AutomationModal from './components/AutomationModal.vue';
 
 const canvasViewRef = ref(null);
 const controlPanelRef = ref(null);
@@ -60,8 +77,14 @@ const isFullscreen = ref(false);
 const engine = shallowRef(null);
 const showAddSource = ref(false);
 const showAddEffect = ref(false);
+const showAutomations = ref(false);
 
 const items = computed(() => engine.value?.items.value ?? []);
+const settingsVersion = ref(0);
+const automationCount = computed(() => {
+  settingsVersion.value;
+  return engine.value?.automationHost?.bindings?.length ?? 0;
+});
 
 function onEngineReady(eng) {
   engine.value = eng;
@@ -99,6 +122,7 @@ function onDeleteSource(instance) {
 }
 
 function onSettingsChange() {
+  settingsVersion.value++;
   engine.value?.settingsController.persistToUrl();
 }
 </script>

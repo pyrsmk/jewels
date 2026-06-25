@@ -1,7 +1,10 @@
+const SLOW_FRAME_THRESHOLD_MS = 50;
+
 export class FrameLoopController {
-  constructor({ moduleHost, pipelineRuntime, onResize, onRenderFrame, onFpsUpdate } = {}) {
+  constructor({ moduleHost, pipelineRuntime, automationHost, onResize, onRenderFrame, onFpsUpdate } = {}) {
     this.moduleHost = moduleHost;
     this.pipelineRuntime = pipelineRuntime;
+    this.automationHost = automationHost;
     this.onResize = onResize;
     this.onRenderFrame = onRenderFrame;
     this.onFpsUpdate = onFpsUpdate;
@@ -9,6 +12,8 @@ export class FrameLoopController {
     this.fpsFrames = 0;
     this.fpsLastTime = performance.now();
     this.fpsDisplayed = -1;
+    this._boundFrame = this.frame.bind(this);
+    this._lastFrameEndMs = performance.now();
   }
 
   getDelta(t) {
@@ -18,10 +23,12 @@ export class FrameLoopController {
   }
 
   start() {
-    requestAnimationFrame(this.frame.bind(this));
+    requestAnimationFrame(this._boundFrame);
   }
 
   frame(nowMs) {
+    const gapMs = nowMs - this._lastFrameEndMs;
+
     this.fpsFrames++;
     if (nowMs - this.fpsLastTime >= 1000) {
       const fpsRounded = Math.round(this.fpsFrames * 1000 / (nowMs - this.fpsLastTime));
@@ -33,19 +40,33 @@ export class FrameLoopController {
       this.fpsLastTime = nowMs;
     }
 
+    const t0 = performance.now();
     this.onResize?.();
+    const t1 = performance.now();
 
     const now = nowMs / 1000;
     const dt = this.getDelta(now);
+
+    this.automationHost?.evaluate(now, dt);
 
     this.moduleHost.updateSources((extra = {}) => this.pipelineRuntime.buildPassContext({
       deltaTime: dt,
       time: now,
       ...extra,
     }));
+    const t2 = performance.now();
 
     this.onRenderFrame?.(now);
+    const t3 = performance.now();
 
-    requestAnimationFrame(this.frame.bind(this));
+    const totalMs = t3 - t0;
+    if (totalMs > SLOW_FRAME_THRESHOLD_MS || gapMs > SLOW_FRAME_THRESHOLD_MS) {
+      console.warn(
+        `[perf] SLOW FRAME: total=${totalMs.toFixed(1)}ms | gap=${gapMs.toFixed(1)}ms | resize=${(t1 - t0).toFixed(1)}ms | sources=${(t2 - t1).toFixed(1)}ms | render=${(t3 - t2).toFixed(1)}ms`
+      );
+    }
+
+    this._lastFrameEndMs = performance.now();
+    requestAnimationFrame(this._boundFrame);
   }
 }

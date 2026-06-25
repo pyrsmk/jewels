@@ -5,16 +5,6 @@
     <div v-if="fps > 0" class="fps">{{ fps }} FPS</div>
     <div class="spacer"></div>
     <Button
-      icon="ev_shadow_add"
-      tooltip="Ajouter un source"
-      @click="$emit('openAddSource')"
-    />
-    <Button
-      icon="texture_add"
-      tooltip="Ajouter un effet"
-      @click="$emit('openAddEffect')"
-    />
-    <Button
       :icon="isFullscreen ? 'fullscreen_exit' : 'fullscreen'"
       :tooltip="isFullscreen ? 'Quitter le plein écran' : 'Plein écran'"
       @click="$emit('toggleFullscreen')"
@@ -29,7 +19,7 @@ defineProps({
   fps: { type: Number, default: 0 },
   isFullscreen: { type: Boolean, default: false },
 });
-defineEmits(['toggleFullscreen', 'openAddEffect', 'openAddSource']);
+defineEmits(['toggleFullscreen']);
 
 const version = __APP_VERSION__;
 </script>

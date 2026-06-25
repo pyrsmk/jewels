@@ -1,6 +1,7 @@
 export class SettingsController {
-  constructor(moduleHost) {
+  constructor(moduleHost, automationHost) {
     this.moduleHost = moduleHost;
+    this.automationHost = automationHost;
   }
 
   encode(str) {
@@ -12,7 +13,11 @@ export class SettingsController {
   }
 
   capture() {
-    return this.moduleHost.captureSettings();
+    const settings = this.moduleHost.captureSettings();
+    settings.v = 3;
+    const automations = this.automationHost?.captureSettings();
+    if (automations?.length) settings.automations = automations;
+    return settings;
   }
 
   persistToUrl() {

@@ -4,6 +4,7 @@ import { PipelineRuntime } from '../core/PipelineRuntime.js';
 import { PostProcessor } from '../core/PostProcessor.js';
 import { SettingsController } from '../core/SettingsController.js';
 import { FrameLoopController } from '../core/FrameLoopController.js';
+import { AutomationHost } from '../core/automation/AutomationHost.js';
 import { effectRegistry } from '../registry/effectRegistry.js';
 import { sourceRegistry } from '../registry/sourceRegistry.js';
 
@@ -29,7 +30,8 @@ export async function useEngine(canvas) {
   const moduleHost = new ModuleHost();
 
   const pipelineRuntime = new PipelineRuntime(canvas, gl, state, runtimeConfig, moduleHost);
-  const settingsController = new SettingsController(moduleHost);
+  const automationHost = new AutomationHost(moduleHost);
+  const settingsController = new SettingsController(moduleHost, automationHost);
   const postProcessor = new PostProcessor({ moduleHost, pipelineRuntime });
 
   function contextFactory(extra = {}) {
@@ -90,15 +92,28 @@ export async function useEngine(canvas) {
 
   function removeSource(instance) {
     if (instance.constructor.name === 'BackgroundSource') return;
+    const item = moduleHost.items.find((i) => i.instance === instance);
+    if (item) automationHost.removeBindingsForModule(item.className, _instanceIndex(item));
     moduleHost.removeSource(instance);
     items.value = [...moduleHost.items];
     pipelineRuntime.clearScene();
   }
 
   function removeEffect(instance) {
+    const item = moduleHost.items.find((i) => i.instance === instance);
+    if (item) automationHost.removeBindingsForModule(item.className, _instanceIndex(item));
     moduleHost.removeEffect(instance);
     items.value = [...moduleHost.items];
     postProcessor.invalidateCache();
+  }
+
+  function _instanceIndex(item) {
+    let count = 0;
+    for (const i of moduleHost.items) {
+      if (i === item) return count;
+      if (i.className === item.className) count++;
+    }
+    return 0;
   }
 
   function toggleEffectEnabled(instance) {
@@ -125,7 +140,7 @@ export async function useEngine(canvas) {
       const settings = JSON.parse(decoded);
       if (!settings || typeof settings !== 'object') return;
 
-      if (settings.v === 2 && Array.isArray(settings.items)) {
+      if ((settings.v === 2 || settings.v === 3) && Array.isArray(settings.items)) {
         for (const itemData of settings.items) {
           const isSource = itemData.type === 'source' || itemData.type === 'source';
           if (isSource && itemData.className === 'BackgroundSource') continue;
@@ -149,6 +164,9 @@ export async function useEngine(canvas) {
       }
 
       moduleHost.applySettings(settings);
+      if (Array.isArray(settings.automations)) {
+        automationHost.applySettings(settings.automations);
+      }
       items.value = [...moduleHost.items];
     } catch (err) {
       console.warn(`Impossible de restaurer les paramètres depuis l'URL :`, err);
@@ -162,6 +180,7 @@ export async function useEngine(canvas) {
   const frameLoopController = new FrameLoopController({
     moduleHost,
     pipelineRuntime,
+    automationHost,
     onResize: resize,
     onRenderFrame: renderFrame,
   });
@@ -183,5 +202,6 @@ export async function useEngine(canvas) {
     removeEffect,
     reorderItems,
     toggleEffectEnabled,
+    automationHost,
   };
 }

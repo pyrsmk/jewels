@@ -70,14 +70,14 @@ watch(
   { deep: true },
 );
 
-function onDocumentMousedown(event) {
+function onDocumentClick(event) {
   if (expandedInstance.value && controlsEl.value && !controlsEl.value.contains(event.target)) {
     expandedInstance.value = null;
   }
 }
 
-onMounted(() => document.addEventListener('mousedown', onDocumentMousedown));
-onUnmounted(() => document.removeEventListener('mousedown', onDocumentMousedown));
+onMounted(() => document.addEventListener('click', onDocumentClick));
+onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 
 function toggleExpanded(instance) {
   expandedInstance.value = expandedInstance.value === instance ? null : instance;
