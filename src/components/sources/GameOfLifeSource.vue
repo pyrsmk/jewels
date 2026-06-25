@@ -47,7 +47,7 @@
 
     <SliderControl
       label="Résolution"
-      :model-value="instance.options.gridResolution ?? 512"
+      :model-value="instance.options.gridResolution ?? 256"
       :min="32" :max="1024" :step="1"
       :display-fn="v => Math.round(v) + ' px'"
       @update:model-value="onGridResolutionChange($event)"

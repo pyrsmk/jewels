@@ -1,5 +1,6 @@
 import { AbstractSource } from '../core/AbstractSource.js';
 import { createProgram } from '../utils/webgl.js';
+import { mulberry32 } from '../utils/math.js';
 
 // ===== Algorithm presets =====
 
@@ -159,6 +160,7 @@ export class GameOfLifeSource extends AbstractSource {
       initialDensity: 0.3,
       initMode: 'multi',
       palette: 'fire',
+      seed: null,
     };
     super(
       { ...defaults, ...options },
@@ -363,6 +365,12 @@ export class GameOfLifeSource extends AbstractSource {
   _initGrid() {
     const gl = this.gl;
     if (!gl) return;
+
+    if (this.options.seed === null) {
+      this.options.seed = Math.floor(Math.random() * 2147483647);
+    }
+    const rng = mulberry32(this.options.seed);
+
     const w = this._gridW;
     const h = this._gridH;
     const data = new Float32Array(w * h);
@@ -375,7 +383,7 @@ export class GameOfLifeSource extends AbstractSource {
         for (let dx = -radius; dx <= radius; dx++) {
           const x = cx + dx;
           const y = cy + dy;
-          if (x >= 0 && x < w && y >= 0 && y < h && Math.random() < 0.5) {
+          if (x >= 0 && x < w && y >= 0 && y < h && rng() < 0.5) {
             data[y * w + x] = 1.0;
           }
         }
@@ -383,17 +391,18 @@ export class GameOfLifeSource extends AbstractSource {
     } else {
       const density = +(this.options.initialDensity ?? 0.3);
       for (let i = 0; i < w * h; i++) {
-        data[i] = Math.random() < density ? 1.0 : 0.0;
+        data[i] = rng() < density ? 1.0 : 0.0;
       }
     }
 
     gl.bindTexture(gl.TEXTURE_2D, this._texA.tex);
     gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, w, h, gl.RED, gl.FLOAT, data);
     this._pingPong = 0;
-    this._stepSeed = Math.random() * 1000;
+    this._stepSeed = rng() * 1000;
   }
 
   reseed() {
+    this.options.seed = null;
     this._initGrid();
   }
 
@@ -401,7 +410,8 @@ export class GameOfLifeSource extends AbstractSource {
     const needsRebuild =
       params.gridResolution !== undefined && params.gridResolution !== this.options.gridResolution ||
       params.initialDensity !== undefined && params.initialDensity !== this.options.initialDensity ||
-      params.initMode !== undefined && params.initMode !== this.options.initMode;
+      params.initMode !== undefined && params.initMode !== this.options.initMode ||
+      params.seed !== undefined && params.seed !== this.options.seed;
     super.setParameters(params);
     if (needsRebuild && this.gl) this._rebuildGrid();
   }

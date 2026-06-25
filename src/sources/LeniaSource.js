@@ -1,5 +1,6 @@
 import { AbstractSource } from '../core/AbstractSource.js';
 import { createProgram } from '../utils/webgl.js';
+import { mulberry32 } from '../utils/math.js';
 
 // ===== Lenia presets =====
 // Each preset defines kernel and growth parameters that produce distinct behaviors.
@@ -143,6 +144,7 @@ export class LeniaSource extends AbstractSource {
       sigma: 0.015,
       dt: 0.1,
       palette: 'cool',
+      seed: null,
     };
     super(
       { ...defaults, ...options },
@@ -369,16 +371,22 @@ export class LeniaSource extends AbstractSource {
   _initGrid() {
     const gl = this.gl;
     if (!gl) return;
+
+    if (this.options.seed === null) {
+      this.options.seed = Math.floor(Math.random() * 2147483647);
+    }
+    const rng = mulberry32(this.options.seed);
+
     const w = this._gridW;
     const h = this._gridH;
     const data = new Float32Array(w * h);
 
     switch (this.options.initMode) {
-      case 'creatures': this._initCreatures(data, w, h); break;
-      case 'perlin':    this._initPerlinNoise(data, w, h); break;
-      case 'rings':     this._initRings(data, w, h); break;
-      case 'uniform':   this._initUniformNoise(data, w, h); break;
-      default:          this._initBlobs(data, w, h); break;
+      case 'creatures': this._initCreatures(data, w, h, rng); break;
+      case 'perlin':    this._initPerlinNoise(data, w, h, rng); break;
+      case 'rings':     this._initRings(data, w, h, rng); break;
+      case 'uniform':   this._initUniformNoise(data, w, h, rng); break;
+      default:          this._initBlobs(data, w, h, rng); break;
     }
 
     gl.bindTexture(gl.TEXTURE_2D, this._texA.tex);
@@ -386,9 +394,9 @@ export class LeniaSource extends AbstractSource {
     this._pingPong = 0;
   }
 
-  _initPerlinNoise(data, w, h) {
+  _initPerlinNoise(data, w, h, rng) {
     // Simple value noise with bicubic interpolation (lightweight Perlin-like)
-    const scale = 6 + Math.random() * 4; // 6-10 octaves across the grid
+    const scale = 6 + rng() * 4; // 6-10 octaves across the grid
     const cellsX = Math.ceil(scale * (w / h)) + 2;
     const cellsY = Math.ceil(scale) + 2;
 
@@ -396,7 +404,7 @@ export class LeniaSource extends AbstractSource {
     const lattice = [];
     for (let y = 0; y < cellsY; y++) {
       const row = [];
-      for (let x = 0; x < cellsX; x++) row.push(Math.random());
+      for (let x = 0; x < cellsX; x++) row.push(rng());
       lattice.push(row);
     }
 
@@ -422,16 +430,16 @@ export class LeniaSource extends AbstractSource {
     }
   }
 
-  _initRings(data, w, h) {
-    const centerCount = 1 + Math.floor(Math.random() * 3);
+  _initRings(data, w, h, rng) {
+    const centerCount = 1 + Math.floor(rng() * 3);
     const maxDim = Math.max(w, h);
 
     for (let c = 0; c < centerCount; c++) {
-      const cx = w * 0.2 + Math.random() * w * 0.6;
-      const cy = h * 0.2 + Math.random() * h * 0.6;
-      const ringCount = 3 + Math.floor(Math.random() * 4); // 3-6 rings
+      const cx = w * 0.2 + rng() * w * 0.6;
+      const cy = h * 0.2 + rng() * h * 0.6;
+      const ringCount = 3 + Math.floor(rng() * 4); // 3-6 rings
       const spacing = (maxDim * 0.4) / ringCount;
-      const thickness = spacing * (0.25 + Math.random() * 0.2);
+      const thickness = spacing * (0.25 + rng() * 0.2);
 
       for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
@@ -441,7 +449,7 @@ export class LeniaSource extends AbstractSource {
             if (ringDist < thickness) {
               const amp = 0.5 + 0.5 * Math.cos((ringDist / thickness) * Math.PI);
               const idx = y * w + x;
-              data[idx] = Math.min(1.0, data[idx] + amp * (0.6 + Math.random() * 0.2));
+              data[idx] = Math.min(1.0, data[idx] + amp * (0.6 + rng() * 0.2));
             }
           }
         }
@@ -449,20 +457,20 @@ export class LeniaSource extends AbstractSource {
     }
   }
 
-  _initUniformNoise(data, w, h) {
-    const density = 0.3 + Math.random() * 0.3; // 30-60% amplitude ceiling
+  _initUniformNoise(data, w, h, rng) {
+    const density = 0.3 + rng() * 0.3; // 30-60% amplitude ceiling
     for (let i = 0; i < w * h; i++) {
-      data[i] = Math.random() * density;
+      data[i] = rng() * density;
     }
   }
 
-  _initBlobs(data, w, h) {
-    const blobCount = 3 + Math.floor(Math.random() * 4);
+  _initBlobs(data, w, h, rng) {
+    const blobCount = 3 + Math.floor(rng() * 4);
     for (let b = 0; b < blobCount; b++) {
-      const cx = Math.random() * w;
-      const cy = Math.random() * h;
-      const r = 5 + Math.random() * 15;
-      const amp = 0.6 + Math.random() * 0.4;
+      const cx = rng() * w;
+      const cy = rng() * h;
+      const r = 5 + rng() * 15;
+      const amp = 0.6 + rng() * 0.4;
       const rSq = r * r;
 
       const minX = Math.max(0, Math.floor(cx - r * 3));
@@ -483,19 +491,19 @@ export class LeniaSource extends AbstractSource {
     }
   }
 
-  _initCreatures(data, w, h) {
+  _initCreatures(data, w, h, rng) {
     const pattern = ORBIUM_PATTERN;
     const pH = pattern.length;
     const pW = pattern[0].length;
-    const count = 2 + Math.floor(Math.random() * 3);
+    const count = 2 + Math.floor(rng() * 3);
     const margin = Math.max(pW, pH) + 4;
 
     for (let b = 0; b < count; b++) {
-      const ox = margin + Math.floor(Math.random() * Math.max(1, w - margin * 2));
-      const oy = margin + Math.floor(Math.random() * Math.max(1, h - margin * 2));
+      const ox = margin + Math.floor(rng() * Math.max(1, w - margin * 2));
+      const oy = margin + Math.floor(rng() * Math.max(1, h - margin * 2));
       // Random rotation (0, 90, 180, 270) + optional horizontal flip for variety
-      const rot = Math.floor(Math.random() * 4);
-      const flip = Math.random() < 0.5;
+      const rot = Math.floor(rng() * 4);
+      const flip = rng() < 0.5;
 
       for (let py = 0; py < pH; py++) {
         for (let px = 0; px < pW; px++) {
@@ -520,6 +528,7 @@ export class LeniaSource extends AbstractSource {
   }
 
   reseed() {
+    this.options.seed = null;
     this._initGrid();
   }
 
@@ -539,7 +548,8 @@ export class LeniaSource extends AbstractSource {
 
   setParameters(params) {
     const needsRebuild =
-      params.gridResolution !== undefined && params.gridResolution !== this.options.gridResolution;
+      params.gridResolution !== undefined && params.gridResolution !== this.options.gridResolution ||
+      params.seed !== undefined && params.seed !== this.options.seed;
     super.setParameters(params);
     if (needsRebuild && this.gl) this._rebuildGrid();
   }
