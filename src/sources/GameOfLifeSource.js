@@ -1,6 +1,8 @@
 import { AbstractSource } from '../core/AbstractSource.js';
 import { createProgram } from '../utils/webgl.js';
 import { mulberry32 } from '../utils/math.js';
+import { PALETTES } from '../core/palettes.js';
+import { quadVS, HASH_GLSL, paletteRenderFS } from '../shaders/common.js';
 
 // ===== Algorithm presets =====
 
@@ -16,45 +18,19 @@ const PRESETS = {
 
   // Brian's Brain
   brain: { type: 'brain' },
-};
 
-// ===== Palettes: [dark, mid, bright] triplets =====
+  // Star Wars (4-state)
+  starwars: { type: 'starwars' },
 
-const PALETTES = {
-  warm:      [[0.02, 0.01, 0.0],  [0.7, 0.15, 0.02], [1.0, 0.8, 0.2]],
-  cool:      [[0.0, 0.01, 0.05],  [0.05, 0.2, 0.6],  [0.3, 0.7, 1.0]],
-  fluo:      [[0.01, 0.02, 0.01], [0.8, 0.0, 0.6],   [0.0, 1.0, 0.3]],
-  cyberpunk: [[0.02, 0.0, 0.04],  [0.5, 0.0, 0.8],   [0.9, 0.1, 1.0]],
-  aurora:    [[0.0, 0.02, 0.01],  [0.0, 0.7, 0.4],   [0.4, 0.1, 0.8]],
-  fire:      [[0.05, 0.0, 0.0],   [0.8, 0.2, 0.0],   [1.0, 0.9, 0.3]],
-  sunset:    [[0.04, 0.0, 0.04],  [0.8, 0.25, 0.1],  [0.4, 0.05, 0.6]],
-  toxic:     [[0.01, 0.04, 0.0],  [0.1, 0.8, 0.0],   [0.5, 1.0, 0.2]],
-  ice:       [[0.0, 0.02, 0.05],  [0.15, 0.4, 0.7],  [0.6, 0.9, 1.0]],
-  midnight:  [[0.0, 0.0, 0.02],   [0.02, 0.05, 0.5],  [0.15, 0.1, 0.7]],
+  // Larger-than-Life: { type, radius, birthMin, birthMax, surviveMin, surviveMax, initDensity }
+  ltl_bugs:     { type: 'ltl', radius: 5,  middle: 1, birthMin: 34, birthMax: 45,  surviveMin: 34, surviveMax: 58,  initDensity: 0.5 },
+  ltl_majority: { type: 'ltl', radius: 4,  middle: 1, birthMin: 41, birthMax: 81,  surviveMin: 41, surviveMax: 81,  initDensity: 0.5 },
+  ltl_globe:    { type: 'ltl', radius: 8,  middle: 0, birthMin: 74, birthMax: 252, surviveMin: 163, surviveMax: 223, initDensity: 0.5 },
+  ltl_waffle:   { type: 'ltl', radius: 7,  middle: 1, birthMin: 75, birthMax: 170, surviveMin: 100, surviveMax: 200, initDensity: 0.5 },
+  ltl_bugsmovie:{ type: 'ltl', radius: 10, middle: 1, birthMin: 123,birthMax: 170, surviveMin: 123, surviveMax: 212, initDensity: 0.29 },
 };
 
 // ===== Shaders =====
-
-const quadVS = `#version 300 es
-precision highp float;
-in vec2 a_pos;
-out vec2 v_uv;
-void main() {
-  v_uv = a_pos * 0.5 + 0.5;
-  gl_Position = vec4(a_pos, 0.0, 1.0);
-}`;
-
-const HASH_GLSL = `
-float hash(vec2 p) {
-  uvec2 v = floatBitsToUint(p);
-  uint h = v.x * 1597334677u ^ v.y * 3812015801u;
-  h ^= h >> 16u;
-  h *= 2246822519u;
-  h ^= h >> 13u;
-  h *= 3266489917u;
-  h ^= h >> 16u;
-  return float(h) / 4294967295.0;
-}`;
 
 const simLifeLikeFS = `#version 300 es
 precision highp float;
@@ -127,24 +103,88 @@ void main() {
   fragColor = vec4(newState);
 }`;
 
-const renderFS = `#version 300 es
+const simStarWarsFS = `#version 300 es
 precision highp float;
-in vec2 v_uv;
 uniform sampler2D u_state;
-uniform vec3 u_palDark;
-uniform vec3 u_palMid;
-uniform vec3 u_palBright;
+uniform ivec2 u_gridSize;
+uniform float u_spawnRate;
+uniform float u_seed;
 out vec4 fragColor;
+${HASH_GLSL}
 void main() {
-  float state = texture(u_state, v_uv).r;
-  vec3 color;
-  if (state < 0.5) {
-    color = mix(u_palDark, u_palMid, state * 2.0);
+  ivec2 coord = ivec2(gl_FragCoord.xy);
+  float state = texelFetch(u_state, coord, 0).r;
+  // 4 states: dead=0.0, dying2=0.25, dying1=0.5, alive=1.0
+  float newState = 0.0;
+  if (state > 0.75) {
+    // alive -> dying1
+    newState = 0.5;
+  } else if (state > 0.375) {
+    // dying1 -> dying2
+    newState = 0.25;
+  } else if (state > 0.125) {
+    // dying2 -> dead
+    newState = 0.0;
   } else {
-    color = mix(u_palMid, u_palBright, (state - 0.5) * 2.0);
+    // dead: birth if exactly 2 alive neighbors
+    int neighbors = 0;
+    for (int dy = -1; dy <= 1; dy++) {
+      for (int dx = -1; dx <= 1; dx++) {
+        if (dx == 0 && dy == 0) continue;
+        ivec2 nc = (coord + ivec2(dx, dy) + u_gridSize) % u_gridSize;
+        if (texelFetch(u_state, nc, 0).r > 0.75) neighbors++;
+      }
+    }
+    if (neighbors == 2) newState = 1.0;
   }
-  fragColor = vec4(color, 1.0);
+  if (newState < 0.01) {
+    float r = hash(vec2(coord) + vec2(u_seed, u_seed * 1.37));
+    if (r < u_spawnRate) newState = 1.0;
+  }
+  fragColor = vec4(newState);
 }`;
+
+const simLtlFS = `#version 300 es
+precision highp float;
+uniform sampler2D u_state;
+uniform ivec2 u_gridSize;
+uniform int u_radius;
+uniform int u_birthMin;
+uniform int u_birthMax;
+uniform int u_surviveMin;
+uniform int u_surviveMax;
+uniform int u_middle;
+uniform float u_spawnRate;
+uniform float u_seed;
+out vec4 fragColor;
+${HASH_GLSL}
+void main() {
+  ivec2 coord = ivec2(gl_FragCoord.xy);
+  float state = texelFetch(u_state, coord, 0).r;
+  bool alive = state > 0.5;
+  int neighbors = 0;
+  int R = u_radius;
+  for (int dy = -R; dy <= R; dy++) {
+    for (int dx = -R; dx <= R; dx++) {
+      if (dx == 0 && dy == 0 && u_middle == 0) continue;
+      ivec2 nc = (coord + ivec2(dx, dy) + u_gridSize) % u_gridSize;
+      if (texelFetch(u_state, nc, 0).r > 0.5) neighbors++;
+    }
+  }
+  float newState;
+  if (alive) {
+    newState = (neighbors >= u_surviveMin && neighbors <= u_surviveMax) ? 1.0 : 0.0;
+  } else {
+    newState = (neighbors >= u_birthMin && neighbors <= u_birthMax) ? 1.0 : 0.0;
+  }
+  if (newState < 0.5) {
+    float r = hash(vec2(coord) + vec2(u_seed, u_seed * 1.37));
+    if (r < u_spawnRate) newState = 1.0;
+  }
+  fragColor = vec4(newState);
+}`;
+
+const renderFS = paletteRenderFS;
 
 
 // ===== Source class =====
@@ -180,6 +220,8 @@ export class GameOfLifeSource extends AbstractSource {
 
     this._simLifeLike = null;
     this._simBrain = null;
+    this._simStarWars = null;
+    this._simLtl = null;
     this._renderProg = null;
     this._quadBuffer = null;
     this._renderContext = { time: 0, gl: null, dpr: 1, locs: null };
@@ -200,6 +242,8 @@ export class GameOfLifeSource extends AbstractSource {
     // Compile simulation programs
     this._simLifeLike = this._buildProgram(simLifeLikeFS);
     this._simBrain = this._buildProgram(simBrainFS);
+    this._simStarWars = this._buildProgram(simStarWarsFS);
+    this._simLtl = this._buildProgram(simLtlFS);
     this._renderProg = this._buildProgram(renderFS);
 
     // Store screen size for aspect-aware grid
@@ -227,6 +271,8 @@ export class GameOfLifeSource extends AbstractSource {
     if (this._texB) { gl.deleteTexture(this._texB.tex); gl.deleteFramebuffer(this._texB.fbo); }
     if (this._simLifeLike) { gl.deleteVertexArray(this._simLifeLike.vao); gl.deleteProgram(this._simLifeLike.program); }
     if (this._simBrain) { gl.deleteVertexArray(this._simBrain.vao); gl.deleteProgram(this._simBrain.program); }
+    if (this._simStarWars) { gl.deleteVertexArray(this._simStarWars.vao); gl.deleteProgram(this._simStarWars.program); }
+    if (this._simLtl) { gl.deleteVertexArray(this._simLtl.vao); gl.deleteProgram(this._simLtl.program); }
     if (this._renderProg) { gl.deleteVertexArray(this._renderProg.vao); gl.deleteProgram(this._renderProg.program); }
     if (this._quadBuffer) gl.deleteBuffer(this._quadBuffer);
   }
@@ -275,7 +321,10 @@ export class GameOfLifeSource extends AbstractSource {
     const write = this._pingPong === 0 ? this._texB : this._texA;
     this._pingPong = 1 - this._pingPong;
 
-    const prog = type === 'brain' ? this._simBrain : this._simLifeLike;
+    const prog = type === 'ltl' ? this._simLtl
+      : type === 'starwars' ? this._simStarWars
+      : type === 'brain' ? this._simBrain
+      : this._simLifeLike;
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, write.fbo);
     gl.viewport(0, 0, this._gridW, this._gridH);
@@ -293,6 +342,13 @@ export class GameOfLifeSource extends AbstractSource {
     if (type === 'lifelike') {
       gl.uniform1i(prog.locs.u_birthMask, preset.birth);
       gl.uniform1i(prog.locs.u_surviveMask, preset.survive);
+    } else if (type === 'ltl') {
+      gl.uniform1i(prog.locs.u_radius, preset.radius);
+      gl.uniform1i(prog.locs.u_middle, preset.middle);
+      gl.uniform1i(prog.locs.u_birthMin, preset.birthMin);
+      gl.uniform1i(prog.locs.u_birthMax, preset.birthMax);
+      gl.uniform1i(prog.locs.u_surviveMin, preset.surviveMin);
+      gl.uniform1i(prog.locs.u_surviveMax, preset.surviveMax);
     }
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -389,7 +445,8 @@ export class GameOfLifeSource extends AbstractSource {
         }
       }
     } else {
-      const density = +(this.options.initialDensity ?? 0.3);
+      const preset = PRESETS[this.options.algorithm];
+      const density = +(preset?.initDensity ?? this.options.initialDensity ?? 0.3);
       for (let i = 0; i < w * h; i++) {
         data[i] = rng() < density ? 1.0 : 0.0;
       }
@@ -411,6 +468,7 @@ export class GameOfLifeSource extends AbstractSource {
       params.gridResolution !== undefined && params.gridResolution !== this.options.gridResolution ||
       params.initialDensity !== undefined && params.initialDensity !== this.options.initialDensity ||
       params.initMode !== undefined && params.initMode !== this.options.initMode ||
+      params.algorithm !== undefined && params.algorithm !== this.options.algorithm ||
       params.seed !== undefined && params.seed !== this.options.seed;
     super.setParameters(params);
     if (needsRebuild && this.gl) this._rebuildGrid();

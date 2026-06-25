@@ -1,35 +1,8 @@
 <template>
   <div>
-    <label>Algorithme</label>
-    <select
-      :value="instance.options.algorithm"
-      @change="onAlgorithmChange($event.target.value)"
-    >
-      <optgroup label="Life-like">
-        <option value="conway">Conway (B3/S23)</option>
-        <option value="highlife">HighLife (B36/S23)</option>
-        <option value="seeds">Seeds (B2/S)</option>
-        <option value="daynight">Day & Night (B3678/S34678)</option>
-        <option value="diamoeba">Diamoeba (B35678/S5678)</option>
-        <option value="replicator">Fredkin / Replicator (B1357/S1357)</option>
-        <option value="lifenodeath">Life without death (B3/S012345678)</option>
-      </optgroup>
-      <optgroup label="Larger-than-Life">
-        <option value="ltl_bugs">Bugs (R=5)</option>
-        <option value="ltl_majority">Majority (R=4)</option>
-        <option value="ltl_globe">Globe (R=8)</option>
-        <option value="ltl_waffle">Waffle (R=7)</option>
-        <option value="ltl_bugsmovie">Bugsmovie (R=10)</option>
-      </optgroup>
-      <optgroup label="Spécial">
-        <option value="brain">Brian's Brain</option>
-        <option value="starwars">Star Wars (4 états)</option>
-      </optgroup>
-    </select>
-
     <label>Seeding</label>
     <select
-      :value="instance.options.initMode ?? 'single'"
+      :value="instance.options.initMode ?? 'multi'"
       @change="instance.setParameters({ initMode: $event.target.value })"
     >
       <option value="single">Single</option>
@@ -55,27 +28,26 @@
 
     <SliderControl
       label="Résolution"
-      :model-value="instance.options.gridResolution ?? 256"
-      :min="32" :max="1024" :step="1"
+      :model-value="instance.options.gridResolution ?? 128"
+      :min="32" :max="512" :step="1"
       :display-fn="v => Math.round(v) + ' px'"
-      @update:model-value="onGridResolutionChange($event)"
+      @update:model-value="instance.setParameters({ gridResolution: $event })"
     />
 
     <SliderControl
       label="Vitesse"
-      :model-value="instance.options.speed ?? 0.485"
+      :model-value="instance.options.speed ?? 0.3"
       :min="0" :max="1" :step="0.005"
       :display-fn="formatSpeed"
       @update:model-value="instance.options.speed = $event"
     />
 
     <SliderControl
-      label="Densité initiale"
-      :model-value="instance.options.initialDensity ?? 0.3"
-      :min="0.01" :max="0.9" :step="0.01"
+      label="Densité conducteurs"
+      :model-value="instance.options.conductorDensity ?? 0.3"
+      :min="0.1" :max="0.6" :step="0.01"
       :display-fn="v => Math.round(v * 100) + ' %'"
-      :disabled="(instance.options.initMode ?? 'single') === 'single'"
-      @update:model-value="instance.options.initialDensity = $event"
+      @update:model-value="instance.options.conductorDensity = $event"
     />
 
     <SliderControl
@@ -95,15 +67,7 @@
 <script setup>
 import SliderControl from '../SliderControl.vue';
 
-const props = defineProps({ instance: { type: Object, required: true } });
-
-function onAlgorithmChange(value) {
-  props.instance.setParameters({ algorithm: value });
-}
-
-function onGridResolutionChange(value) {
-  props.instance.setParameters({ gridResolution: value });
-}
+defineProps({ instance: { type: Object, required: true } });
 
 function formatSpeed(t) {
   let sps;
