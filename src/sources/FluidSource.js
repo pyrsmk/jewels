@@ -42,7 +42,7 @@ float noise(vec2 p) {
 float fbm(vec2 p) {
   float v = 0.0, a = 0.5;
   mat2 m = mat2(1.8, 1.2, -1.2, 1.8);
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 4; i++) {
     v += a * noise(p);
     p  = m * p + vec2(1.7, 9.2);
     a *= 0.5;
@@ -60,7 +60,7 @@ void main() {
   vec3 nearColor = u_fluidColors[0];
 
   for (int i = 0; i < 8; i++) {
-    if (i >= count) continue;
+    if (i >= count) break;
 
     float seed = u_fluidSeeds[i];
 
@@ -112,12 +112,15 @@ export class FluidSource extends AbstractSource {
     const directions = options.directions ?? Array.from({ length: n }, (_, i) => Math.round((i * 360) / n));
     const seeds = options.seeds ?? colors.map(() => Math.random() * 100);
     super({ speed: 0.4, ...options, colors, directions, seeds }, [], []);
-    this._accTime  = 0;
-    this._lastTime = null;
-    this.gl      = null;
-    this.program = null;
-    this.buffer  = null;
-    this.locs    = null;
+    this._accTime    = 0;
+    this._lastTime   = null;
+    this.gl          = null;
+    this.program     = null;
+    this.buffer      = null;
+    this.locs        = null;
+    this._colorsFlat = new Float32Array(24);
+    this._seedsArr   = new Float32Array(8);
+    this._colorsDirty = true;
   }
 
   _evenDirections(n) {
@@ -132,6 +135,7 @@ export class FluidSource extends AbstractSource {
     }
     while (this.options.seeds.length < n) this.options.seeds.push(Math.random() * 100);
     this.options.seeds.length = n;
+    this._colorsDirty = true;
   }
 
   setParameters(params) {
@@ -139,6 +143,19 @@ export class FluidSource extends AbstractSource {
     while (this.options.seeds.length < this.options.colors.length) {
       this.options.seeds.push(Math.random() * 100);
     }
+    this._colorsDirty = true;
+  }
+
+  _rebuildColorBuffers() {
+    const count = Math.min(this.options.colors.length, 8);
+    for (let i = 0; i < count; i++) {
+      const hex = this.options.colors[i] ?? '#ffffff';
+      this._colorsFlat[i * 3 + 0] = parseInt(hex.slice(1, 3), 16) / 255;
+      this._colorsFlat[i * 3 + 1] = parseInt(hex.slice(3, 5), 16) / 255;
+      this._colorsFlat[i * 3 + 2] = parseInt(hex.slice(5, 7), 16) / 255;
+      this._seedsArr[i] = this.options.seeds[i] ?? i * 13.7;
+    }
+    this._colorsDirty = false;
   }
 
   setupGPU(runtime) {
@@ -184,21 +201,12 @@ export class FluidSource extends AbstractSource {
     gl.uniform2f(this.locs.u_resolution, state.width, state.height);
     gl.uniform1f(this.locs.u_accTime,    this._accTime);
 
-    const count      = Math.min(this.options.colors.length, 8);
-    const colorsFlat = new Float32Array(24);
-    const seedsArr   = new Float32Array(8);
+    if (this._colorsDirty) this._rebuildColorBuffers();
 
-    for (let i = 0; i < count; i++) {
-      const hex = this.options.colors[i] ?? '#ffffff';
-      colorsFlat[i * 3 + 0] = parseInt(hex.slice(1, 3), 16) / 255;
-      colorsFlat[i * 3 + 1] = parseInt(hex.slice(3, 5), 16) / 255;
-      colorsFlat[i * 3 + 2] = parseInt(hex.slice(5, 7), 16) / 255;
-      seedsArr[i] = this.options.seeds[i] ?? i * 13.7;
-    }
-
+    const count = Math.min(this.options.colors.length, 8);
     gl.uniform1f(this.locs.u_fluidCount,   count);
-    gl.uniform3fv(this.locs.u_fluidColors, colorsFlat);
-    gl.uniform1fv(this.locs.u_fluidSeeds,  seedsArr);
+    gl.uniform3fv(this.locs.u_fluidColors, this._colorsFlat);
+    gl.uniform1fv(this.locs.u_fluidSeeds,  this._seedsArr);
 
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }

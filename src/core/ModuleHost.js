@@ -1,14 +1,31 @@
 export class ModuleHost {
   constructor() {
     this.items = [];
+    this._cachedSourceGroups = null;
+    this._cachedEffects = null;
+    this._cachedSources = null;
+    this._dirty = true;
+  }
+
+  _invalidate() {
+    this._dirty = true;
+    this._cachedSourceGroups = null;
+    this._cachedEffects = null;
+    this._cachedSources = null;
   }
 
   get sources() {
-    return this.items.filter((i) => i.type === 'source').map((i) => i.instance);
+    if (!this._cachedSources || this._dirty) {
+      this._cachedSources = this.items.filter((i) => i.type === 'source').map((i) => i.instance);
+    }
+    return this._cachedSources;
   }
 
   get effects() {
-    return this.items.filter((i) => i.type === 'effect').map((i) => i.instance);
+    if (!this._cachedEffects || this._dirty) {
+      this._cachedEffects = this.items.filter((i) => i.type === 'effect').map((i) => i.instance);
+    }
+    return this._cachedEffects;
   }
 
   getAllModules() {
@@ -24,6 +41,7 @@ export class ModuleHost {
   }
 
   getSourceGroups() {
+    if (this._cachedSourceGroups && !this._dirty) return this._cachedSourceGroups;
     const groups = [];
     let current = null;
     for (const item of this.items) {
@@ -34,6 +52,8 @@ export class ModuleHost {
         current.effects.push(item.instance);
       }
     }
+    this._cachedSourceGroups = groups;
+    this._dirty = false;
     return groups;
   }
 
@@ -106,6 +126,7 @@ export class ModuleHost {
 
   addSource(instance, position = this.items.length, className) {
     this.items.splice(position, 0, { type: 'source', instance, className: className ?? instance.constructor.name });
+    this._invalidate();
   }
 
   removeSource(instance) {
@@ -114,17 +135,21 @@ export class ModuleHost {
     let end = idx + 1;
     while (end < this.items.length && this.items[end].type === 'effect') end++;
     this.items.splice(idx, end - idx);
+    this._invalidate();
   }
 
   addEffect(instance, position = this.items.length, className) {
     this.items.splice(position, 0, { type: 'effect', instance, enabled: true, className: className ?? instance.constructor.name });
+    this._invalidate();
   }
 
   removeEffect(instance) {
     this.items = this.items.filter((i) => i.instance !== instance);
+    this._invalidate();
   }
 
   reorderItems(newItems) {
     this.items = newItems;
+    this._invalidate();
   }
 }

@@ -46,10 +46,11 @@ export async function useEngine(canvas) {
     moduleHost.resizeAllModules(contextFactory);
   }
 
+  const _effectUpdateContext = { time: 0, moduleHost, state };
   function executeEffectStages(t) {
-    const runtimeContext = { time: t, moduleHost, state };
+    _effectUpdateContext.time = t;
     for (const effect of moduleHost.getEffects()) {
-      effect.update({ ...runtimeContext });
+      effect.update(_effectUpdateContext);
     }
     postProcessor.render(t);
   }
@@ -104,6 +105,7 @@ export async function useEngine(canvas) {
     const item = moduleHost.items.find((i) => i.instance === instance);
     if (!item) return;
     item.enabled = item.enabled === false ? true : false;
+    moduleHost._invalidate();
     items.value = [...moduleHost.items];
     postProcessor.invalidateCache();
   }

@@ -5,6 +5,9 @@ export class PostProcessor {
     this.moduleHost = moduleHost;
     this.pipelineRuntime = pipelineRuntime;
     this.effectProgramCache = new Map();
+    this._effectStack = new EffectStack([], null);
+    this._transformCtx = { gl: null, locs: null, time: 0, effectStack: this._effectStack };
+    this._passExtra = { time: 0, effects: null };
   }
 
   _getRebuildKey(effect, effectStack) {
@@ -35,21 +38,24 @@ export class PostProcessor {
     let isFirst = true;
 
     for (const group of groups) {
-      group.source.renderScenePass(pipelineRuntime.buildPassContext({
-        time: t,
-        effects: group.effects,
-      }));
+      this._passExtra.time = t;
+      this._passExtra.effects = group.effects;
+      group.source.renderScenePass(pipelineRuntime.buildPassContext(this._passExtra));
 
       pipelineRuntime.resetPostChain();
       let inputTex = pipelineRuntime.getSceneTarget().tex;
       let lastOut = null;
 
       for (const effect of group.effects) {
-        const effectStack = new EffectStack(group.effects, effect);
+        const effectStack = this._effectStack.reset(group.effects, effect);
         const { program, locs } = this._getOrBuildProgram(effect, effectStack);
         const out = pipelineRuntime.getNextPostTarget();
         pipelineRuntime.bindEffectPass(program, locs, inputTex, out.fbo, prevTexture, t);
-        effect.transform({ gl, locs, time: t, effectStack });
+        this._transformCtx.gl = gl;
+        this._transformCtx.locs = locs;
+        this._transformCtx.time = t;
+        this._transformCtx.effectStack = effectStack;
+        effect.transform(this._transformCtx);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         inputTex = out.tex;
         lastOut = out;

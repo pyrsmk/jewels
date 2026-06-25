@@ -33,11 +33,11 @@
       @change="instance.options.colorTint2Palette = $event.target.value"
     >
       <option value="all">Toutes</option>
-      <option value="warm">Chaleureuses</option>
+      <option value="warm">Chaudes</option>
       <option value="cool">Froides</option>
-      <option value="fluo">Fluo</option>
+      <option value="fluo">Fluos</option>
       <option value="cyberpunk">Cyberpunk</option>
-      <option value="aurora">Aurora</option>
+      <option value="aurora">Aurore boréale</option>
       <option value="fire">Feu</option>
       <option value="sunset">Coucher de soleil</option>
       <option value="toxic">Toxique</option>

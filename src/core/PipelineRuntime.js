@@ -36,6 +36,10 @@ export class PipelineRuntime {
     gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadData, gl.STATIC_DRAW);
 
+    this._passContext = { gl: null, state: null };
+    this._frameHistoryRing = new Array(config.frameHistoryLimit);
+    this._frameHistoryHead = 0;
+    this._frameHistoryCount = 0;
     this.blitProgram = createProgram(gl, quadVS, blitFS);
     this.blitLocs = {
       a_pos: gl.getAttribLocation(this.blitProgram, 'a_pos'),
@@ -45,11 +49,19 @@ export class PipelineRuntime {
   }
 
   buildPassContext(extra = {}) {
-    return { gl: this.gl, state: this.state, ...extra };
+    this._passContext.gl = this.gl;
+    this._passContext.state = this.state;
+    for (const key in this._passContext) {
+      if (key !== 'gl' && key !== 'state') delete this._passContext[key];
+    }
+    for (const key in extra) {
+      this._passContext[key] = extra[key];
+    }
+    return this._passContext;
   }
 
   clearFrameHistory() {
-    this.state.frameHistory.length = 0;
+    this._frameHistoryCount = 0;
   }
 
   resetPostChain() {
@@ -70,14 +82,15 @@ export class PipelineRuntime {
   }
 
   pushFrameHistory(texture) {
-    this.state.frameHistory.unshift({
-      texture,
-      width: Math.max(1, Math.floor(this.state.width * this.config.frameHistoryScale)),
-      height: Math.max(1, Math.floor(this.state.height * this.config.frameHistoryScale)),
-    });
-    if (this.state.frameHistory.length > this.config.frameHistoryLimit) {
-      this.state.frameHistory.length = this.config.frameHistoryLimit;
-    }
+    const limit = this.config.frameHistoryLimit;
+    const ring = this._frameHistoryRing;
+    // Reuse or create slot
+    const slot = ring[this._frameHistoryHead] || (ring[this._frameHistoryHead] = { texture: null, width: 0, height: 0 });
+    slot.texture = texture;
+    slot.width = Math.max(1, Math.floor(this.state.width * this.config.frameHistoryScale));
+    slot.height = Math.max(1, Math.floor(this.state.height * this.config.frameHistoryScale));
+    this._frameHistoryHead = (this._frameHistoryHead + 1) % limit;
+    if (this._frameHistoryCount < limit) this._frameHistoryCount++;
   }
 
   getSceneTarget() {
@@ -89,7 +102,11 @@ export class PipelineRuntime {
   }
 
   getPreviousFrameTexture(fallbackTexture = null) {
-    return this.state.frameHistory[0]?.texture || fallbackTexture;
+    if (this._frameHistoryCount === 0) return fallbackTexture;
+    // Most recent entry is one step behind head
+    const limit = this.config.frameHistoryLimit;
+    const idx = (this._frameHistoryHead - 1 + limit) % limit;
+    return this._frameHistoryRing[idx]?.texture || fallbackTexture;
   }
 
   getNextPostTarget() {

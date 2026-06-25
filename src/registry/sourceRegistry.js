@@ -33,12 +33,22 @@ export const sourceRegistry = [
   },
   {
     className: 'GameOfLifeSource',
-    label: 'Automates cellulaires',
+    label: 'Game of Life',
     isDeletable: true,
     classLoader: () => import('../sources/GameOfLifeSource.js').then((m) => m.GameOfLifeSource),
     componentLoader: () => import('../components/sources/GameOfLifeSource.vue'),
     component: defineAsyncComponent(
       () => import('../components/sources/GameOfLifeSource.vue')
+    ),
+  },
+  {
+    className: 'LeniaSource',
+    label: 'Lenia',
+    isDeletable: true,
+    classLoader: () => import('../sources/LeniaSource.js').then((m) => m.LeniaSource),
+    componentLoader: () => import('../components/sources/LeniaSource.vue'),
+    component: defineAsyncComponent(
+      () => import('../components/sources/LeniaSource.vue')
     ),
   },
   {

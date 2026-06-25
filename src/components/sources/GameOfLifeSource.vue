@@ -19,13 +19,13 @@
       </optgroup>
     </select>
 
-    <label>Initialisation</label>
+    <label>Seeding</label>
     <select
       :value="instance.options.initMode ?? 'single'"
       @change="instance.setParameters({ initMode: $event.target.value })"
     >
-      <option value="single">Single seed</option>
-      <option value="multi">Multi seeds</option>
+      <option value="single">Single</option>
+      <option value="multi">Multi</option>
     </select>
 
     <label>Palette</label>
@@ -33,11 +33,11 @@
       :value="instance.options.palette"
       @change="instance.options.palette = $event.target.value"
     >
-      <option value="warm">Chaleureuses</option>
+      <option value="warm">Chaudes</option>
       <option value="cool">Froides</option>
-      <option value="fluo">Fluo</option>
+      <option value="fluo">Fluos</option>
       <option value="cyberpunk">Cyberpunk</option>
-      <option value="aurora">Aurora</option>
+      <option value="aurora">Aurore boréale</option>
       <option value="fire">Feu</option>
       <option value="sunset">Coucher de soleil</option>
       <option value="toxic">Toxique</option>
