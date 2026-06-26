@@ -20,18 +20,28 @@ export class SettingsController {
     return settings;
   }
 
+  _writeUrl() {
+    try {
+      const url = new URL(window.location.href);
+      const json = JSON.stringify(this.capture());
+      url.searchParams.set('settings', this.encode(json));
+      window.history.replaceState({}, '', url.toString());
+    } catch (err) {
+      console.warn(`Impossible de sauvegarder les paramètres dans l'URL :`, err);
+    }
+    this._maxTimer = null;
+    this._persistTimer = null;
+  }
+
   persistToUrl() {
     clearTimeout(this._persistTimer);
-    this._persistTimer = setTimeout(() => {
-      try {
-        const url = new URL(window.location.href);
-        const json = JSON.stringify(this.capture());
-        url.searchParams.set('settings', this.encode(json));
-        window.history.replaceState({}, '', url.toString());
-      } catch (err) {
-        console.warn(`Impossible de sauvegarder les paramètres dans l'URL :`, err);
-      }
-    }, 500);
+    this._persistTimer = setTimeout(() => this._writeUrl(), 500);
+    if (!this._maxTimer) {
+      this._maxTimer = setTimeout(() => {
+        clearTimeout(this._persistTimer);
+        this._writeUrl();
+      }, 2000);
+    }
   }
 
   loadFromUrl() {
@@ -43,6 +53,9 @@ export class SettingsController {
       const settings = JSON.parse(decoded);
       if (!settings || typeof settings !== 'object') return;
       this.moduleHost.applySettings(settings);
+      if (settings.automations && this.automationHost) {
+        this.automationHost.applySettings(settings.automations);
+      }
     } catch (err) {
       console.warn(`Impossible de restaurer les paramètres depuis l'URL :`, err);
     }

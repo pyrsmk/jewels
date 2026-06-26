@@ -93,8 +93,13 @@ export class AutomationHost {
         enabled: data.enabled ?? true,
       });
       this.addBinding(binding);
-      const target = this._resolveTarget(binding);
-      binding.captureInitialValue(target);
+      if (data.initialValue !== undefined) {
+        binding._initialValue = data.initialValue;
+        binding._captured = true;
+      } else {
+        const target = this._resolveTarget(binding);
+        binding.captureInitialValue(target);
+      }
     }
   }
 

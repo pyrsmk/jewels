@@ -48,6 +48,7 @@ export class AutomationBinding {
       paramType: this.paramType,
       mappingConfig: { ...this.mappingConfig },
       enabled: this.enabled,
+      initialValue: this._captured ? this._initialValue : undefined,
     };
   }
 }
