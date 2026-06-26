@@ -3,12 +3,12 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class GlowEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      glow: 1.0,
-      glowGrainResponse: 1.0,
+      intensity: 1.0,
+      grainResponse: 1.0,
     };
     super({ ...defaults, ...options },
-      ['glow', 'glowGrainResponse'],
-      ['glowVal', 'glowGrainResponseVal']
+      ['intensity', 'grainResponse'],
+      ['intensityVal', 'grainResponseVal']
     );
   }
 
@@ -20,8 +20,8 @@ export class GlowEffect extends EffectInterface {
   }
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_glow, +(this.options.glow ?? 1.0));
-    gl.uniform1f(locs.u_glowGrainResponse, +(this.options.glowGrainResponse ?? 1.0));
+    gl.uniform1f(locs.u_glow, +(this.options.intensity ?? 1.0));
+    gl.uniform1f(locs.u_glowGrainResponse, +(this.options.grainResponse ?? 1.0));
   }
 
   getPostShaderUniforms(context = {}) {

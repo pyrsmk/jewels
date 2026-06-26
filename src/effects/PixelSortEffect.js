@@ -3,22 +3,22 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class PixelSortEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      hGlitch: 1.0,
-      hGlitchSpeed: 1.20,
-      hGlitchScale: 0,
+      intensity: 1.0,
+      speed: 1.20,
+      density: 0,
     };
     super({ ...defaults, ...options },
-      ['hGlitch', 'hGlitchSpeed', 'hGlitchScale'],
-      ['hGlitchVal', 'hGlitchSpeedVal', 'hGlitchScaleVal']
+      ['intensity', 'speed', 'density'],
+      ['intensityVal', 'speedVal', 'densityVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_hGlitch, +(this.options.hGlitch ?? 1.0));
-    gl.uniform1f(locs.u_hGlitchSpeed, +(this.options.hGlitchSpeed ?? 1.20));
-    gl.uniform1f(locs.u_hGlitchScale, +(this.options.hGlitchScale ?? 0));
+    gl.uniform1f(locs.u_hGlitch, +(this.options.intensity ?? 1.0));
+    gl.uniform1f(locs.u_hGlitchSpeed, +(this.options.speed ?? 1.20));
+    gl.uniform1f(locs.u_hGlitchScale, +(this.options.density ?? 0));
   }
 
   getPostShaderUniforms() {

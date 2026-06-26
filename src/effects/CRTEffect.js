@@ -3,28 +3,28 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class CRTEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      crt: 1.0,
-      crtScanlines: 0.60,
-      crtScanlinesSize: 2.0,
-      crtFlicker: 0.70,
-      crtVignette: 0.03,
-      crtPhosphore: 0.30,
+      intensity: 1.0,
+      scanlines: 0.60,
+      scanlineSpacing: 2.0,
+      flicker: 0.70,
+      vignette: 0.03,
+      phosphor: 0.30,
     };
     super({ ...defaults, ...options },
-      ['crt', 'crtScanlines', 'crtScanlinesSize', 'crtFlicker', 'crtVignette', 'crtPhosphore'],
-      ['crtVal', 'crtScanlinesVal', 'crtScanlinesSizeVal', 'crtFlickerVal', 'crtVignetteVal', 'crtPhosphoreVal']
+      ['intensity', 'scanlines', 'scanlineSpacing', 'flicker', 'vignette', 'phosphor'],
+      ['intensityVal', 'scanlinesVal', 'scanlineSpacingVal', 'flickerVal', 'vignetteVal', 'phosphorVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_crt, +(this.options.crt ?? 1.0));
-    gl.uniform1f(locs.u_crtScanlines, +(this.options.crtScanlines ?? 0.60));
-    gl.uniform1f(locs.u_crtScanlinesSize, +(this.options.crtScanlinesSize ?? 2.0));
-    gl.uniform1f(locs.u_crtFlicker, +(this.options.crtFlicker ?? 0.70));
-    gl.uniform1f(locs.u_crtVignette, +(this.options.crtVignette ?? 0.03));
-    gl.uniform1f(locs.u_crtPhosphore, +(this.options.crtPhosphore ?? 0.30));
+    gl.uniform1f(locs.u_crt, +(this.options.intensity ?? 1.0));
+    gl.uniform1f(locs.u_crtScanlines, +(this.options.scanlines ?? 0.60));
+    gl.uniform1f(locs.u_crtScanlinesSize, +(this.options.scanlineSpacing ?? 2.0));
+    gl.uniform1f(locs.u_crtFlicker, +(this.options.flicker ?? 0.70));
+    gl.uniform1f(locs.u_crtVignette, +(this.options.vignette ?? 0.03));
+    gl.uniform1f(locs.u_crtPhosphore, +(this.options.phosphor ?? 0.30));
   }
 
   getPostShaderUniforms() {

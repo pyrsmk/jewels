@@ -2,30 +2,30 @@
   <div>
     <label>
       Intensité
-      <span class="value">{{ (+(instance.options.rgbSplit ?? 1.80)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.intensity ?? 1.80)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="1.8" step="0.01"
-      :value="instance.options.rgbSplit ?? 1.80"
-      @input="instance.options.rgbSplit = +$event.target.value"
+      :value="instance.options.intensity ?? 1.80"
+      @input="instance.options.intensity = +$event.target.value"
     />
     <label>
       Vitesse
-      <span class="value">{{ (+(instance.options.rgbSplitSpeed ?? 2.20)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.speed ?? 2.20)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="8" step="0.01"
-      :value="instance.options.rgbSplitSpeed ?? 2.20"
-      @input="instance.options.rgbSplitSpeed = +$event.target.value"
+      :value="instance.options.speed ?? 2.20"
+      @input="instance.options.speed = +$event.target.value"
     />
     <label>
       Échelle
-      <span class="value">{{ (+(instance.options.rgbSplitScale ?? 2.00)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.scale ?? 2.00)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0.2" max="8" step="0.01"
-      :value="instance.options.rgbSplitScale ?? 2.00"
-      @input="instance.options.rgbSplitScale = +$event.target.value"
+      :value="instance.options.scale ?? 2.00"
+      @input="instance.options.scale = +$event.target.value"
     />
   </div>
 </template>

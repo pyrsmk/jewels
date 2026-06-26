@@ -5,17 +5,17 @@ export class BackgroundSource extends AbstractSource {
 
   constructor(options = {}) {
     const defaults = {
-      bgColor: '#000000',
+      color: '#000000',
     };
-    super({ ...defaults, ...options }, ['bgColor'], []);
+    super({ ...defaults, ...options }, ['color'], []);
     this.gl = null;
     this.program = null;
     this.buffer = null;
     this.locs = null;
   }
 
-  setBgColor(val) {
-    this.options.bgColor = val;
+  setColor(val) {
+    this.options.color = val;
   }
 
   setupGPU(runtime) {
@@ -57,7 +57,7 @@ export class BackgroundSource extends AbstractSource {
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
-    const hex = this.options.bgColor ?? '#000000';
+    const hex = this.options.color ?? '#000000';
     const r = parseInt(hex.slice(1, 3), 16) / 255;
     const g = parseInt(hex.slice(3, 5), 16) / 255;
     const b = parseInt(hex.slice(5, 7), 16) / 255;

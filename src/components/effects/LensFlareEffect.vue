@@ -2,17 +2,17 @@
   <div>
     <label>
       Réponse au grain
-      <span class="value">{{ (+(instance.options.lensFlareGrainResponse ?? 0.5)).toFixed(2) }}</span>
+      <span class="value">{{ (+(instance.options.grainResponse ?? 0.5)).toFixed(2) }}</span>
     </label>
     <input
       type="range" min="0" max="1" step="0.01"
-      :value="instance.options.lensFlareGrainResponse ?? 0.5"
-      @input="instance.options.lensFlareGrainResponse = +$event.target.value"
+      :value="instance.options.grainResponse ?? 0.5"
+      @input="instance.options.grainResponse = +$event.target.value"
     />
     <label>Type</label>
     <select
-      :value="instance.options.lensFlareType ?? 'horizontal'"
-      @change="instance.options.lensFlareType = $event.target.value"
+      :value="instance.options.type ?? 'horizontal'"
+      @change="instance.options.type = $event.target.value"
     >
       <option value="horizontal">Horizontal</option>
       <option value="vertical">Vertical</option>
@@ -22,99 +22,99 @@
       Anamorphique
       <input
         type="checkbox"
-        :checked="instance.options.lensFlareAnamorphic ?? true"
-        @change="instance.options.lensFlareAnamorphic = $event.target.checked"
+        :checked="instance.options.anamorphic ?? true"
+        @change="instance.options.anamorphic = $event.target.checked"
       />
     </label>
     <label>
       Épaisseur
-      <span class="value">{{ (+(instance.options.flareThickness ?? 3)).toFixed(1) }} px</span>
+      <span class="value">{{ (+(instance.options.thickness ?? 3)).toFixed(1) }} px</span>
     </label>
     <input
       type="range" min="0" max="10" step="0.1"
-      :value="instance.options.flareThickness ?? 3"
-      @input="instance.options.flareThickness = +$event.target.value"
+      :value="instance.options.thickness ?? 3"
+      @input="instance.options.thickness = +$event.target.value"
     />
     <label>
       Longueur
-      <span class="value">{{ (+(instance.options.flareLength ?? 60)) }}%</span>
+      <span class="value">{{ (+(instance.options.length ?? 60)) }}%</span>
     </label>
     <input
       type="range" min="5" max="100" step="1"
-      :value="instance.options.flareLength ?? 60"
-      @input="instance.options.flareLength = +$event.target.value"
+      :value="instance.options.length ?? 60"
+      @input="instance.options.length = +$event.target.value"
     />
     <label>
       Diffusion
-      <span class="value">{{ (+(instance.options.flareDiffusion ?? 2.5)).toFixed(1) }}x</span>
+      <span class="value">{{ (+(instance.options.diffusion ?? 2.5)).toFixed(1) }}x</span>
     </label>
     <input
       type="range" min="0" max="5" step="0.1"
-      :value="instance.options.flareDiffusion ?? 2.5"
-      @input="instance.options.flareDiffusion = +$event.target.value"
+      :value="instance.options.diffusion ?? 2.5"
+      @input="instance.options.diffusion = +$event.target.value"
     />
     <label>
       Durée
-      <span class="value">{{ (+(instance.options.flareDuration ?? 4000)) }} ms</span>
+      <span class="value">{{ (+(instance.options.duration ?? 4000)) }} ms</span>
     </label>
     <input
       type="range" min="100" max="20000" step="10"
-      :value="instance.options.flareDuration ?? 4000"
-      @input="instance.options.flareDuration = +$event.target.value"
+      :value="instance.options.duration ?? 4000"
+      @input="instance.options.duration = +$event.target.value"
     />
     <label>
       Borne min de déclenchement
-      <span class="value">{{ (+(instance.options.flareMin ?? 10)).toFixed(1) }}</span>
+      <span class="value">{{ (+(instance.options.triggerMin ?? 10)).toFixed(1) }}</span>
     </label>
     <input
       type="range" min="1" max="30" step="0.5"
-      :value="instance.options.flareMin ?? 10"
-      @input="instance.options.flareMin = +$event.target.value"
+      :value="instance.options.triggerMin ?? 10"
+      @input="instance.options.triggerMin = +$event.target.value"
     />
     <label>
       Borne max de déclenchement
-      <span class="value">{{ (+(instance.options.flareMax ?? 60)).toFixed(1) }}</span>
+      <span class="value">{{ (+(instance.options.triggerMax ?? 60)).toFixed(1) }}</span>
     </label>
     <input
       type="range" min="5" max="60" step="0.5"
-      :value="instance.options.flareMax ?? 60"
-      @input="instance.options.flareMax = +$event.target.value"
+      :value="instance.options.triggerMax ?? 60"
+      @input="instance.options.triggerMax = +$event.target.value"
     />
     <label>
       Fondu entrant
-      <span class="value">{{ (+(instance.options.flareFadeIn ?? 13)) }}%</span>
+      <span class="value">{{ (+(instance.options.fadeIn ?? 13)) }}%</span>
     </label>
     <input
       type="range" min="0" max="100" step="1"
-      :value="instance.options.flareFadeIn ?? 13"
-      @input="instance.options.flareFadeIn = +$event.target.value"
+      :value="instance.options.fadeIn ?? 13"
+      @input="instance.options.fadeIn = +$event.target.value"
     />
     <label>
       Maintien
-      <span class="value">{{ (+(instance.options.flareHold ?? 10)) }}%</span>
+      <span class="value">{{ (+(instance.options.hold ?? 10)) }}%</span>
     </label>
     <input
       type="range" min="0" max="100" step="1"
-      :value="instance.options.flareHold ?? 10"
-      @input="instance.options.flareHold = +$event.target.value"
+      :value="instance.options.hold ?? 10"
+      @input="instance.options.hold = +$event.target.value"
     />
     <label>
       Fondu sortant
-      <span class="value">{{ (+(instance.options.flareFadeOut ?? 77)) }}%</span>
+      <span class="value">{{ (+(instance.options.fadeOut ?? 77)) }}%</span>
     </label>
     <input
       type="range" min="0" max="100" step="1"
-      :value="instance.options.flareFadeOut ?? 77"
-      @input="instance.options.flareFadeOut = +$event.target.value"
+      :value="instance.options.fadeOut ?? 77"
+      @input="instance.options.fadeOut = +$event.target.value"
     />
     <label>
       Distance au bord
-      <span class="value">{{ (+(instance.options.flareEdgeDistance ?? 0)) }} px</span>
+      <span class="value">{{ (+(instance.options.edgeDistance ?? 0)) }} px</span>
     </label>
     <input
       type="range" min="0" max="500" step="1"
-      :value="instance.options.flareEdgeDistance ?? 0"
-      @input="instance.options.flareEdgeDistance = +$event.target.value"
+      :value="instance.options.edgeDistance ?? 0"
+      @input="instance.options.edgeDistance = +$event.target.value"
     />
     <label>
       Fantômes

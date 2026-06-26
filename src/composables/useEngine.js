@@ -92,8 +92,16 @@ export async function useEngine(canvas) {
 
   function removeSource(instance) {
     if (instance.constructor.name === 'BackgroundSource') return;
-    const item = moduleHost.items.find((i) => i.instance === instance);
-    if (item) automationHost.removeBindingsForModule(item.className, _instanceIndex(item));
+    const idx = moduleHost.items.findIndex((i) => i.instance === instance);
+    if (idx === -1) return;
+    // Collect the source + its cascading effects before removal
+    const cascaded = [moduleHost.items[idx]];
+    for (let i = idx + 1; i < moduleHost.items.length && moduleHost.items[i].type === 'effect'; i++) {
+      cascaded.push(moduleHost.items[i]);
+    }
+    for (const item of cascaded) {
+      automationHost.removeBindingsForModule(item.className, _instanceIndex(item));
+    }
     moduleHost.removeSource(instance);
     items.value = [...moduleHost.items];
     pipelineRuntime.clearScene();

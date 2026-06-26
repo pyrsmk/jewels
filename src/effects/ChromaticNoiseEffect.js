@@ -3,22 +3,22 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class ChromaticNoiseEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      chromaticNoise: 4.00,
-      chromaticNoiseSpeed: 2.10,
-      chromaticNoiseScale: 2.80,
+      intensity: 4.00,
+      speed: 2.10,
+      scale: 2.80,
     };
     super({ ...defaults, ...options },
-      ['chromaticNoise', 'chromaticNoiseSpeed', 'chromaticNoiseScale'],
-      ['chromaticNoiseVal', 'chromaticNoiseSpeedVal', 'chromaticNoiseScaleVal']
+      ['intensity', 'speed', 'scale'],
+      ['intensityVal', 'speedVal', 'scaleVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_chromaticNoise, +(this.options.chromaticNoise ?? 4.00));
-    gl.uniform1f(locs.u_chromaticNoiseSpeed, +(this.options.chromaticNoiseSpeed ?? 2.10));
-    gl.uniform1f(locs.u_chromaticNoiseScale, +(this.options.chromaticNoiseScale ?? 2.80));
+    gl.uniform1f(locs.u_chromaticNoise, +(this.options.intensity ?? 4.00));
+    gl.uniform1f(locs.u_chromaticNoiseSpeed, +(this.options.speed ?? 2.10));
+    gl.uniform1f(locs.u_chromaticNoiseScale, +(this.options.scale ?? 2.80));
   }
 
   getPostShaderUniforms() {

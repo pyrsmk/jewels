@@ -3,13 +3,13 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class DreamyGlowEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      dreamyGlow: 4,
-      dreamyGrainResponse: 1.0,
-      dreamyEdgeBoost: 0.5,
-      dreamyHaloDir: 15,
+      intensity: 4,
+      grainResponse: 1.0,
+      haloStrength: 0.5,
+      haloDirection: 15,
     };
     super({ ...defaults, ...options },
-      ['dreamyGlow', 'dreamyGrainResponse', 'dreamyEdgeBoost', 'dreamyHaloDir'],
+      ['intensity', 'grainResponse', 'haloStrength', 'haloDirection'],
       ['dreamyVal', 'dreamyGrainResponseVal', 'dreamyEdgeBoostVal']
     );
   }
@@ -22,10 +22,10 @@ export class DreamyGlowEffect extends EffectInterface {
   }
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_dreamyGlow, +(this.options.dreamyGlow ?? 4));
-    gl.uniform1f(locs.u_dreamyEdgeBoost, +(this.options.dreamyEdgeBoost ?? 0.5));
-    gl.uniform1f(locs.u_dreamyHaloDir, +(this.options.dreamyHaloDir ?? 15));
-    gl.uniform1f(locs.u_dreamyGrainResponse, +(this.options.dreamyGrainResponse ?? 1.0));
+    gl.uniform1f(locs.u_dreamyGlow, +(this.options.intensity ?? 4));
+    gl.uniform1f(locs.u_dreamyEdgeBoost, +(this.options.haloStrength ?? 0.5));
+    gl.uniform1f(locs.u_dreamyHaloDir, +(this.options.haloDirection ?? 15));
+    gl.uniform1f(locs.u_dreamyGrainResponse, +(this.options.grainResponse ?? 1.0));
   }
 
   getPostShaderUniforms(context = {}) {

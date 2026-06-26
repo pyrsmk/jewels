@@ -3,13 +3,13 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class ChromaticAberrationEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      chromaticMode: 'edges',
-      chromaticWidth: 0.55,
-      chromaticOffset: 0.75,
+      mode: 'edges',
+      width: 0.55,
+      offset: 0.75,
     };
     super({ ...defaults, ...options },
-      ['chromaticMode', 'chromaticWidth', 'chromaticOffset'],
-      ['chromaticWidthVal', 'chromaticOffsetVal']
+      ['mode', 'width', 'offset'],
+      ['widthVal', 'offsetVal']
     );
   }
 
@@ -22,10 +22,10 @@ export class ChromaticAberrationEffect extends EffectInterface {
   transform({ gl, locs }) {
     gl.uniform1f(
       locs.u_chromaticMode,
-      (this.options.chromaticMode ?? 'edges') === 'edges' ? 1.0 : 0.0
+      (this.options.mode ?? 'edges') === 'edges' ? 1.0 : 0.0
     );
-    gl.uniform1f(locs.u_chromaticWidth, +(this.options.chromaticWidth ?? 0.55));
-    gl.uniform1f(locs.u_chromaticOffset, +(this.options.chromaticOffset ?? 0.75));
+    gl.uniform1f(locs.u_chromaticWidth, +(this.options.width ?? 0.55));
+    gl.uniform1f(locs.u_chromaticOffset, +(this.options.offset ?? 0.75));
   }
 
   getPostShaderUniforms() {

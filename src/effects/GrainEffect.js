@@ -2,14 +2,14 @@ import { EffectInterface } from '../core/EffectInterface.js';
 
 export class GrainEffect extends EffectInterface {
   constructor(options = {}) {
-    const defaults = { grainAmount: 6.0 };
-    super({ ...defaults, ...options }, ['grainAmount'], ['grainAmountVal']);
+    const defaults = { amount: 6.0 };
+    super({ ...defaults, ...options }, ['amount'], ['amountVal']);
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_grainAmount, +(this.options.grainAmount ?? 6.0));
+    gl.uniform1f(locs.u_grainAmount, +(this.options.amount ?? 6.0));
   }
 
   getPostShaderUniforms() {

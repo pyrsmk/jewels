@@ -3,17 +3,17 @@ import { EffectInterface } from "../core/EffectInterface.js";
 export class ColorGradingEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      cgBrightness: 0.0,
-      cgContrast: 0.0,
-      cgSaturation: 0.0,
-      cgWarmth: 0.0,
-      cgHue: 0.0,
-      cgShadows: 0.0,
-      cgHighlights: 0.0,
+      brightness: 0.0,
+      contrast: 0.0,
+      saturation: 0.0,
+      warmth: 0.0,
+      hue: 0.0,
+      shadows: 0.0,
+      highlights: 0.0,
     };
     super({ ...defaults, ...options },
-      ["cgBrightness", "cgContrast", "cgSaturation", "cgWarmth", "cgHue",
-        "cgShadows", "cgHighlights"],
+      ["brightness", "contrast", "saturation", "warmth", "hue",
+        "shadows", "highlights"],
       []
     );
   }
@@ -25,13 +25,13 @@ export class ColorGradingEffect extends EffectInterface {
   }
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_cgBrightness, +(this.options.cgBrightness ?? 0.0));
-    gl.uniform1f(locs.u_cgContrast, +(this.options.cgContrast ?? 0.0));
-    gl.uniform1f(locs.u_cgSaturation, +(this.options.cgSaturation ?? 0.0));
-    gl.uniform1f(locs.u_cgWarmth, +(this.options.cgWarmth ?? 0.0));
-    gl.uniform1f(locs.u_cgHue, +(this.options.cgHue ?? 0.0));
-    gl.uniform1f(locs.u_cgShadows, +(this.options.cgShadows ?? 0.0));
-    gl.uniform1f(locs.u_cgHighlights, +(this.options.cgHighlights ?? 0.0));
+    gl.uniform1f(locs.u_cgBrightness, +(this.options.brightness ?? 0.0));
+    gl.uniform1f(locs.u_cgContrast, +(this.options.contrast ?? 0.0));
+    gl.uniform1f(locs.u_cgSaturation, +(this.options.saturation ?? 0.0));
+    gl.uniform1f(locs.u_cgWarmth, +(this.options.warmth ?? 0.0));
+    gl.uniform1f(locs.u_cgHue, +(this.options.hue ?? 0.0));
+    gl.uniform1f(locs.u_cgShadows, +(this.options.shadows ?? 0.0));
+    gl.uniform1f(locs.u_cgHighlights, +(this.options.highlights ?? 0.0));
   }
 
   getPostShaderUniforms() {

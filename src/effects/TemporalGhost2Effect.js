@@ -3,26 +3,26 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class TemporalGhost2Effect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      tg2Opacity: 1.0,
-      tg2: 1.25,
-      tg2RgbShift: 0.80,
-      tg2Speed: 1.20,
-      tg2Scale: 1.50,
+      intensity: 1.0,
+      amplitude: 1.25,
+      rgbShift: 0.80,
+      speed: 1.20,
+      offset: 1.50,
     };
     super({ ...defaults, ...options },
-      ['tg2Opacity', 'tg2', 'tg2RgbShift', 'tg2Speed', 'tg2Scale'],
-      ['tg2OpacityVal', 'tg2Val', 'tg2RgbShiftVal', 'tg2SpeedVal', 'tg2ScaleVal']
+      ['intensity', 'amplitude', 'rgbShift', 'speed', 'offset'],
+      ['intensityVal', 'amplitudeVal', 'rgbShiftVal', 'speedVal', 'offsetVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_tg2, +(this.options.tg2 ?? 1.25));
-    gl.uniform1f(locs.u_tg2Opacity, +(this.options.tg2Opacity ?? 1.0));
-    gl.uniform1f(locs.u_tg2RgbShift, +(this.options.tg2RgbShift ?? 0.80));
-    gl.uniform1f(locs.u_tg2Speed, +(this.options.tg2Speed ?? 1.20));
-    gl.uniform1f(locs.u_tg2Scale, +(this.options.tg2Scale ?? 1.50));
+    gl.uniform1f(locs.u_tg2, +(this.options.amplitude ?? 1.25));
+    gl.uniform1f(locs.u_tg2Opacity, +(this.options.intensity ?? 1.0));
+    gl.uniform1f(locs.u_tg2RgbShift, +(this.options.rgbShift ?? 0.80));
+    gl.uniform1f(locs.u_tg2Speed, +(this.options.speed ?? 1.20));
+    gl.uniform1f(locs.u_tg2Scale, +(this.options.offset ?? 1.50));
   }
 
   getPostShaderUniforms() {

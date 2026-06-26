@@ -12,7 +12,7 @@
     />
     <div class="badge-wrapper">
       <Button
-        icon="grid_on"
+        icon="cable"
         tooltip="Automations"
         @click="$emit('openAutomations')"
       />

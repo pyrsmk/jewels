@@ -3,22 +3,22 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class BlockGlitch3Effect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      bg3: 1.50,
-      bg3Speed: 1.50,
-      bg3Scale: 1.50,
+      intensity: 1.50,
+      speed: 1.50,
+      density: 1.50,
     };
     super({ ...defaults, ...options },
-      ['bg3', 'bg3Speed', 'bg3Scale'],
-      ['bg3Val', 'bg3SpeedVal', 'bg3ScaleVal']
+      ['intensity', 'speed', 'density'],
+      ['intensityVal', 'speedVal', 'densityVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_bg3, +(this.options.bg3 ?? 1.50));
-    gl.uniform1f(locs.u_bg3Speed, +(this.options.bg3Speed ?? 1.50));
-    gl.uniform1f(locs.u_bg3Scale, +(this.options.bg3Scale ?? 1.50));
+    gl.uniform1f(locs.u_bg3, +(this.options.intensity ?? 1.50));
+    gl.uniform1f(locs.u_bg3Speed, +(this.options.speed ?? 1.50));
+    gl.uniform1f(locs.u_bg3Scale, +(this.options.density ?? 1.50));
   }
 
   getPostShaderUniforms() {

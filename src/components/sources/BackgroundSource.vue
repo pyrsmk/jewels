@@ -3,7 +3,7 @@
     <label>Couleur</label>
     <input
       type="color"
-      :value="bgColor"
+      :value="color"
       @input="updateColor($event.target.value)"
       @change="updateColor($event.target.value)"
     />
@@ -15,20 +15,20 @@ import { ref, watch, onMounted } from 'vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-const bgColor = ref(props.instance.options.bgColor ?? '#000000');
+const color = ref(props.instance.options.color ?? '#000000');
 
 onMounted(() => {
-  bgColor.value = props.instance.options.bgColor ?? '#000000';
+  color.value = props.instance.options.color ?? '#000000';
 });
 
 function updateColor(val) {
-  bgColor.value = val;
-  props.instance.setBgColor(val);
+  color.value = val;
+  props.instance.setColor(val);
 }
 
-watch(() => props.instance.options.bgColor, (val) => {
-  if (val !== bgColor.value) {
-    bgColor.value = val ?? '#000000';
+watch(() => props.instance.options.color, (val) => {
+  if (val !== color.value) {
+    color.value = val ?? '#000000';
   }
 });
 </script>

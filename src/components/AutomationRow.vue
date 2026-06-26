@@ -18,7 +18,7 @@
         </select>
       </label>
       <label>
-        Module
+        Cible
         <select :value="currentModuleIndex" @change="$emit('change-module', Number($event.target.value))">
           <option v-for="(m, idx) in moduleOptions" :key="idx" :value="idx">
             {{ m.label }}
@@ -29,7 +29,7 @@
         Paramètre
         <select :value="targetOptionKey" @change="$emit('change-param', $event.target.value)">
           <option v-for="key in paramOptions" :key="key" :value="key">
-            {{ key }}
+            {{ formatKey(key) }}
           </option>
         </select>
       </label>
@@ -131,6 +131,26 @@
         </div>
       </template>
     </div>
+    <div v-if="binding.paramType === 'range'" class="automation-row__mapping">
+      <label class="mapping-slider">
+        Intensité
+        <span class="mapping-slider__value">{{ ((binding.mappingConfig.amount ?? 1) * 100).toFixed(0) }}%</span>
+        <input
+          type="range"
+          :min="0" :max="1" :step="0.01"
+          :value="binding.mappingConfig.amount ?? 1"
+          @input="updateMappingConfig('amount', +$event.target.value)"
+        />
+      </label>
+      <label>
+        Modulation
+        <select :value="binding.mappingConfig.anchor ?? 0" @change="updateMappingConfig('anchor', Number($event.target.value))">
+          <option :value="0">Vers le haut</option>
+          <option :value="0.5">Au centre</option>
+          <option :value="1">Vers le bas</option>
+        </select>
+      </label>
+    </div>
   </div>
 </template>
 
@@ -153,6 +173,12 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['toggle', 'remove', 'change-source', 'change-module', 'change-param', 'settings-change']);
+
+function formatKey(key) {
+  return key
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^./, c => c.toUpperCase());
+}
 
 
 const moduleOptions = computed(() =>
@@ -236,6 +262,11 @@ function toggleAudioPlayback() {
 
 function updateSourceOption(key, value) {
   props.binding.source.options[key] = value;
+  emit('settings-change');
+}
+
+function updateMappingConfig(key, value) {
+  props.binding.mappingConfig[key] = value;
   emit('settings-change');
 }
 </script>
@@ -346,6 +377,42 @@ function updateSourceOption(key, value) {
 .audio-btn:hover:not(:disabled) { color: #ddd; }
 .audio-btn:disabled { opacity: 0.3; cursor: default; }
 .audio-btn .material-symbols-outlined { font-size: 16px; }
+.automation-row__mapping {
+  display: flex;
+  align-items: center;
+  gap: 8px 16px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 12px;
+}
+.automation-row__mapping label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #8f9bb3;
+  white-space: nowrap;
+}
+.automation-row__mapping select {
+  background: #181a22;
+  color: #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+.mapping-slider {
+  flex: 1;
+}
+.mapping-slider__value {
+  font-size: 11px;
+  color: #aaa;
+  min-width: 32px;
+  text-align: right;
+}
+.mapping-slider input[type="range"] {
+  flex: 1;
+}
 .toggle-btn, .delete-btn {
   appearance: none;
   background: transparent;

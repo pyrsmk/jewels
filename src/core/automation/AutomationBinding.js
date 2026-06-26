@@ -28,7 +28,7 @@ export class AutomationBinding {
   apply(time, dt, moduleInstance) {
     if (!this.enabled || !moduleInstance) return;
     const normalized = this.source.evaluate(time, dt);
-    moduleInstance.options[this.targetOptionKey] = mapValue(normalized, this.paramType, this.mappingConfig);
+    moduleInstance.options[this.targetOptionKey] = mapValue(normalized, this.paramType, this.mappingConfig, this._initialValue);
   }
 
   changeSource(newSource) {

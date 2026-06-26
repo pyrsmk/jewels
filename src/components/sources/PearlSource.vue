@@ -15,8 +15,8 @@
       Imperfections de surface
       <input
         type="checkbox"
-        :checked="instance.options.surfaceImperfections"
-        @change="instance.options.surfaceImperfections = $event.target.checked"
+        :checked="instance.options.imperfections"
+        @change="instance.options.imperfections = $event.target.checked"
       />
     </label>
     <label>
@@ -29,10 +29,10 @@
     </label>
     <SliderControl
       label="Nombre"
-      :model-value="instance.options.pearlCount ?? 0.316"
+      :model-value="instance.options.count ?? 0.316"
       :min="0" :max="1" :step="0.001"
       :display-fn="formatPearlCount"
-      @update:model-value="instance.options.pearlCount = $event"
+      @update:model-value="instance.options.count = $event"
     />
     <SliderControl
       label="Vitesse"
@@ -50,10 +50,10 @@
     />
     <SliderControl
       label="Chaos"
-      :model-value="instance.options.pearlJitter ?? 0.3"
+      :model-value="instance.options.jitter ?? 0.3"
       :min="0" :max="1" :step="0.01"
       :display-fn="v => Math.round(v * 100) + ' %'"
-      @update:model-value="instance.options.pearlJitter = $event"
+      @update:model-value="instance.options.jitter = $event"
     />
   </div>
 </template>
@@ -65,7 +65,7 @@ import SliderControl from '../SliderControl.vue';
 
 const props = defineProps({ instance: { type: Object, required: true } });
 
-watch(() => props.instance.options.pearlCount, () => {
+watch(() => props.instance.options.count, () => {
   props.instance.reseedPearls();
 });
 

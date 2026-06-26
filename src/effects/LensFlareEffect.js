@@ -5,19 +5,19 @@ export class LensFlareEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
       lensFlare: true,
-      lensFlareGrainResponse: 0.5,
-      lensFlareType: 'horizontal',
-      lensFlareAnamorphic: true,
-      flareThickness: 3,
-      flareLength: 60,
-      flareDiffusion: 2.5,
-      flareDuration: 4000,
-      flareMin: 10,
-      flareMax: 60,
-      flareFadeIn: 13,
-      flareHold: 10,
-      flareFadeOut: 77,
-      flareEdgeDistance: 0,
+      grainResponse: 0.5,
+      type: 'horizontal',
+      anamorphic: true,
+      thickness: 3,
+      length: 60,
+      diffusion: 2.5,
+      duration: 4000,
+      triggerMin: 10,
+      triggerMax: 60,
+      fadeIn: 13,
+      hold: 10,
+      fadeOut: 77,
+      edgeDistance: 0,
       ghostEnabled: true,
       ghostIntensity: 0.3,
       ghostCount: 2,
@@ -28,16 +28,16 @@ export class LensFlareEffect extends EffectInterface {
     };
     super({ ...defaults, ...options },
       [
-        'lensFlare', 'lensFlareGrainResponse', 'lensFlareType', 'lensFlareAnamorphic',
-        'flareThickness', 'flareLength', 'flareDiffusion', 'flareDuration',
-        'flareMin', 'flareMax', 'flareFadeIn', 'flareHold', 'flareFadeOut',
-        'flareEdgeDistance', 'ghostEnabled', 'ghostIntensity', 'ghostCount',
+        'lensFlare', 'grainResponse', 'type', 'anamorphic',
+        'thickness', 'length', 'diffusion', 'duration',
+        'triggerMin', 'triggerMax', 'fadeIn', 'hold', 'fadeOut',
+        'edgeDistance', 'ghostEnabled', 'ghostIntensity', 'ghostCount',
         'ghostSpacing', 'ghostSize', 'ghostDiffusion', 'ghostDecay',
       ],
       [
         'lensFlareGrainResponseVal', 'flareDurationVal', 'flareMinVal', 'flareMaxVal',
-        'flareThicknessVal', 'flareLengthVal', 'flareDiffusionVal', 'flareFadeInVal',
-        'flareHoldVal', 'flareFadeOutVal', 'flareEdgeDistanceVal', 'ghostIntensityVal',
+        'thicknessVal', 'lengthVal', 'diffusionVal', 'fadeInVal',
+        'holdVal', 'fadeOutVal', 'edgeDistanceVal', 'ghostIntensityVal',
         'ghostCountVal', 'ghostSpacingVal', 'ghostSizeVal', 'ghostDiffusionVal',
         'ghostDecayVal',
       ]
@@ -52,8 +52,8 @@ export class LensFlareEffect extends EffectInterface {
       fadeOut: 0,
       anchor: { x: 0.5, y: 0.5, s: 0 },
     };
-    this._lastFlareMin = this.options.flareMin;
-    this._lastFlareMax = this.options.flareMax;
+    this._lastFlareMin = this.options.triggerMin;
+    this._lastFlareMax = this.options.triggerMax;
     this.scheduleNextFlare(0);
   }
 
@@ -68,7 +68,7 @@ export class LensFlareEffect extends EffectInterface {
     const particles = source?.particles || [];
     const w = Math.max(context.state.width, 1);
     const h = Math.max(context.state.height, 1);
-    const edgeDistanceUv = (+(this.options.flareEdgeDistance ?? 0)) / w;
+    const edgeDistanceUv = (+(this.options.edgeDistance ?? 0)) / w;
     const jitterPx = 50.0;
     const jitterUvX = jitterPx / w;
     const jitterUvY = jitterPx / h;
@@ -126,8 +126,8 @@ export class LensFlareEffect extends EffectInterface {
       this.flareState = { x: 0.5, y: 0.5, s: 0 };
       return;
     }
-    const rawMin = +(this.options.flareMin ?? 10);
-    const rawMax = +(this.options.flareMax ?? 60);
+    const rawMin = +(this.options.triggerMin ?? 10);
+    const rawMax = +(this.options.triggerMax ?? 60);
     const minI = Math.min(rawMin, rawMax);
     const maxI = Math.max(rawMin, rawMax);
     this.flareEvent.active = false;
@@ -138,11 +138,11 @@ export class LensFlareEffect extends EffectInterface {
   update({ time, moduleHost: mh, state: st } = {}) {
     const t = time ?? 0;
     if (
-      this._lastFlareMin !== this.options.flareMin ||
-      this._lastFlareMax !== this.options.flareMax
+      this._lastFlareMin !== this.options.triggerMin ||
+      this._lastFlareMax !== this.options.triggerMax
     ) {
-      this._lastFlareMin = this.options.flareMin;
-      this._lastFlareMax = this.options.flareMax;
+      this._lastFlareMin = this.options.triggerMin;
+      this._lastFlareMax = this.options.triggerMax;
       if (!this.flareEvent.active) this.scheduleNextFlare(t);
     }
     if (!this.options.lensFlare) {
@@ -158,10 +158,10 @@ export class LensFlareEffect extends EffectInterface {
         useLeftEdge, { moduleHost: mh, state: st }
       );
       this.flareEvent.startAt = t;
-      const totalDuration = (+(this.options.flareDuration ?? 4000)) / 1000.0;
-      const fi = +(this.options.flareFadeIn ?? 13);
-      const ho = +(this.options.flareHold ?? 10);
-      const fo = +(this.options.flareFadeOut ?? 77);
+      const totalDuration = (+(this.options.duration ?? 4000)) / 1000.0;
+      const fi = +(this.options.fadeIn ?? 13);
+      const ho = +(this.options.hold ?? 10);
+      const fo = +(this.options.fadeOut ?? 77);
       const sum = Math.max(fi + ho + fo, 0.0001);
       this.flareEvent.fadeIn = totalDuration * (fi / sum);
       this.flareEvent.hold = totalDuration * (ho / sum);
@@ -183,8 +183,8 @@ export class LensFlareEffect extends EffectInterface {
         amp = 1.0 - smooth(u);
       } else {
         this.flareEvent.active = false;
-        const rawMin = +(this.options.flareMin ?? 10);
-        const rawMax = +(this.options.flareMax ?? 60);
+        const rawMin = +(this.options.triggerMin ?? 10);
+        const rawMax = +(this.options.triggerMax ?? 60);
         const minI = Math.min(rawMin, rawMax);
         const maxI = Math.max(rawMin, rawMax);
         this.flareEvent.nextAt = t + minI + Math.random() * (maxI - minI);
@@ -206,14 +206,14 @@ export class LensFlareEffect extends EffectInterface {
   transform({ gl, locs, effectStack }) {
     const typeMap = { horizontal: 0.6, vertical: 1.0, star: 2.0 };
     const lensMode = !!this.options.lensFlare
-      ? (typeMap[this.options.lensFlareType ?? 'horizontal'] || 1.0)
+      ? (typeMap[this.options.type ?? 'horizontal'] || 1.0)
       : 0.0;
     gl.uniform1f(locs.u_lensMode, lensMode);
-    const lensAnamorphic = !!this.options.lensFlareAnamorphic ? 1.0 : 0.0;
+    const lensAnamorphic = !!this.options.anamorphic ? 1.0 : 0.0;
     gl.uniform1f(locs.u_lensAnamorphic, lensAnamorphic);
-    gl.uniform1f(locs.u_lensThickness, +(this.options.flareThickness ?? 3));
-    gl.uniform1f(locs.u_lensLength, (+(this.options.flareLength ?? 60)) / 100.0);
-    gl.uniform1f(locs.u_lensDiffusion, +(this.options.flareDiffusion ?? 2.5));
+    gl.uniform1f(locs.u_lensThickness, +(this.options.thickness ?? 3));
+    gl.uniform1f(locs.u_lensLength, (+(this.options.length ?? 60)) / 100.0);
+    gl.uniform1f(locs.u_lensDiffusion, +(this.options.diffusion ?? 2.5));
     gl.uniform1f(locs.u_ghostEnabled, !!this.options.ghostEnabled ? 1.0 : 0.0);
     gl.uniform1f(locs.u_ghostIntensity, +(this.options.ghostIntensity ?? 0.3));
     gl.uniform1f(locs.u_ghostCount, +(this.options.ghostCount ?? 2));
@@ -225,7 +225,7 @@ export class LensFlareEffect extends EffectInterface {
     gl.uniform1f(locs.u_flareStrength, this.flareState.s * 1.6);
     const hasGrainAfter = effectStack?.hasEffectAfter('GrainEffect') || false;
     if (hasGrainAfter) {
-      gl.uniform1f(locs.u_lensFlareGrainResponse, +(this.options.lensFlareGrainResponse ?? 0.5));
+      gl.uniform1f(locs.u_lensFlareGrainResponse, +(this.options.grainResponse ?? 0.5));
     }
   }
 

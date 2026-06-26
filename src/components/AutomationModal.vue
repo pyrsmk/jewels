@@ -150,9 +150,9 @@ function detectParamType(value) {
     return { paramType: 'color', mappingConfig: {} };
   }
   if (typeof value === 'number') {
-    return { paramType: 'range', mappingConfig: { min: 0, max: Math.max(1, value * 2) } };
+    return { paramType: 'range', mappingConfig: { min: 0, max: Math.max(1, value * 2), anchor: 0, amount: 1 } };
   }
-  return { paramType: 'range', mappingConfig: { min: 0, max: 1 } };
+  return { paramType: 'range', mappingConfig: { min: 0, max: 1, anchor: 0, amount: 1 } };
 }
 
 function toggleBinding(binding) {

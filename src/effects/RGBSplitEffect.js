@@ -3,22 +3,22 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class RGBSplitEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      rgbSplit: 1.8,
-      rgbSplitSpeed: 2.20,
-      rgbSplitScale: 2.00,
+      intensity: 1.8,
+      speed: 2.20,
+      scale: 2.00,
     };
     super({ ...defaults, ...options },
-      ['rgbSplit', 'rgbSplitSpeed', 'rgbSplitScale'],
-      ['rgbSplitVal', 'rgbSplitSpeedVal', 'rgbSplitScaleVal']
+      ['intensity', 'speed', 'scale'],
+      ['intensityVal', 'speedVal', 'scaleVal']
     );
   }
 
   syncValueDisplays() {}
 
   transform({ gl, locs }) {
-    gl.uniform1f(locs.u_rgbSplit, +(this.options.rgbSplit ?? 1.8));
-    gl.uniform1f(locs.u_rgbSplitSpeed, +(this.options.rgbSplitSpeed ?? 2.20));
-    gl.uniform1f(locs.u_rgbSplitScale, +(this.options.rgbSplitScale ?? 2.00));
+    gl.uniform1f(locs.u_rgbSplit, +(this.options.intensity ?? 1.8));
+    gl.uniform1f(locs.u_rgbSplitSpeed, +(this.options.speed ?? 2.20));
+    gl.uniform1f(locs.u_rgbSplitScale, +(this.options.scale ?? 2.00));
   }
 
   getPostShaderUniforms() {

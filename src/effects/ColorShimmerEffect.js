@@ -3,14 +3,14 @@ import { EffectInterface } from '../core/EffectInterface.js';
 export class ColorShimmerEffect extends EffectInterface {
   constructor(options = {}) {
     const defaults = {
-      colorTint2Palette: 'all',
-      colorTint2: 3.0,
-      colorTint2Speed: 0.60,
-      colorTint2Scale: 1.10,
+      palette: 'all',
+      intensity: 3.0,
+      speed: 0.60,
+      scale: 1.10,
     };
     super({ ...defaults, ...options },
-      ['colorTint2Palette', 'colorTint2', 'colorTint2Speed', 'colorTint2Scale'],
-      ['colorTint2Val', 'colorTint2SpeedVal', 'colorTint2ScaleVal']
+      ['palette', 'intensity', 'speed', 'scale'],
+      ['intensityVal', 'speedVal', 'scaleVal']
     );
   }
 
@@ -21,12 +21,12 @@ export class ColorShimmerEffect extends EffectInterface {
       all: 0.0, warm: 1.0, cool: 2.0, fluo: 3.0, cyberpunk: 4.0,
       aurora: 5.0, fire: 6.0, sunset: 7.0, toxic: 8.0, ice: 9.0, midnight: 10.0,
     };
-    const paletteIndex = paletteMap[this.options.colorTint2Palette ?? 'all'] ?? 0.0;
+    const paletteIndex = paletteMap[this.options.palette ?? 'all'] ?? 0.0;
 
-    gl.uniform1f(locs.u_colorTint2, +(this.options.colorTint2 ?? 3.0));
+    gl.uniform1f(locs.u_colorTint2, +(this.options.intensity ?? 3.0));
     gl.uniform1f(locs.u_colorTint2Palette, paletteIndex);
-    gl.uniform1f(locs.u_colorTint2Speed, +(this.options.colorTint2Speed ?? 0.60));
-    gl.uniform1f(locs.u_colorTint2Scale, +(this.options.colorTint2Scale ?? 1.10));
+    gl.uniform1f(locs.u_colorTint2Speed, +(this.options.speed ?? 0.60));
+    gl.uniform1f(locs.u_colorTint2Scale, +(this.options.scale ?? 1.10));
   }
 
   getPostShaderUniforms() {

@@ -8,18 +8,18 @@ export class PearlSource extends AbstractSource {
   constructor(options = {}) {
     const defaults = {
       flowDirection: 'free',
-      surfaceImperfections: false,
-      pearlCount: 0.316,
+      imperfections: false,
+      count: 0.316,
       speed: 0.047,
       size: 9,
-      pearlJitter: 0.3,
+      jitter: 0.3,
       edgeFade: true,
     };
     super(
       { ...defaults, ...options },
-      ['flowDirection', 'surfaceImperfections', 'pearlCount', 'speed', 'size',
-        'pearlJitter', 'edgeFade'],
-      ['pearlCountVal', 'speedVal', 'sizeVal'],
+      ['flowDirection', 'imperfections', 'count', 'speed', 'size',
+        'jitter', 'edgeFade'],
+      ['countVal', 'speedVal', 'sizeVal'],
     );
     this.gl = null;
     this.program = null;
@@ -109,7 +109,7 @@ void main() {
   }
 
   getPearlCountFromSlider() {
-    const t = +(this.options.pearlCount ?? 0.316);
+    const t = +(this.options.count ?? 0.316);
     if (t < 0.20) {
       const local = smooth(t / 0.20);
       return Math.round(100 + (1000 - 100) * local);
@@ -143,7 +143,7 @@ void main() {
   }
 
   useSurfaceImperfections() {
-    return !!this.options.surfaceImperfections;
+    return !!this.options.imperfections;
   }
 
   createImperfectionSeed(ageOffset) {
@@ -490,7 +490,7 @@ void main() {
       const flow = this.sampleFlowField(p.x, p.y);
       let targetVx = flow[0] * speed * depthFactor;
       let targetVy = flow[1] * speed * depthFactor;
-      const jitter = this.options.pearlJitter ?? 0.3;
+      const jitter = this.options.jitter ?? 0.3;
       if (jitter > 0) {
         p.jitterAge++;
         if (p.jitterAge >= 6) {
