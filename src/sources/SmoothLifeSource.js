@@ -12,7 +12,7 @@ const PRESETS = {
   blobs:     { ra: 8,  ri: 2,  birthLo: 0.21,  birthHi: 0.33,  deathLo: 0.21,  deathHi: 0.50,  alphaM: 0.12,  alphaN: 0.02,  dt: 0.08 },
 };
 
-// ===== Shader =====
+// ===== Shader ====
 
 const simSmoothLifeFS = `#version 300 es
 precision highp float;

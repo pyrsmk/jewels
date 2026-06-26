@@ -2,7 +2,6 @@
 - améliorer les palettes / le système de palettes
 - le beat est légèrement décalé
 
-- problème de freeze intermittent
 
 - la sidebar devient flottante (toujours calée à gauche, avec une marge par rapport aux bords de l'écran), la toolbar va en bas au centre, avec aussi le bouton fullscreen, le fps reste affiché en haut à droite (avec une marge)
 

@@ -184,6 +184,15 @@ export async function useEngine(canvas) {
     onRenderFrame: renderFrame,
   });
 
+  function dispose() {
+    frameLoopController.stop();
+    automationHost.dispose();
+    for (const item of moduleHost.items) {
+      item.instance.dispose?.();
+    }
+    postProcessor.invalidateCache();
+  }
+
   return {
     gl,
     state,
@@ -193,6 +202,7 @@ export async function useEngine(canvas) {
     frameLoopController,
     settingsController,
     resize,
+    dispose,
     sourceRegistry,
     effectRegistry,
     addSource,

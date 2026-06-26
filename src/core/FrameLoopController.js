@@ -14,6 +14,7 @@ export class FrameLoopController {
     this.fpsDisplayed = -1;
     this._boundFrame = this.frame.bind(this);
     this._lastFrameEndMs = performance.now();
+    this._rafId = 0;
   }
 
   getDelta(t) {
@@ -23,7 +24,14 @@ export class FrameLoopController {
   }
 
   start() {
-    requestAnimationFrame(this._boundFrame);
+    this._rafId = requestAnimationFrame(this._boundFrame);
+  }
+
+  stop() {
+    if (this._rafId) {
+      cancelAnimationFrame(this._rafId);
+      this._rafId = 0;
+    }
   }
 
   frame(nowMs) {
@@ -67,6 +75,6 @@ export class FrameLoopController {
     }
 
     this._lastFrameEndMs = performance.now();
-    requestAnimationFrame(this._boundFrame);
+    this._rafId = requestAnimationFrame(this._boundFrame);
   }
 }

@@ -26,6 +26,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  engine?.dispose();
   resizeObserver?.disconnect();
   document.removeEventListener('fullscreenchange', onFullscreenChange);
 });
