@@ -36,7 +36,7 @@
       <span class="value">{{ (+(instance.options.haloStrength ?? 0.5)).toFixed(2) }}</span>
     </label>
     <input
-      type="range" min="0" max="1" step="0.01"
+      type="range" min="0" max="3" step="0.01"
       :value="instance.options.haloStrength ?? 0.5"
       @input="instance.options.haloStrength = +$event.target.value"
     />
