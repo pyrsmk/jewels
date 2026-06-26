@@ -174,6 +174,8 @@ class AudioFile {
     if (this._lastAnalysisFrame === frameId) return this.analysis;
     this._lastAnalysisFrame = frameId;
 
+    if (!this.playing) return this.analysis;
+
     this.analyser.getByteFrequencyData(this._frequencyData);
 
     const sr = this.audioContext.sampleRate;
@@ -294,7 +296,25 @@ class AudioFile {
       console.log(`[calibrating] stride ${stride}:`, intervals.map(iv => (iv * 1000).toFixed(0) + 'ms'), 'median:', (median * 1000).toFixed(0) + 'ms', allConsistent ? 'LOCK' : 'inconsistent');
 
       if (allConsistent) {
-        this._beatInterval = median;
+        let finalInterval = median;
+
+        // Octave correction: try halving the interval and check if onsets
+        // align better on the faster grid
+        const halfInterval = median / 2;
+        if (halfInterval >= 0.250) { // ≤ 240 BPM
+          const ref = times[times.length - 1];
+          let aligned = 0;
+          for (const t of times) {
+            const phase = ((ref - t) / halfInterval) % 1;
+            if (phase < 0.15 || phase > 0.85) aligned++;
+          }
+          if (aligned >= times.length * 0.6) {
+            finalInterval = halfInterval;
+            console.log(`[calibrating] Octave correction: ${aligned}/${times.length} onsets align on ${(halfInterval * 1000).toFixed(0)}ms grid`);
+          }
+        }
+
+        this._beatInterval = finalInterval;
         this._phaseOffset = this._onsetTimes[this._onsetTimes.length - 1];
         this._tempoState = 'locked';
         this._prevBeatIndex = 0;

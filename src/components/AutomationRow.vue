@@ -93,11 +93,8 @@
               <option value="__load__">Charger un fichier...</option>
             </select>
             <input ref="audioFileInput" type="file" accept="audio/*" style="display: none" @change="onFileInputChange" />
-            <button class="audio-btn" :disabled="!binding.source.options.fileId" @click="toggleAudioPlayback" :title="isAudioPlaying ? 'Pause' : 'Lecture'">
-              <span class="material-symbols-outlined">{{ isAudioPlaying ? 'pause' : 'play_arrow' }}</span>
-            </button>
-            <button class="audio-btn" :disabled="!binding.source.options.fileId" @click="stopAudioPlayback" title="Stop">
-              <span class="material-symbols-outlined">stop</span>
+            <button class="audio-btn" :disabled="!binding.source.options.fileId" @click="toggleAudioPlayback" :title="isAudioPlaying ? 'Stop' : 'Lecture'">
+              <span class="material-symbols-outlined">{{ isAudioPlaying ? 'stop' : 'play_arrow' }}</span>
             </button>
           </div>
 
@@ -187,6 +184,7 @@ const paramOptions = computed(() => {
 
 const audioFileInput = ref(null);
 const audioFilesVersion = ref(0);
+const playbackVersion = ref(0);
 
 const audioModes = AUDIO_MODES;
 
@@ -196,6 +194,7 @@ const audioFiles = computed(() => {
 });
 
 const isAudioPlaying = computed(() => {
+  playbackVersion.value;
   const fileId = props.binding.source.options.fileId;
   if (!fileId) return false;
   const file = AudioFileManager.getInstance().getFile(fileId);
@@ -231,13 +230,8 @@ async function onFileInputChange(e) {
 function toggleAudioPlayback() {
   const file = AudioFileManager.getInstance().getFile(props.binding.source.options.fileId);
   if (!file) return;
-  file.playing ? file.pause() : file.play();
-}
-
-function stopAudioPlayback() {
-  const file = AudioFileManager.getInstance().getFile(props.binding.source.options.fileId);
-  if (!file) return;
-  file.stop();
+  file.playing ? file.stop() : file.play();
+  playbackVersion.value++;
 }
 
 function updateSourceOption(key, value) {

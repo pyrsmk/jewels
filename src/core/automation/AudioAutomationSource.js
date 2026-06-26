@@ -87,6 +87,9 @@ export class AudioAutomationSource extends AbstractAutomationSource {
     if (!fileId) return 0;
 
     const manager = AudioFileManager.getInstance();
+    const file = manager.getFile(fileId);
+    if (!file || !file.playing) return 0;
+
     const analysis = manager.getAnalysis(fileId);
     if (!analysis) return 0;
 
