@@ -42,8 +42,9 @@ import { AutomationBinding } from '../core/automation/AutomationBinding.js';
 import { LFOAutomationSource } from '../core/automation/LFOAutomationSource.js';
 import { NoiseAutomationSource } from '../core/automation/NoiseAutomationSource.js';
 import { MouseAutomationSource } from '../core/automation/MouseAutomationSource.js';
+import { AudioAutomationSource } from '../core/automation/AudioAutomationSource.js';
 
-const SOURCE_CTORS = { lfo: LFOAutomationSource, noise: NoiseAutomationSource, mouse: MouseAutomationSource };
+const SOURCE_CTORS = { lfo: LFOAutomationSource, noise: NoiseAutomationSource, mouse: MouseAutomationSource, audio: AudioAutomationSource };
 
 const props = defineProps({
   automationHost: { type: Object, required: true },

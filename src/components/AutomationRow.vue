@@ -8,33 +8,31 @@
       >
         <span class="material-symbols-outlined">{{ enabled ? 'toggle_on' : 'toggle_off' }}</span>
       </button>
-      <div class="automation-row__selects">
-        <label>
-          Source
-          <select :value="sourceType" @change="$emit('change-source', $event.target.value)">
-            <option value="lfo">LFO</option>
-            <option value="noise">Bruit</option>
-            <option value="mouse">Souris</option>
-          </select>
-        </label>
-        <label>
-          Module
-          <select :value="currentModuleIndex" @change="$emit('change-module', Number($event.target.value))">
-            <option v-for="(m, idx) in moduleOptions" :key="idx" :value="idx">
-              {{ m.label }}
-            </option>
-          </select>
-        </label>
-        <label>
-          Paramètre
-          <select :value="targetOptionKey" @change="$emit('change-param', $event.target.value)">
-            <option v-for="key in paramOptions" :key="key" :value="key">
-              {{ key }}
-            </option>
-          </select>
-        </label>
-      </div>
-      <div class="spacer" />
+      <label>
+        Source
+        <select :value="sourceType" @change="$emit('change-source', $event.target.value)">
+          <option value="lfo">LFO</option>
+          <option value="noise">Noise</option>
+          <option value="mouse">Souris</option>
+          <option value="audio">Audio</option>
+        </select>
+      </label>
+      <label>
+        Module
+        <select :value="currentModuleIndex" @change="$emit('change-module', Number($event.target.value))">
+          <option v-for="(m, idx) in moduleOptions" :key="idx" :value="idx">
+            {{ m.label }}
+          </option>
+        </select>
+      </label>
+      <label>
+        Paramètre
+        <select :value="targetOptionKey" @change="$emit('change-param', $event.target.value)">
+          <option v-for="key in paramOptions" :key="key" :value="key">
+            {{ key }}
+          </option>
+        </select>
+      </label>
       <button class="delete-btn" title="Supprimer" @click="$emit('remove')">
         <span class="material-symbols-outlined">close</span>
       </button>
@@ -83,13 +81,67 @@
           </select>
         </label>
       </template>
+      <template v-else-if="sourceType === 'audio'">
+        <div class="audio-grid">
+          <span class="audio-grid__label">Fichier</span>
+          <div class="audio-grid__control audio-grid__file">
+            <select :value="binding.source.options.fileId ?? ''" @change="onAudioFileSelect($event.target.value)">
+              <option v-if="!binding.source.options.fileId" value="" disabled>
+                {{ binding.source.options.fileName ? binding.source.options.fileName + ' (manquant)' : 'Aucun fichier' }}
+              </option>
+              <option v-for="f in audioFiles" :key="f.id" :value="f.id">{{ f.name }}</option>
+              <option value="__load__">Charger un fichier...</option>
+            </select>
+            <input ref="audioFileInput" type="file" accept="audio/*" style="display: none" @change="onFileInputChange" />
+            <button class="audio-btn" :disabled="!binding.source.options.fileId" @click="toggleAudioPlayback" :title="isAudioPlaying ? 'Pause' : 'Lecture'">
+              <span class="material-symbols-outlined">{{ isAudioPlaying ? 'pause' : 'play_arrow' }}</span>
+            </button>
+            <button class="audio-btn" :disabled="!binding.source.options.fileId" @click="stopAudioPlayback" title="Stop">
+              <span class="material-symbols-outlined">stop</span>
+            </button>
+          </div>
+
+          <span class="audio-grid__label">Mode</span>
+          <div class="audio-grid__control">
+            <select :value="binding.source.options.mode" @change="updateSourceOption('mode', $event.target.value)">
+              <option v-for="m in audioModes" :key="m.value" :value="m.value">{{ m.label }}</option>
+            </select>
+          </div>
+
+          <template v-if="binding.source.options.mode !== 'beat'">
+            <span class="audio-grid__label">Attack</span>
+            <div class="audio-grid__control audio-grid__slider">
+              <span class="audio-grid__value">{{ (binding.source.options.attack * 1000).toFixed(0) }} ms</span>
+              <input
+                type="range"
+                :min="0.001" :max="0.5" :step="0.001"
+                :value="binding.source.options.attack"
+                @input="updateSourceOption('attack', +$event.target.value)"
+              />
+            </div>
+
+            <span class="audio-grid__label">Release</span>
+            <div class="audio-grid__control audio-grid__slider">
+              <span class="audio-grid__value">{{ (binding.source.options.release * 1000).toFixed(0) }} ms</span>
+              <input
+                type="range"
+                :min="0.01" :max="1" :step="0.001"
+                :value="binding.source.options.release"
+                @input="updateSourceOption('release', +$event.target.value)"
+              />
+            </div>
+          </template>
+        </div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import SliderControl from './SliderControl.vue';
+import { AudioFileManager } from '../core/automation/AudioFileManager.js';
+import { AUDIO_MODES } from '../core/automation/AudioAutomationSource.js';
 
 const props = defineProps({
   binding: { type: Object, required: true },
@@ -133,6 +185,61 @@ const paramOptions = computed(() => {
   return Object.keys(item.instance.options).filter((k) => !k.startsWith('_'));
 });
 
+const audioFileInput = ref(null);
+const audioFilesVersion = ref(0);
+
+const audioModes = AUDIO_MODES;
+
+const audioFiles = computed(() => {
+  audioFilesVersion.value;
+  return AudioFileManager.getInstance().getFileList();
+});
+
+const isAudioPlaying = computed(() => {
+  const fileId = props.binding.source.options.fileId;
+  if (!fileId) return false;
+  const file = AudioFileManager.getInstance().getFile(fileId);
+  return file?.playing ?? false;
+});
+
+function onAudioFileSelect(value) {
+  if (value === '__load__') {
+    audioFileInput.value?.click();
+    return;
+  }
+  updateSourceOption('fileId', value);
+  const file = AudioFileManager.getInstance().getFile(value);
+  if (file) {
+    updateSourceOption('fileName', file.name);
+    if (!file.playing) file.play();
+  }
+}
+
+async function onFileInputChange(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const manager = AudioFileManager.getInstance();
+  const fileId = await manager.loadFile(file);
+  updateSourceOption('fileId', fileId);
+  updateSourceOption('fileName', file.name);
+  audioFilesVersion.value++;
+  const audioFile = manager.getFile(fileId);
+  if (audioFile) audioFile.play();
+  e.target.value = '';
+}
+
+function toggleAudioPlayback() {
+  const file = AudioFileManager.getInstance().getFile(props.binding.source.options.fileId);
+  if (!file) return;
+  file.playing ? file.pause() : file.play();
+}
+
+function stopAudioPlayback() {
+  const file = AudioFileManager.getInstance().getFile(props.binding.source.options.fileId);
+  if (!file) return;
+  file.stop();
+}
+
 function updateSourceOption(key, value) {
   props.binding.source.options[key] = value;
   emit('settings-change');
@@ -140,7 +247,6 @@ function updateSourceOption(key, value) {
 </script>
 
 <style scoped>
-.spacer { flex: 1; }
 .automation-row {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -156,28 +262,22 @@ function updateSourceOption(key, value) {
   align-items: center;
   gap: 8px;
 }
-.automation-row__selects {
-  flex: 1;
-  display: flex;
-  gap: 8px;
-}
-.automation-row__selects label {
-  flex: 1;
+.automation-row__header label {
   display: flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
   color: #8f9bb3;
+  white-space: nowrap;
 }
-.automation-row__selects select {
-  flex: 1;
-  min-width: 60px;
+.automation-row__header select {
   background: #181a22;
   color: #ddd;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   padding: 3px 6px;
   font-size: 11px;
+  width: 75px;
 }
 .automation-row__config {
   display: flex;
@@ -200,15 +300,71 @@ function updateSourceOption(key, value) {
   padding: 3px 6px;
   font-size: 11px;
 }
-.toggle-btn, .delete-btn {
+.audio-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 8px;
+  align-items: center;
+  width: 100%;
+}
+.audio-grid__label {
+  font-size: 12px;
+  color: #8f9bb3;
+  white-space: nowrap;
+}
+.audio-grid__control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.audio-grid__control select {
+  flex: 1;
+  background: #181a22;
+  color: #ddd;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+.audio-grid__value {
+  font-size: 11px;
+  color: #aaa;
+  min-width: 42px;
+  text-align: right;
+}
+.audio-grid__slider input[type="range"] {
+  flex: 1;
+}
+.audio-btn {
+  width: 24px;
+  height: 24px;
   background: none;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
   color: #8f9bb3;
   cursor: pointer;
   padding: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
-.toggle-btn:hover, .delete-btn:hover { color: #ddd; }
+.audio-btn:hover:not(:disabled) { color: #ddd; }
+.audio-btn:disabled { opacity: 0.3; cursor: default; }
+.audio-btn .material-symbols-outlined { font-size: 16px; }
+.toggle-btn, .delete-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: #8f9bb3;
+  color-scheme: normal;
+  cursor: pointer;
+  padding: 0;
+}
+.toggle-btn span, .delete-btn span {
+  background: transparent;
+}
+.toggle-btn:hover, .delete-btn:hover { background: transparent; color: #ddd; }
 .toggle-btn .material-symbols-outlined { font-size: 22px; }
 .delete-btn .material-symbols-outlined { font-size: 16px; }
 </style>

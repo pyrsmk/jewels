@@ -2,11 +2,14 @@ import { AutomationBinding } from './AutomationBinding.js';
 import { LFOAutomationSource } from './LFOAutomationSource.js';
 import { NoiseAutomationSource } from './NoiseAutomationSource.js';
 import { MouseAutomationSource } from './MouseAutomationSource.js';
+import { AudioAutomationSource } from './AudioAutomationSource.js';
+import { AudioFileManager } from './AudioFileManager.js';
 
 const SOURCE_CONSTRUCTORS = {
   lfo: LFOAutomationSource,
   noise: NoiseAutomationSource,
   mouse: MouseAutomationSource,
+  audio: AudioAutomationSource,
 };
 
 export class AutomationHost {
@@ -46,6 +49,9 @@ export class AutomationHost {
   }
 
   evaluate(time, dt) {
+    const manager = AudioFileManager.getInstance();
+    manager.advanceFrame();
+
     for (const binding of this.bindings) {
       const target = this._resolveTarget(binding);
       binding.apply(time, dt, target);
