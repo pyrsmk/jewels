@@ -29,6 +29,17 @@
     </div>
     <div class="source-item__body" :class="{ 'source-item__body--expanded': expanded }">
       <div class="source-item__body-inner">
+        <label v-if="className !== 'BackgroundSource'">
+          Mode de fusion
+          <select
+            :value="instance.options.blendMode"
+            @change="instance.options.blendMode = $event.target.value"
+          >
+            <option v-for="mode in blendModes" :key="mode.value" :value="mode.value">
+              {{ mode.label }}
+            </option>
+          </select>
+        </label>
         <slot />
       </div>
     </div>
@@ -36,6 +47,8 @@
 </template>
 
 <script setup>
+import { blendModes } from '../core/PipelineRuntime.js';
+
 defineProps({
   instance: { type: Object, required: true },
   label: { type: String, required: true },

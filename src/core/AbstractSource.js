@@ -1,6 +1,10 @@
 import { AbstractModule } from './AbstractModule.js';
 
 export class AbstractSource extends AbstractModule {
+  constructor(options = {}, controlIds = [], valueIds = []) {
+    super({ blendMode: 'normal', ...options }, controlIds, valueIds);
+  }
+
   update(context) {
     throw new Error(`${this.constructor.name}.update(context) must be implemented`);
   }

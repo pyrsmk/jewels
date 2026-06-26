@@ -5,7 +5,7 @@ Outil visuel temps réel de compositing WebGL avec pipeline de sources et d'effe
 ## Stack
 
 - **Vue 3** (Composition API) + **Vite 5** — pas de TypeScript
-- **WebGL 1** natif (pas de Three.js ni autre abstraction)
+- **WebGL 2** natif (pas de Three.js ni autre abstraction)
 - **Yarn 4** (PnP, zero-install) — pas de `node_modules` classique
 - Tâches dev via `Runfile.rb` : `run dev`, `run build`, `run preview`
 
@@ -18,13 +18,13 @@ Le moteur suit un pattern **source -> effets -> post-process** :
 1. **Sources** (`src/sources/`) génèrent la scène initiale (particules, fluides, vidéo, fond)
 2. **Effets** (`src/effects/`) transforment l'image via des shaders GLSL en post-process
 3. Les sources et effets sont ordonnés dans un `ModuleHost` qui gère une liste plate `items[]` (type source/effect, instance, enabled, className)
-4. `PostProcessor` orchestre le rendu en groupant les effets par source via `getSourceGroups()`
-5. `PipelineRuntime` gère le contexte WebGL, les FBOs ping-pong, le quad fullscreen et la compilation des shaders
+4. `PostProcessor` orchestre le rendu en groupant les effets par source via `getSourceGroups()`, puis composite chaque groupe sur l'accumulateur via un shader de compositing avec mode de fusion configurable (normal, additif, screen, multiply)
+5. `PipelineRuntime` gère le contexte WebGL, les FBOs ping-pong, le quad fullscreen, la compilation des shaders et le compositing inter-sources
 
 ### Hiérarchie de classes
 
 - `AbstractModule` — classe de base commune (options réactives Vue, gestion GPU, lifecycle setup/resize/dispose)
-- `AbstractSource extends AbstractModule` — sources (renderScenePass, résolution automatique des uniforms/attributes)
+- `AbstractSource extends AbstractModule` — sources (renderScenePass, résolution automatique des uniforms/attributes, option `blendMode` pour le mode de fusion inter-sources)
 - `EffectInterface extends AbstractModule` — effets (transform, contribution au shader post-process via getPostShader*)
 
 ### Registres

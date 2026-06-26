@@ -21,6 +21,49 @@ const blitFS = `#version 300 es
   }
 `;
 
+const BLEND_NORMAL = 0;
+const BLEND_ADD = 1;
+const BLEND_SCREEN = 2;
+const BLEND_MULTIPLY = 3;
+
+export const blendModes = [
+  { value: 'normal', label: 'Normal', id: BLEND_NORMAL },
+  { value: 'add', label: 'Additif', id: BLEND_ADD },
+  { value: 'screen', label: 'Screen', id: BLEND_SCREEN },
+  { value: 'multiply', label: 'Multiply', id: BLEND_MULTIPLY },
+];
+
+const blendModeIds = Object.fromEntries(blendModes.map((m) => [m.value, m.id]));
+
+const compositeFS = `#version 300 es
+  precision highp float;
+  in vec2 v_uv;
+  uniform sampler2D u_base;
+  uniform sampler2D u_overlay;
+  uniform int u_blendMode;
+  out vec4 fragColor;
+  void main() {
+    vec4 base = texture(u_base, v_uv);
+    vec4 over = texture(u_overlay, v_uv);
+    vec3 result;
+    if (u_blendMode == ${BLEND_NORMAL}) {
+      result = mix(base.rgb, over.rgb, over.a);
+    } else if (u_blendMode == ${BLEND_ADD}) {
+      result = base.rgb + over.rgb * over.a;
+    } else if (u_blendMode == ${BLEND_SCREEN}) {
+      vec3 screened = 1.0 - (1.0 - base.rgb) * (1.0 - over.rgb);
+      result = mix(base.rgb, screened, over.a);
+    } else if (u_blendMode == ${BLEND_MULTIPLY}) {
+      vec3 multiplied = base.rgb * over.rgb;
+      result = mix(base.rgb, multiplied, over.a);
+    } else {
+      result = mix(base.rgb, over.rgb, over.a);
+    }
+    float a = base.a + over.a * (1.0 - base.a);
+    fragColor = vec4(result, a);
+  }
+`;
+
 
 export class PipelineRuntime {
   constructor(canvas, gl, state, config, moduleHost) {
@@ -46,6 +89,13 @@ export class PipelineRuntime {
       u_tex: gl.getUniformLocation(this.blitProgram, 'u_tex'),
     };
 
+    this.compositeProgram = createProgram(gl, quadVS, compositeFS);
+    this.compositeLocs = {
+      a_pos: gl.getAttribLocation(this.compositeProgram, 'a_pos'),
+      u_base: gl.getUniformLocation(this.compositeProgram, 'u_base'),
+      u_overlay: gl.getUniformLocation(this.compositeProgram, 'u_overlay'),
+      u_blendMode: gl.getUniformLocation(this.compositeProgram, 'u_blendMode'),
+    };
   }
 
   buildPassContext(extra = {}) {
@@ -137,25 +187,30 @@ export class PipelineRuntime {
     this.blitTo(texture, null);
   }
 
-  compositeOntoAccumulator(overlayTex, isFirst) {
+  compositeOntoAccumulator(overlayTex, isFirst, blendMode = 'normal') {
     const { gl, state } = this;
     if (isFirst) {
       this.blitTo(overlayTex, state.accumulator.fbo);
-    } else {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, state.accumulator.fbo);
-      gl.viewport(0, 0, state.width, state.height);
-      gl.enable(gl.BLEND);
-      gl.blendFunc(gl.ONE, gl.ONE);
-      gl.useProgram(this.blitProgram);
-      gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
-      gl.enableVertexAttribArray(this.blitLocs.a_pos);
-      gl.vertexAttribPointer(this.blitLocs.a_pos, 2, gl.FLOAT, false, 0, 0);
-      gl.activeTexture(gl.TEXTURE0);
-      gl.bindTexture(gl.TEXTURE_2D, overlayTex);
-      gl.uniform1i(this.blitLocs.u_tex, 0);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      gl.disable(gl.BLEND);
+      return;
     }
+
+    const tmp = state.sceneA;
+    gl.bindFramebuffer(gl.FRAMEBUFFER, tmp.fbo);
+    gl.viewport(0, 0, state.width, state.height);
+    gl.useProgram(this.compositeProgram);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuffer);
+    gl.enableVertexAttribArray(this.compositeLocs.a_pos);
+    gl.vertexAttribPointer(this.compositeLocs.a_pos, 2, gl.FLOAT, false, 0, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, state.accumulator.tex);
+    gl.uniform1i(this.compositeLocs.u_base, 0);
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, overlayTex);
+    gl.uniform1i(this.compositeLocs.u_overlay, 1);
+    gl.uniform1i(this.compositeLocs.u_blendMode, blendModeIds[blendMode] ?? BLEND_ADD);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+    this.blitTo(tmp.tex, state.accumulator.fbo);
   }
 
   resizeTargets(width, height, dpr) {

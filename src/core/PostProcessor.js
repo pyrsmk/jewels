@@ -62,7 +62,8 @@ export class PostProcessor {
       }
 
       const groupResultTex = lastOut ? lastOut.tex : inputTex;
-      pipelineRuntime.compositeOntoAccumulator(groupResultTex, isFirst);
+      const blendMode = group.source.options.blendMode ?? 'normal';
+      pipelineRuntime.compositeOntoAccumulator(groupResultTex, isFirst, blendMode);
       isFirst = false;
     }
 
