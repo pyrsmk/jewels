@@ -85,23 +85,15 @@ export class ModuleHost {
   }
 
   applySettings(settings) {
-    if (!settings || typeof settings !== 'object') return;
-    if (settings.v === 2 && Array.isArray(settings.items)) {
-      const counters = {};
-      for (const saved of settings.items) {
-        if (!saved?.className || !saved.params) continue;
-        const cls = saved.className;
-        const idx = counters[cls] ?? 0;
-        counters[cls] = idx + 1;
-        const match = this.items.filter((i) => i.className === cls)[idx];
-        if (match) match.instance.setParameters(saved.params);
-      }
-      return;
-    }
-    for (const item of this.items) {
-      const saved = settings[item.className];
-      if (!saved || typeof saved !== 'object') continue;
-      item.instance.setParameters(saved);
+    if (!settings || typeof settings !== 'object' || !Array.isArray(settings.items)) return;
+    const counters = {};
+    for (const saved of settings.items) {
+      if (!saved?.className || !saved.params) continue;
+      const cls = saved.className;
+      const idx = counters[cls] ?? 0;
+      counters[cls] = idx + 1;
+      const match = this.items.filter((i) => i.className === cls)[idx];
+      if (match) match.instance.setParameters(saved.params);
     }
   }
 

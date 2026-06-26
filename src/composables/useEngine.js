@@ -148,26 +148,17 @@ export async function useEngine(canvas) {
       const settings = JSON.parse(decoded);
       if (!settings || typeof settings !== 'object') return;
 
-      if ((settings.v === 2 || settings.v === 3) && Array.isArray(settings.items)) {
-        for (const itemData of settings.items) {
-          const isSource = itemData.type === 'source' || itemData.type === 'source';
-          if (isSource && itemData.className === 'BackgroundSource') continue;
-          if (isSource) {
-            await addSource(itemData.className, itemData.params || {});
-          } else if (itemData.type === 'effect') {
-            await addEffect(itemData.className);
-          }
-        }
-      } else {
-        for (const reg of sourceRegistry) {
-          if (reg.className === 'BackgroundSource') continue;
-          const saved = settings[reg.className];
-          if (!saved) continue;
-          await addSource(reg.className, typeof saved === 'object' ? saved : {});
-        }
-        for (const reg of effectRegistry) {
-          if (!settings[reg.className]) continue;
-          await addEffect(reg.className);
+      if (settings.v !== 3 || !Array.isArray(settings.items)) {
+        console.error(`Format de settings non supporté (v${settings.v ?? '?'}), seul le format v3 est accepté.`);
+        return;
+      }
+
+      for (const itemData of settings.items) {
+        if (itemData.type === 'source') {
+          if (itemData.className === 'BackgroundSource') continue;
+          await addSource(itemData.className, itemData.params || {});
+        } else if (itemData.type === 'effect') {
+          await addEffect(itemData.className);
         }
       }
 
