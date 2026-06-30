@@ -2,7 +2,6 @@
 - améliorer les palettes / le système de palettes
 - le beat est légèrement décalé
 
-
 - la sidebar devient flottante (toujours calée à gauche, avec une marge par rapport aux bords de l'écran), la toolbar va en bas au centre, avec aussi le bouton fullscreen, le fps reste affiché en haut à droite (avec une marge)
 
 - Teinte 2 s'applique sur toutes les sources alors qu'il ne faut pas que ça s'applique sur le Fond; avec Teinte 1 ça plante

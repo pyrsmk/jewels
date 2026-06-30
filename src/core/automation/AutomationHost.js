@@ -3,7 +3,7 @@ import { LFOAutomationSource } from './LFOAutomationSource.js';
 import { NoiseAutomationSource } from './NoiseAutomationSource.js';
 import { MouseAutomationSource } from './MouseAutomationSource.js';
 import { AudioAutomationSource } from './AudioAutomationSource.js';
-import { AudioFileManager } from './AudioFileManager.js';
+import { AudioStreamManager } from './AudioStreamManager.js';
 
 const SOURCE_CONSTRUCTORS = {
   lfo: LFOAutomationSource,
@@ -49,7 +49,7 @@ export class AutomationHost {
   }
 
   evaluate(time, dt) {
-    const manager = AudioFileManager.getInstance();
+    const manager = AudioStreamManager.getInstance();
     manager.advanceFrame();
 
     for (const binding of this.bindings) {

@@ -83,17 +83,18 @@
       </template>
       <template v-else-if="sourceType === 'audio'">
         <div class="audio-grid">
-          <span class="audio-grid__label">Fichier</span>
+          <span class="audio-grid__label">Flux</span>
           <div class="audio-grid__control audio-grid__file">
-            <select :value="binding.source.options.fileId ?? ''" @change="onAudioFileSelect($event.target.value)">
-              <option v-if="!binding.source.options.fileId" value="" disabled>
-                {{ binding.source.options.fileName ? binding.source.options.fileName + ' (manquant)' : 'Aucun fichier' }}
+            <select :value="binding.source.options.streamId ?? ''" @change="onAudioFileSelect($event.target.value)">
+              <option v-if="!binding.source.options.streamId" value="" disabled>
+                {{ binding.source.options.streamName ? binding.source.options.streamName + ' (manquant)' : 'Aucun flux' }}
               </option>
               <option v-for="f in audioFiles" :key="f.id" :value="f.id">{{ f.name }}</option>
               <option value="__load__">Charger un fichier...</option>
+              <option value="__channel__">Choisir un canal audio...</option>
             </select>
             <input ref="audioFileInput" type="file" accept="audio/*" style="display: none" @change="onFileInputChange" />
-            <button class="audio-btn" :disabled="!binding.source.options.fileId" @click="toggleAudioPlayback" :title="isAudioPlaying ? 'Stop' : 'Lecture'">
+            <button class="audio-btn" :disabled="!binding.source.options.streamId" @click="toggleAudioPlayback" :title="isAudioPlaying ? 'Stop' : 'Lecture'">
               <span class="material-symbols-outlined">{{ isAudioPlaying ? 'stop' : 'play_arrow' }}</span>
             </button>
           </div>
@@ -129,6 +130,11 @@
             </div>
           </template>
         </div>
+        <AudioChannelPicker
+          v-if="showChannelPicker"
+          @select="onChannelSelect"
+          @close="showChannelPicker = false"
+        />
       </template>
     </div>
     <div v-if="binding.paramType === 'range'" class="automation-row__mapping">
@@ -157,8 +163,9 @@
 <script setup>
 import { computed, ref } from 'vue';
 import SliderControl from './SliderControl.vue';
-import { AudioFileManager } from '../core/automation/AudioFileManager.js';
+import { AudioStreamManager } from '../core/automation/AudioStreamManager.js';
 import { AUDIO_MODES } from '../core/automation/AudioAutomationSource.js';
+import AudioChannelPicker from './AudioChannelPicker.vue';
 
 const props = defineProps({
   binding: { type: Object, required: true },
@@ -211,19 +218,20 @@ const paramOptions = computed(() => {
 const audioFileInput = ref(null);
 const audioFilesVersion = ref(0);
 const playbackVersion = ref(0);
+const showChannelPicker = ref(false);
 
 const audioModes = AUDIO_MODES;
 
 const audioFiles = computed(() => {
   audioFilesVersion.value;
-  return AudioFileManager.getInstance().getFileList();
+  return AudioStreamManager.getInstance().getStreamList();
 });
 
 const isAudioPlaying = computed(() => {
   playbackVersion.value;
-  const fileId = props.binding.source.options.fileId;
+  const fileId = props.binding.source.options.streamId;
   if (!fileId) return false;
-  const file = AudioFileManager.getInstance().getFile(fileId);
+  const file = AudioStreamManager.getInstance().getStream(fileId);
   return file?.playing ?? false;
 });
 
@@ -232,29 +240,49 @@ function onAudioFileSelect(value) {
     audioFileInput.value?.click();
     return;
   }
-  updateSourceOption('fileId', value);
-  const file = AudioFileManager.getInstance().getFile(value);
-  if (file) {
-    updateSourceOption('fileName', file.name);
-    if (!file.playing) file.play();
+  if (value === '__channel__') {
+    showChannelPicker.value = true;
+    return;
+  }
+  updateSourceOption('streamId', value);
+  const stream = AudioStreamManager.getInstance().getStream(value);
+  if (stream) {
+    updateSourceOption('streamName', stream.name);
+    if (!stream.playing) stream.play();
+  }
+}
+
+async function onChannelSelect(device) {
+  showChannelPicker.value = false;
+  try {
+    const manager = AudioStreamManager.getInstance();
+    const streamId = await manager.addChannel(device.deviceId, device.label || 'Canal audio');
+    const stream = manager.getStream(streamId);
+    updateSourceOption('streamId', streamId);
+    updateSourceOption('streamName', stream.name);
+    stream.play();
+    audioFilesVersion.value++;
+    playbackVersion.value++;
+  } catch (err) {
+    console.error('[audio] Erreur canal audio:', err);
   }
 }
 
 async function onFileInputChange(e) {
   const file = e.target.files?.[0];
   if (!file) return;
-  const manager = AudioFileManager.getInstance();
+  const manager = AudioStreamManager.getInstance();
   const fileId = await manager.loadFile(file);
-  updateSourceOption('fileId', fileId);
-  updateSourceOption('fileName', file.name);
+  updateSourceOption('streamId', fileId);
+  updateSourceOption('streamName', file.name);
   audioFilesVersion.value++;
-  const audioFile = manager.getFile(fileId);
+  const audioFile = manager.getStream(fileId);
   if (audioFile) audioFile.play();
   e.target.value = '';
 }
 
 function toggleAudioPlayback() {
-  const file = AudioFileManager.getInstance().getFile(props.binding.source.options.fileId);
+  const file = AudioStreamManager.getInstance().getStream(props.binding.source.options.streamId);
   if (!file) return;
   file.playing ? file.stop() : file.play();
   playbackVersion.value++;

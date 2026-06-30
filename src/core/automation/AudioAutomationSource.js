@@ -1,5 +1,5 @@
 import { AbstractAutomationSource } from './AbstractAutomationSource.js';
-import { AudioFileManager } from './AudioFileManager.js';
+import { AudioStreamManager } from './AudioStreamManager.js';
 
 export const AUDIO_MODES = [
   { value: 'beat',     label: 'Beat' },
@@ -44,8 +44,8 @@ function pickDuration(mode) {
 export class AudioAutomationSource extends AbstractAutomationSource {
   constructor(options = {}) {
     super('audio', {
-      fileId: null,
-      fileName: '',
+      streamId: null,
+      streamName: '',
       mode: 'beat',
       threshold: 0.15,
       attack: 0.02,
@@ -83,14 +83,14 @@ export class AudioAutomationSource extends AbstractAutomationSource {
   }
 
   evaluate(_time, dt) {
-    const fileId = this.options.fileId;
-    if (!fileId) return 0;
+    const streamId = this.options.streamId;
+    if (!streamId) return 0;
 
-    const manager = AudioFileManager.getInstance();
-    const file = manager.getFile(fileId);
-    if (!file || !file.playing) return 0;
+    const manager = AudioStreamManager.getInstance();
+    const stream = manager.getStream(streamId);
+    if (!stream || !stream.playing) return 0;
 
-    const analysis = manager.getAnalysis(fileId);
+    const analysis = manager.getAnalysis(streamId);
     if (!analysis) return 0;
 
     if (this.options.mode === 'beat') {
@@ -151,10 +151,10 @@ export class AudioAutomationSource extends AbstractAutomationSource {
   }
 
   setup() {
-    const manager = AudioFileManager.getInstance();
-    const file = manager.getFile(this.options.fileId);
-    if (file && !file.playing) {
-      file.play();
+    const manager = AudioStreamManager.getInstance();
+    const stream = manager.getStream(this.options.streamId);
+    if (stream && !stream.playing) {
+      stream.play();
     }
   }
 
@@ -164,7 +164,7 @@ export class AudioAutomationSource extends AbstractAutomationSource {
 
   serialize() {
     const params = this.getParameters();
-    delete params.fileId;
+    delete params.streamId;
     return { type: this.type, params };
   }
 

@@ -79,12 +79,12 @@ function computeCentroid(data, sampleRate, fftSize) {
   return Math.max(0, Math.min(1, normalized));
 }
 
-class AudioFile {
-  constructor(id, name, audioBuffer, audioContext) {
+class AudioStream {
+  constructor(id, name, audioContext, { audioBuffer = null, mediaStream = null, deviceId = null } = {}) {
     this.id = id;
     this.name = name;
-    this.audioBuffer = audioBuffer;
     this.audioContext = audioContext;
+    this.streamType = mediaStream ? 'channel' : 'file';
 
     this.analyser = audioContext.createAnalyser();
     this.analyser.fftSize = FFT_SIZE;
@@ -92,15 +92,26 @@ class AudioFile {
     this.gainNode = audioContext.createGain();
     this.gainNode.gain.value = 1;
     this.analyser.connect(this.gainNode);
+
     this.gainNode.connect(audioContext.destination);
+    if (this.streamType === 'channel') {
+      this.gainNode.gain.value = 0;
+    }
 
     this._frequencyData = new Uint8Array(this.analyser.frequencyBinCount);
     this._floatFrequencyData = new Float32Array(this.analyser.frequencyBinCount);
     this._sourceNode = null;
+    this.playing = false;
+
+    // File-specific state
+    this.audioBuffer = audioBuffer;
     this._startOffset = 0;
     this._startTime = 0;
-    this.playing = false;
     this.loop = true;
+
+    // Channel-specific state
+    this._mediaStream = mediaStream;
+    this.deviceId = deviceId;
 
     this.analysis = { bass: 0, mids: 0, treble: 0, volume: 0, centroid: 0, beat: 0, beatCount: 0, beatInterval: 0, isLocked: false, isCooldown: false };
 
@@ -129,6 +140,14 @@ class AudioFile {
 
   play() {
     if (this.playing) return;
+
+    if (this.streamType === 'channel') {
+      this._sourceNode = this.audioContext.createMediaStreamSource(this._mediaStream);
+      this._sourceNode.connect(this.analyser);
+      this.playing = true;
+      return;
+    }
+
     this._sourceNode = this.audioContext.createBufferSource();
     this._sourceNode.buffer = this.audioBuffer;
     this._sourceNode.loop = this.loop;
@@ -147,6 +166,12 @@ class AudioFile {
 
   pause() {
     if (!this.playing) return;
+
+    if (this.streamType === 'channel') {
+      this.stop();
+      return;
+    }
+
     this._startOffset += this.audioContext.currentTime - this._startTime;
     this._sourceNode.onended = null;
     this._sourceNode.stop();
@@ -156,13 +181,23 @@ class AudioFile {
   }
 
   stop() {
-    if (this.playing) {
-      this._sourceNode.onended = null;
-      this._sourceNode.stop();
+    if (!this.playing) {
+      if (this.streamType === 'file') this._startOffset = 0;
+      return;
+    }
+
+    if (this.streamType === 'channel') {
       this._sourceNode.disconnect();
       this._sourceNode = null;
       this.playing = false;
+      return;
     }
+
+    this._sourceNode.onended = null;
+    this._sourceNode.stop();
+    this._sourceNode.disconnect();
+    this._sourceNode = null;
+    this.playing = false;
     this._startOffset = 0;
   }
 
@@ -177,6 +212,8 @@ class AudioFile {
     if (!this.playing) return this.analysis;
 
     this.analyser.getByteFrequencyData(this._frequencyData);
+
+
 
     const sr = this.audioContext.sampleRate;
     const fft = this.analyser.fftSize;
@@ -375,22 +412,26 @@ class AudioFile {
 
   dispose() {
     this.stop();
+    if (this._mediaStream) {
+      for (const track of this._mediaStream.getTracks()) track.stop();
+      this._mediaStream = null;
+    }
     this.analyser.disconnect();
     this.gainNode.disconnect();
   }
 }
 
-export class AudioFileManager {
+export class AudioStreamManager {
   static getInstance() {
     if (!instance) {
-      instance = new AudioFileManager();
+      instance = new AudioStreamManager();
     }
     return instance;
   }
 
   constructor() {
     this._audioContext = null;
-    this._files = new Map();
+    this._streams = new Map();
     this._nextId = 1;
     this._frameId = 0;
   }
@@ -410,43 +451,61 @@ export class AudioFileManager {
     const arrayBuffer = await file.arrayBuffer();
     const audioBuffer = await ctx.decodeAudioData(arrayBuffer);
     const id = String(this._nextId++);
-    const audioFile = new AudioFile(id, file.name, audioBuffer, ctx);
-    this._files.set(id, audioFile);
+    const stream = new AudioStream(id, file.name, ctx, { audioBuffer });
+    this._streams.set(id, stream);
     return id;
   }
 
-  removeFile(id) {
-    const file = this._files.get(id);
-    if (!file) return;
-    file.dispose();
-    this._files.delete(id);
+  async addChannel(deviceId, name) {
+    // Reuse existing channel for the same device
+    for (const stream of this._streams.values()) {
+      if (stream.streamType === 'channel' && stream.deviceId === deviceId) {
+        return stream.id;
+      }
+    }
+
+    const ctx = this._ensureContext();
+    const mediaStream = await navigator.mediaDevices.getUserMedia({
+      audio: { deviceId: { exact: deviceId } },
+    });
+    const id = String(this._nextId++);
+    const stream = new AudioStream(id, name, ctx, { mediaStream, deviceId });
+    this._streams.set(id, stream);
+    return id;
   }
 
-  getFile(id) {
-    return this._files.get(id) ?? null;
+  removeStream(id) {
+    const stream = this._streams.get(id);
+    if (!stream) return;
+    stream.dispose();
+    this._streams.delete(id);
   }
 
-  getFileList() {
-    return [...this._files.values()].map(f => ({ id: f.id, name: f.name }));
+  getStream(id) {
+    return this._streams.get(id) ?? null;
   }
 
-  getAnalysis(fileId) {
-    const file = this._files.get(fileId);
-    if (!file) return null;
-    return file.analyse(this._frameId);
+  getStreamList() {
+    return [...this._streams.values()].map(s => ({ id: s.id, name: s.name, streamType: s.streamType }));
+  }
+
+  getAnalysis(streamId) {
+    const stream = this._streams.get(streamId);
+    if (!stream) return null;
+    return stream.analyse(this._frameId);
   }
 
   advanceFrame() {
     this._frameId++;
   }
 
-  hasFiles() {
-    return this._files.size > 0;
+  hasStreams() {
+    return this._streams.size > 0;
   }
 
   dispose() {
-    for (const file of this._files.values()) file.dispose();
-    this._files.clear();
+    for (const stream of this._streams.values()) stream.dispose();
+    this._streams.clear();
     if (this._audioContext) {
       this._audioContext.close();
       this._audioContext = null;
