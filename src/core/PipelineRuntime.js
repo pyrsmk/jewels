@@ -45,21 +45,23 @@ const compositeFS = `#version 300 es
   void main() {
     vec4 base = texture(u_base, v_uv);
     vec4 over = texture(u_overlay, v_uv);
+    float oa = clamp(over.a, 0.0, 1.0);
+    vec3 overRgb = oa > 0.001 ? over.rgb / oa : vec3(0.0);
     vec3 result;
     if (u_blendMode == ${BLEND_NORMAL}) {
-      result = mix(base.rgb, over.rgb, over.a);
+      result = mix(base.rgb, overRgb, oa);
     } else if (u_blendMode == ${BLEND_ADD}) {
-      result = base.rgb + over.rgb * over.a;
+      result = base.rgb + overRgb * oa;
     } else if (u_blendMode == ${BLEND_SCREEN}) {
-      vec3 screened = 1.0 - (1.0 - base.rgb) * (1.0 - over.rgb);
-      result = mix(base.rgb, screened, over.a);
+      vec3 screened = 1.0 - (1.0 - base.rgb) * (1.0 - overRgb);
+      result = mix(base.rgb, screened, oa);
     } else if (u_blendMode == ${BLEND_MULTIPLY}) {
-      vec3 multiplied = base.rgb * over.rgb;
-      result = mix(base.rgb, multiplied, over.a);
+      vec3 multiplied = base.rgb * overRgb;
+      result = mix(base.rgb, multiplied, oa);
     } else {
-      result = mix(base.rgb, over.rgb, over.a);
+      result = mix(base.rgb, overRgb, oa);
     }
-    float a = base.a + over.a * (1.0 - base.a);
+    float a = base.a + oa * (1.0 - base.a);
     fragColor = vec4(result, a);
   }
 `;
@@ -194,7 +196,7 @@ export class PipelineRuntime {
       return;
     }
 
-    const tmp = state.sceneA;
+    const tmp = this.getAltPostTarget();
     gl.bindFramebuffer(gl.FRAMEBUFFER, tmp.fbo);
     gl.viewport(0, 0, state.width, state.height);
     gl.useProgram(this.compositeProgram);
